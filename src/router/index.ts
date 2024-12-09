@@ -26,7 +26,7 @@ import Error404View from '@/views/Error404View.vue'
 
 
 
-const PATH_NAMES_THAT_DO_NOT_REQUIRE_LOGIN = ['login', 'password-reset', 'password-set-new'] /* this equals a routes "name" property */
+const PATH_NAMES_THAT_DO_NOT_REQUIRE_LOGIN = ['home', 'login', 'password-reset', 'password-set-new'] /* this equals a routes "name" property */
 const PATH_NAMES_THAT_DO_NOT_ALLOW_LOGGED_IN = ['password-reset', 'password-set-new'] /* this equals a routes "name" property */
 
 
