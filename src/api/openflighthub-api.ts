@@ -114,14 +114,14 @@ export type ApiResponse_AuthLoginwithtokenPost = { id: number }
 export type ApiResponse_AuthCheckGet = { id: number }
 export type ApiResponse_AuthRegisterPost = { id: number }
 export type ApiResponse_UserGet = { id: number, name: string }
-export type ApiResponse_UserPatch = { id: number, name: string, email: string, created_at: string, locale: string, is_recruiter: boolean, registration_incomplete: boolean }
-export type ApiResponse_UserSelfGet = { id: number, name: string, email: string, created_at: string, locale: string, is_recruiter: boolean, registration_incomplete: boolean }
+export type ApiResponse_UserPatch = { id: number, name: string, email: string, created_at: string, locale: string, registration_incomplete: boolean }
+export type ApiResponse_UserSelfGet = { id: number, name: string, email: string, created_at: string, locale: string, registration_incomplete: boolean }
 
 
 let apiAuth: String
 
 async function makeRequest<T>(url: string, method: method, isFormData: boolean, params?: object, data?: object): Promise<T> {
-    return new Promise((resolve, reject)=>{
+    return new Promise((resolve, reject) => {
 
         if (url.startsWith('/')) {
             url = url.substring(1)
@@ -134,8 +134,8 @@ async function makeRequest<T>(url: string, method: method, isFormData: boolean, 
             }
 
             if (typeof params[p1] !== 'string' && typeof params[p1] !== 'number') {
-               reject('url contains param "' + p1 + '" but no valid value for this param was provided (string or number)')
-               return
+                reject('url contains param "' + p1 + '" but no valid value for this param was provided (string or number)')
+                return
             }
 
             return '' + params[p1]
@@ -166,12 +166,12 @@ async function makeRequest<T>(url: string, method: method, isFormData: boolean, 
             data = form
         }
 
-        const headers: {[key: string]: string}= {
+        const headers: { [key: string]: string } = {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
         }
 
-        if(apiAuth){
+        if (apiAuth) {
             headers.Cookie = 'user-auth=' + apiAuth
         }
 
@@ -190,8 +190,8 @@ async function makeRequest<T>(url: string, method: method, isFormData: boolean, 
 
         let rejectedDueToTimeout = false
 
-        setTimeout(()=>{
-            if(fetchIsDone){
+        setTimeout(() => {
+            if (fetchIsDone) {
                 return
             }
             rejectedDueToTimeout = true
@@ -243,7 +243,7 @@ async function makeRequest<T>(url: string, method: method, isFormData: boolean, 
                 }
             }
         }).catch(reason => {
-            if(rejectedDueToTimeout){
+            if (rejectedDueToTimeout) {
                 return
             } else {
                 reject(reason)
@@ -323,8 +323,8 @@ export class ReconnectingWebSocket extends EventManager<ReconnectingWebSocketEve
 
         this.socket = new WebSocket(this.url)
 
-        setTimeout(()=>{
-            if(this.firstOpenEvent && !this.isOpen()){
+        setTimeout(() => {
+            if (this.firstOpenEvent && !this.isOpen()) {
                 console.warn('fatal: connecting to websocket timed out')
                 this.socket.close()
             }
