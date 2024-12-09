@@ -18,8 +18,9 @@ export type DjiBridge = {
 
     /**
      *
-     * @param workspaceName the name displayed on the Pilot cloud portal
-     * @param desc the description displayed on the Pilot cloud portal
+     * @param platformName the text displayed at the top of the webview
+     * @param workspaceName the name displayed on the "cloud" tile in the pilot 2 app home screen
+     * @param desc the description displayed on the "cloud" tile in the pilot 2 app home screen (just below workspaceName)
      *
      */
     platformSetInformation: (platformName: string, workspaceName: string, desc: string) => DjiBridgeResponse<void>

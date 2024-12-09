@@ -76,29 +76,71 @@ function init(){
 
 <template>
 
-    <v-container>
-        <v-row class="flex-nowrap bg-surface-variant" no-gutters>
-            <v-col cols="4" class="d-flex flex-column justify-center">
-                <span>Remote Controller SN: {{ remoteControllerSerialNumber || '?' }}</span>
-                <span>Aircraft SN: {{ aircraftSerialNumber || '?' }}</span>
-            </v-col>
-            <v-col cols="8">
-                <span>Debug Log</span>
-                <div id="logs">
-                    <pre v-for="log of logs">{{log}}</pre>
-                </div>
-            </v-col>
-        </v-row>
-    </v-container>
-
+    <div id="container">
+        <div id="left">
+            <div>
+                <span>Remote Controller SN:</span>
+                <span>{{ remoteControllerSerialNumber || '?' }}</span>
+            </div>
+            <div>
+                <span>Aircraft SN:</span>
+                <span>{{ aircraftSerialNumber || '?' }}</span>
+            </div>
+        </div>
+        <div id="right">
+            <span>Debug Log</span>
+            <div id="logs">
+                <pre v-for="log of logs">{{log}}</pre>
+            </div>
+        </div>
+    </div>
 
 </template>
 
 <style scoped lang="scss">
 
+#container {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    padding: 1em;
+    gap: 1em;
+
+    #left {
+        display: flex;
+        flex-direction: column;
+        gap: 1em;
+        flex-grow: 0;
+        flex-shrink: 0;
+
+        div {
+            display: flex;
+            flex-direction: column;
+        }
+    }
+
+    #right {
+        flex-grow: 1;
+    }
+
+    #left, #right {
+        background: var(--neutral-dark);
+        color: var(--neutral-lighter);
+        border-radius: 0.3em;
+        padding: 0.5em;
+    }
+}
+
 #logs {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2em;
+    max-height: 100%;
+    overflow-y: auto;
+
     pre {
-        background: var(--neutral-darker);
+        padding: 0.2em 0.3em;
+        background: var(--neutral-darkest);
         color: var(--neutral-lighter);
     }
 }

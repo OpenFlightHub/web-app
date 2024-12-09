@@ -34,6 +34,8 @@ const store = useMainStore()
 <style scoped lang="scss">
 
 #nav-bar {
+    flex-grow: 0;
+    flex-shrink: 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -44,6 +46,7 @@ const store = useMainStore()
         display: flex;
         align-items: center;
         font-weight: bold;
+        color: var(--neutral-lighter);
         cursor: pointer;
         transition: all 0.2s ease;
 

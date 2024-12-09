@@ -27,12 +27,11 @@ const props = defineProps<{
 <style scoped lang="scss">
 
 #content {
+    flex-grow: 1;
     display: flex;
     justify-content: center;
     align-items: center;
     position: relative;
-    height: 100%;
-    width: 100%;
     background: var(--neutral-darker);
     padding: 10vh 10vw;
 
