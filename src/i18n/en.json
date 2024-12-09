@@ -11,6 +11,18 @@
         "logout": "Logout"
     },
 
+    "connect": {
+        "connectable_device_connect_now": "Seems like you are on a connectable device. Do you want to connect your device now?",
+        "dji-pilot-2": {
+
+        }
+    },
+
+    "hub": {
+        "hub": "Hub",
+        "go_to_hub": "Go to the Hub"
+    },
+
 
     "auth": {
         "password_restrictions": "Password must be at least 10 characters long.",
