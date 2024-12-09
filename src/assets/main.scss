@@ -1,0 +1,15 @@
+@import '_colors.scss';
+
+@import '/icons/bootstrap/bootstrap-icons.css';//TODO linking this to /fonts creates warnings in vite
+
+@import 'vuetify/styles';
+
+
+#app {
+    height: 100vh;
+    width: 100vw;
+    overflow: auto;
+    background-color: var(--tertiary);
+    background-image: url('/images/PatternBackground.png');
+    background-repeat: repeat;
+}

@@ -1,0 +1,60 @@
+{
+
+    "login": {
+        "sign_in": "Sign in",
+        "reset_password": "Reset Password",
+        "auth_error": "Invalid credentials"
+    },
+    "logout": {
+        "logout": "Logout"
+    },
+
+
+    "auth": {
+        "password_restrictions": "Password must be at least 10 characters long.",
+        "current_password": "Current password",
+        "new_password": "New password",
+        "repeat_new_password": "Repeat new Password",
+        "email": "Email",
+        "finish_registration": "Please follow these steps to finish setting up your account."
+    },
+
+    "actions": {
+        "get_started": "Get Started",
+        "back": "Back",
+        "next": "Next",
+        "finish": "Finish",
+        "return_to_home": "Return to Home",
+        "ok": "Okay",
+        "save_changes": "Save Changes",
+        "cancel": "Cancel",
+        "browse_file": "Browse",
+        "download": "Download",
+        "create": "Create",
+        "edit": "Edit",
+        "confirm": "Confirm",
+        "accept": "Accept",
+        "decline": "Decline"
+    },
+
+    "time_and_data": {
+        "time": {
+            "h": "0 hours | {n} hour | {n} hours",
+            "m": "0 mins | {n} min | {n} mins",
+            "s": "0 secs | {n} sec | {n} secs"
+        },
+        "duration": "Duration",
+        "formats": {
+            "day": {
+                "short": "ddd D MMM"
+            },
+            "time": {
+                "hours_and_minutes": "h:mm a"
+            }
+        }
+    },
+
+    "clipboard": {
+        "added_to": "Added to clipboard"
+    }
+}
