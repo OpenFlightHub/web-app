@@ -33,7 +33,7 @@ const props = defineProps<{
     position: relative;
     height: 100%;
     width: 100%;
-    background: var(--neutral-dark);
+    background: var(--neutral-darker);
     padding: 10vh 10vw;
 
     &:after {
@@ -62,7 +62,7 @@ const props = defineProps<{
         padding: 2em;
         overflow-y: auto;
         z-index: 90;
-        background-color: var(--neutral-darker);
+        background-color: var(--neutral-darkest);
         box-shadow: 2px 0 5px rgba(0,0,0,0.1);
         color: var(--neutral-lighter);
 

@@ -38,16 +38,26 @@ const store = useMainStore()
     justify-content: space-between;
     align-items: center;
     padding: 10px;
-    background: var(--neutral-dark);
+    background: var(--neutral-darkest);
 
     #left {
         display: flex;
         align-items: center;
         font-weight: bold;
+        cursor: pointer;
+        transition: all 0.2s ease;
 
         #logo {
             font-size: 30px;
             margin-right: 0.5em;
+        }
+
+        &:hover {
+            color: var(--neutral-light);
+
+            #logo {
+                filter: brightness(90%);
+            }
         }
     }
 

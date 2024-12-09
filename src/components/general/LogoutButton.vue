@@ -15,7 +15,7 @@ async function logout(){
 
 <template>
 
-    <Button @click="logout">{{ $t("logout.logout") }}</Button>
+    <Button @click="logout" variant="text" severity="danger">{{ $t("logout.logout") }}</Button>
 
 </template>
 
