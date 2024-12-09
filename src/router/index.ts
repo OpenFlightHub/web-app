@@ -17,6 +17,8 @@ import FinishRegistrationView from '@/views/auth/FinishRegistrationView.vue'
 // Hub
 import HubView from '@/views/hub/HubView.vue'
 import HubDevicesView from '@/views/hub/HubDevicesView.vue'
+import HubConnectView from '@/views/hub/HubConnectView.vue'
+import ConnectDJIPilot2 from '@/views/hub/connect/dji-pilot-2/ConnectDJIPilot2.vue';
 
 
 //Error
@@ -95,27 +97,7 @@ export function makeRouter(pinia: Pinia){
             {
                 path: '/',
                 name: 'home',
-                component: HomeView,
-                beforeEnter: (to, from, next) => {
-
-                    const { uri } = to.query
-
-                    if (uri != null && uri != '/') {
-                        next(false)
-                        router.push(uri as string)
-                    } else {// path = /
-                        if(store.isLoggedIn){
-
-                            next(false)
-                            router.push({
-                                name: 'hub'
-                            })
-
-                        } else {
-                            next()
-                        }
-                    }
-                }
+                component: HomeView
             },
 
             {
@@ -164,6 +146,16 @@ export function makeRouter(pinia: Pinia){
                 component: HubView,
                 children: [
                     {
+                        path: 'connect',
+                        component: HubConnectView,
+                        children: [
+                            {
+                                path: 'dji-pilot-2',
+                                component: ConnectDJIPilot2
+                            }
+                        ]
+                    },
+                    {
                         path: 'devices',
                         component: HubDevicesView
                     }
@@ -185,7 +177,6 @@ export function makeRouter(pinia: Pinia){
             store.loginInitialCheckWasDone = true
 
             console.info('login check')
-
             if(await store.loginCheck()){
                 // user was logged in via cookie
                 console.info('login check success')

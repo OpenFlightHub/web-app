@@ -34,7 +34,7 @@ For local development you will run into issues because the api is running on a d
 * run web-app via `npm run dev`
 * install `CORS Everywhere` plugin for Firefox or `Allow CORS: Access-Control-Allow-Origin` plugin for Chrome
 * edit `C:\Windows\System32\drivers\etc\hosts` and add the following line `127.0.0.1 dev.openflighthub.org`
-* run `npm run dev -- --host`
+* run `npm run dev -- --host --port 9000`
 
 ## Setup https environment (required for e.g. media devices apis of the browser)
 * generate self-signed certificates and save them in e.g. `/vite_dev_cert` or `C:\\vite_dev_cert`

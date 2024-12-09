@@ -62,7 +62,8 @@ export const useMainStore = defineStore('main', {
                 this.user = user
                 return true
             } catch(err) {
-                if((err as Error).message.toLowerCase().trim().startsWith('fatal')){
+
+                if(err instanceof Error && err.message.toLowerCase().trim().startsWith('fatal') || typeof err === 'string' && err.toLowerCase().trim().startsWith('fatal')){
                     this.apiUnavailable = true
                 }
 

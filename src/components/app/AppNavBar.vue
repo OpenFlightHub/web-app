@@ -1,0 +1,61 @@
+<script setup lang="ts">
+import { useRouter } from 'vue-router';
+import LogoVue from '../branding/LogoVue.vue';
+import LogoutButton from '@/components/general/LogoutButton.vue';
+import useMainStore from '@/stores/main';
+import { Button } from 'primevue';
+
+const router = useRouter()
+
+
+const store = useMainStore()
+</script>
+
+<template>
+
+    <div id="nav-bar">
+        <div id="left" @click="router.push({name: 'home'})">
+            <LogoVue id="logo" size1em></LogoVue>
+            OpenFlightHub
+        </div>
+
+        <div id="right">
+            <slot></slot>
+
+            <LogoutButton v-if="store.isLoggedIn"></LogoutButton>
+            <RouterLink v-else to="/auth/login">
+                <Button :label="$t('login.sign_in')"></Button>
+            </RouterLink>
+        </div>
+    </div>
+
+</template>
+
+<style scoped lang="scss">
+
+#nav-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background: var(--neutral-dark);
+
+    #left {
+        display: flex;
+        align-items: center;
+        font-weight: bold;
+
+        #logo {
+            font-size: 30px;
+            margin-right: 0.5em;
+        }
+    }
+
+    #right {
+        display: flex;
+        align-items: center;
+        gap: 0.5em;
+    }
+}
+
+</style>

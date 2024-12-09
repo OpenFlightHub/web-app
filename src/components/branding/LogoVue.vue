@@ -13,10 +13,10 @@ const props = defineProps<{
 const style = computed(()=>{
 
     if(props.size1em === true){
-        return `height: 1em; width: calc(1em / ${LOGO_HEIGHT} * ${LOGO_WIDTH});`
-    } else {
-        return `height: ${LOGO_HEIGHT}px; width: ${LOGO_WIDTH}px`
+        return `height: 1em; width: calc(1em * 1);`
     }
+
+    return `height: ${LOGO_HEIGHT}px; width: ${LOGO_WIDTH}px`
 })
 
 </script>

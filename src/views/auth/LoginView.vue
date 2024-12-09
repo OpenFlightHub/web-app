@@ -3,7 +3,8 @@ import useMainStore from "@/stores/main";
 import { ref } from "vue";
 import api from "@/api";
 
-import LogoVue from '@/components/branding/LogoVue.vue';
+import IconVue from "@/components/general/IconVue.vue";
+import { Button, Password, InputText, IftaLabel } from "primevue";
 
 const store = useMainStore()
 
@@ -38,54 +39,83 @@ function handleKeyUp(evt: KeyboardEvent){
 
 <template>
 
-    <v-container class="d-flex flex-column align-center rounded-xl">
-
-        <v-container class="d-flex justify-center mb-6">
-            <LogoVue></LogoVue>
-        </v-container>
+    <div>
 
         <div v-if="store.apiUnavailable">Service currently not available, sorry!</div>
 
-        <v-form v-else class="login_form">
+        <div v-else class="login_form">
 
-            <v-container class="d-flex flex-column" :min-width="300">
-                <v-text-field name="username" type="email" v-model="username" placeholder="email@example.org" autocomplete="username" @keyup="handleKeyUp" :disabled="isLoggingIn" :rules="[v => {if(v.length > 5){return true} return 'at least 5 chars'}]"></v-text-field>
+            <div id="input_fields">
+                <IftaLabel>
+                    <InputText id="username" name="username" v-model="username" autocomplete="username" @keyup="handleKeyUp" :disabled="isLoggingIn"/>
+                    <label for="username">{{ $t("login.username")}}</label>
+                </IftaLabel>
 
-                <v-text-field name="password" type="password" v-model="password" placeholder="password" autocomplete="current-password" @keyup="handleKeyUp" :disabled="isLoggingIn"></v-text-field>
+                <div>
+                    <IftaLabel>
+                        <Password id="password" name="password" type="password" v-model="password" autocomplete="current-password" @keyup="handleKeyUp" :disabled="isLoggingIn" :feedback="false"/>
+                        <label for="password">{{ $t("login.password")}}</label>
+                    </IftaLabel>
 
-                <div class="reset_password_container">
-                    <a class="reset_password" href="/auth/password-reset"> {{ $t("login.reset_password") }}</a>
+                    <div class="reset_password_container">
+                        <a class="reset_password" href="/auth/password-reset"> {{ $t("login.reset_password") }}</a>
+                    </div>
                 </div>
+            </div>
 
-                <div class="d-flex justify-end">
-                    <v-btn type="submit" @click="login" icon-right="arrow-right">{{ $t("login.sign_in") }}</v-btn>
-                </div>
-
-            </v-container>
+            <div class="buttons">
+                <Button :label="$t('login.sign_in')" @click="login">
+                    <template #icon>
+                        <IconVue name="arrow-right" buttonIconPos="right"></IconVue>
+                    </template>
+                </Button>
+            </div>
 
             <template v-if="loginError">
                 <span>{{ $t("login.auth_error") }}</span>
             </template>
 
-        </v-form>
-    </v-container>
+        </div>
+    </div>
 
 </template>
 
 <style scoped lang="scss">
 
+.login_form {
+    display: flex;
+    flex-direction: column;
+    gap: 2em;
+
+    #input_fields {
+        display: flex;
+        flex-direction: column;
+        gap: 2em;
+    }
 
     .reset_password_container {
+        margin-top: 0.5em;
 
         .reset_password {
             font-size: 14px;
-            color: var(--neutral-lighter);
+            color: var(--neutral-light);
 
             &:hover {
-                color: var(--neutral-light);
+                color: var(--neutral-lighter);
             }
         }
     }
 
+    .buttons {
+        display: flex;
+        justify-content: center;
+    }
+}
+
+@media only screen and (max-width: 800px) {
+    .login_form #input_fields {
+        flex-direction: row !important;
+    }
+}
 
 </style>

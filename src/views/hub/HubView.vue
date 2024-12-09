@@ -1,40 +1,37 @@
 <script setup lang="ts">
 
-import LogoVue from '@/components/branding/LogoVue.vue';
-import LogoutButton from '@/components/general/LogoutButton.vue';
+import App from '@/components/app/App.vue';
+import AppNavBar from '@/components/app/AppNavBar.vue';
+import AppContent from '@/components/app/AppContent.vue';
 import { useRouter } from 'vue-router';
 import { computed } from 'vue';
 
 const router = useRouter()
 
 const isMainView = computed(()=>{
-    return router.currentRoute.value.name === 'home'
+    return router.currentRoute.value.name === 'hub'
 })
 
 
 </script>
 
 <template>
-    <v-app>
+    <App>
+        <AppNavBar>
+        </AppNavBar>
 
-        <v-app-bar title="OpenFlightHub"></v-app-bar>
+        <AppContent>
 
-        <v-navigation-drawer>
-            <v-list>
-                <v-list-item title="Navigation drawer"></v-list-item>
-            </v-list>
-        </v-navigation-drawer>
-
-        <v-main class="d-flex align-center justify-center" style="min-height: 300px;">
             <div v-if="isMainView">
-                Hello
+                Welcome to the Hub!
             </div>
             <RouterView v-else>
 
             </RouterView>
-        </v-main>
 
-    </v-app>
+        </AppContent>
+
+    </App>
 
 </template>
 

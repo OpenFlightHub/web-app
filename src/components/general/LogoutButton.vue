@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import api from '@/api';
+import { Button } from 'primevue';
 
 async function logout(){
     await api.auth.logout.post().then(()=>{
@@ -14,7 +15,7 @@ async function logout(){
 
 <template>
 
-    <v-btn @click="logout">{{ $t("logout.logout") }}</v-btn>
+    <Button @click="logout">{{ $t("logout.logout") }}</Button>
 
 </template>
 

@@ -1,6 +1,8 @@
 {
 
     "login": {
+        "username": "Username/Email",
+        "password": "Password",
         "sign_in": "Sign in",
         "reset_password": "Reset Password",
         "auth_error": "Invalid credentials"

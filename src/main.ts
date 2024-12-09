@@ -13,9 +13,20 @@ const pinia = createPinia()
 const app = createApp(Main)
 
 
+import PrimeVue from 'primevue/config';
+import Aura from '@primevue/themes/aura';
+app.use(PrimeVue, {
+    theme: {
+        preset: Aura
+    }
+})
+
+
 const router = makeRouter(pinia)
 app.use(router)
 app.use(pinia)
+
+
 
 
 import useMainStore from './stores/main'
@@ -53,6 +64,7 @@ api.status.addListener('disconnected', reason=>{
 
 app.config.globalProperties.window = window
 app.config.globalProperties.document = document
+app.config.globalProperties.AbortSignal = AbortSignal
 
 // internationalisation
 
@@ -87,24 +99,7 @@ window.addEventListener('keydown', evt => {
 })
 
 
-
-//@ts-ignore
-import { createVuetify } from 'vuetify';
-//@ts-ignore
-import { VTimePicker } from 'vuetify/labs/VTimePicker'
-import DayJsAdapter from '@date-io/dayjs';
-
-
-app.use(createVuetify({
-    components: {
-        VTimePicker
-    },
-    date: {
-      adapter: DayJsAdapter,
-    },
-  }))
-
-app.mount('#app')
+app.mount('#ofh')
 
 
 //prevent default drag and drop behaviour (= show file)

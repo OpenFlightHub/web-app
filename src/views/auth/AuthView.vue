@@ -1,36 +1,19 @@
 <script setup lang="ts">
 
-import LogoVue from '@/components/branding/LogoVue.vue';
-import Error404View from '../Error404View.vue';
+import App from '@/components/app/App.vue';
+import AppContentOnly from '@/components/app/AppContentOnly.vue';
 
 </script>
 
 <template>
+    <App>
+        <AppContentOnly show-logo>
 
-    <v-app id="app">
+            <RouterView/>
 
-        <v-main id="main" class="d-flex align-center justify-center">
+        </AppContentOnly>
 
-            <v-container id="inner" class="rounded-xl">
-                <RouterView/>
-            </v-container>
-
-        </v-main>
-
-    </v-app>
+    </App>
 
 </template>
 
-<style lang="scss" scoped>
-
-#main {
-    background-color: var(--neutral-dark);
-}
-
-#inner {
-    background-color: var(--neutral-darker);
-    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-    color: var(--neutral-lighter);
-}
-
-</style>

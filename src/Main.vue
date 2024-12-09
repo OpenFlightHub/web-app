@@ -11,26 +11,8 @@ export default defineComponent({
 
 </script>
 
-<script lang="ts" setup>
-    import useMainStore from "@/stores/main"
-    const store = useMainStore()
-
-</script>
-
 <template>
 
     <RouterView/>
 
 </template>
-
-<style scoped lang="scss">
-
-</style>
-
-<style lang="scss">
-
-html {
-    overflow: auto !important;//fix vuetify
-}
-
-</style>

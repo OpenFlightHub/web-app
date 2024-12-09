@@ -1,85 +1,47 @@
 <script setup lang="ts">
-import LogoutButton from '@/components/general/LogoutButton.vue';
-import IconVue from '@/components/general/IconVue.vue';
-import WIP from '@/components/WIP.vue';
 
+import WIP from '@/components/WIP.vue';
+import { deviceSupportsSDK } from './hub/connect/dji-pilot-2/dji-connect-sdk';
+import { onMounted, ref } from 'vue';
+import App from '@/components/app/App.vue';
+import AppNavBar from '@/components/app/AppNavBar.vue';
+import AppContent from '@/components/app/AppContent.vue';
+import { Button } from 'primevue';
+
+const isDjiRemoteController = ref(false)
+
+function checkIsDjiRemoteController(){
+    isDjiRemoteController.value = deviceSupportsSDK()
+}
+
+onMounted(checkIsDjiRemoteController)
 
 </script>
 
 <template>
-    <v-app>
+    <App>
+        <AppNavBar>
+            <RouterLink to="/hub">
+                <Button>Hub</Button>
+            </RouterLink>
+        </AppNavBar>
 
-        <v-app-bar title="OpenFlightHub"></v-app-bar>
+        <AppContent>
 
-        <v-main class="d-flex align-center justify-center" style="min-height: 300px;">
-            Welcome to OpenFlightHub!
+            <div v-if="isDjiRemoteController">
+                <RouterLink to="/hub/connect/dji-pilot-2">Connect your DJI Remote Controller now</RouterLink>
+            </div>
 
-            <WIP></WIP>
-        </v-main>
+            <div v-else>
+                <h1>Welcome to OpenFlightHub!</h1>
 
-    </v-app>
+                    <a href="/hub">link</a>
+
+                <WIP></WIP>
+            </div>
+
+        </AppContent>
+
+    </App>
 
 </template>
-
-<style lang="scss" scoped>
-
-.container {
-    padding: 15vh;
-    height: 100%;
-
-    .container_inner {
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        background: #0004;
-        border-radius: 3em;
-        padding: 2em;
-        height: 100%;
-
-        .background_image {
-            z-index: 1;
-            width: calc(100% - 2em);
-            height: calc(100% - 2em);
-            position: absolute;
-            top: 1em;
-            left: 1em;
-            background-image: url('/images/logo.png');
-            background-size: contain;
-            background-position: center;
-            background-repeat: no-repeat;
-            opacity: 10%;
-        }
-
-        .foreground {
-            z-index: 2;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-
-            .links {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                font-size: 2em;
-
-                .link {
-                    color: #fff;
-                    transition: all 0.2s ease;
-
-                    &:hover {
-                        color: var(--neutral-light);
-                    }
-                }
-            }
-
-            .bottom {
-                position: absolute;
-                bottom: 2em;
-            }
-        }
-    }
-}
-</style>
