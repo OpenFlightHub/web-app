@@ -45,7 +45,7 @@ async function init(){
     const newParams = {}
 
     for(const paramName of Object.keys(props.idParams)){
-        const id = getIdParamFromRoute('workspace_id', route)
+        const id = getIdParamFromRoute(paramName, route)
         if(id <= 0){
             paramsValid.value = false
             return

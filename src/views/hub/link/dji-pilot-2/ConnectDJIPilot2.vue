@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue';
-import { DjiOpenPlatformConnectSDK } from './dji-open-platform-connect-sdk';
+import { DjiOpenPlatformConnectSDK } from '@/sdks/dji-pilot-2/dji-open-platform-connect-sdk';
 import api from '@/api';
 
 const PLATFORM_UUID = 'e97dd32f-5977-44f9-ab4d-e34205012dcd'

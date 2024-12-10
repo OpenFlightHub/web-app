@@ -17,8 +17,9 @@ import FinishRegistrationView from '@/views/auth/FinishRegistrationView.vue'
 // Hub
 import HubView from '@/views/hub/HubView.vue'
 import HubWorkspaceView from '@/views/hub/HubWorkspaceView.vue'
-import HubConnectView from '@/views/hub/HubConnectView.vue'
-import ConnectDJIPilot2 from '@/views/hub/connect/dji-pilot-2/ConnectDJIPilot2.vue';
+import HubConnectionView from '@/views/hub/HubConnectionView.vue';
+import HubLinkView from '@/views/hub/link/HubLinkView.vue'
+import ConnectDJIPilot2 from '@/views/hub/link/dji-pilot-2/ConnectDJIPilot2.vue';
 
 
 //Error
@@ -146,8 +147,8 @@ export function makeRouter(pinia: Pinia){
                 component: HubView,
                 children: [
                     {
-                        path: 'connect',
-                        component: HubConnectView,
+                        path: 'link',
+                        component: HubLinkView,
                         children: [
                             {
                                 path: 'dji-pilot-2',
@@ -156,8 +157,12 @@ export function makeRouter(pinia: Pinia){
                         ]
                     },
                     {
-                        path: 'workspace/:workspace_id',
+                        path: 'workspace/:workspaceId',
                         component: HubWorkspaceView
+                    },
+                    {
+                        path: 'connection/:connectionId',
+                        component: HubConnectionView
                     }
                 ]
             },

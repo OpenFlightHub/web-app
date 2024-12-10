@@ -7,7 +7,6 @@ import DroneSnippet from '../drone/DroneSnippet.vue';
 
 
 const props = defineProps<{
-    workspaceId: number
     connectionId: number
 }>()
 
@@ -18,7 +17,7 @@ const props = defineProps<{
     <LoadApi :api-method="api.connection.get" :params="{connectionId: props.connectionId}" v-slot="scope">
         <Snippet>
             <div id="inner">
-                <RouterLink :to="'/hub/workspace/' + props.workspaceId + '/connnection/' + props.connectionId">Connection #{{ scope.data.id }}</RouterLink>
+                <RouterLink :to="'/hub/connection/' + props.connectionId">Connection #{{ scope.data.id }}</RouterLink>
 
                 <RemoteControllerSnippet v-if="typeof scope.data.remote_controller_id === 'number'" :id="scope.data.remote_controller_id"></RemoteControllerSnippet>
 

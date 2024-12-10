@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
 import WIP from '@/components/WIP.vue';
-import { deviceSupportsSDK } from './hub/connect/dji-pilot-2/dji-open-platform-connect-sdk';
+import { deviceSupportsSDK } from '@/sdks/dji-pilot-2/dji-open-platform-connect-sdk';
 import { onMounted, ref } from 'vue';
 import App from '@/components/app/App.vue';
 import AppNavBar from '@/components/app/AppNavBar.vue';
@@ -29,7 +29,7 @@ onMounted(checkIsDjiRemoteController)
         <AppContent>
 
             <div v-if="isDjiRemoteController">
-                <RouterLink to="/hub/connect/dji-pilot-2">{{ $t("connect.connectable_device_connect_now")}}</RouterLink>
+                <RouterLink to="/hub/link/dji-pilot-2">{{ $t("connect.connectable_device_connect_now")}}</RouterLink>
             </div>
             <div v-else id="intro">
                 <h1>Welcome to OpenFlightHub!</h1>
