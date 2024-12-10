@@ -23,7 +23,7 @@ import ConnectDJIPilot2 from '@/views/hub/connect/dji-pilot-2/ConnectDJIPilot2.v
 
 //Error
 
-import Error404View from '@/views/Error404View.vue'
+import Error404View from '@/views/error/Error404View.vue'
 
 
 
