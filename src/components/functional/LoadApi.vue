@@ -8,7 +8,6 @@ const props = defineProps<{
     params: P
 }>()
 
-
 const initialLoadDone = ref(false)
 const isLoading = ref(true)
 

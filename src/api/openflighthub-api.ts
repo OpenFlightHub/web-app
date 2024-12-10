@@ -122,52 +122,64 @@ function OpenFlightHubApi(baseURL?: string) {
                     return makeRequest<void>('/workspace/{workspaceId}', 'delete', false, params, undefined)
                 },
             connections: {
-                list: {
-                    get:
-                        function(params: { workspaceId: number }) {
-                            return makeRequest<ApiResponse_WorkspaceConnectionsListGet>('/workspace/{workspaceId}/connections/list', 'get', false, params, undefined)
-                        },
-                    post:
-                        function(params: { workspaceId: number }, data: { name: string }) {
-                            return makeRequest<ApiResponse_WorkspaceConnectionsListPost>('/workspace/{workspaceId}/connections/list', 'post', false, params, data)
-                        },
-                },
                 get:
-                    function(params: { workspaceId: number, connectionId: number }) {
-                        return makeRequest<ApiResponse_WorkspaceConnectionsGet>('/workspace/{workspaceId}/connections/{connectionId}', 'get', false, params, undefined)
+                    function(params: { workspaceId: number }) {
+                        return makeRequest<ApiResponse_WorkspaceConnectionsGet>('/workspace/{workspaceId}/connections', 'get', false, params, undefined)
                     },
-                delete:
-                    function(params: { workspaceId: number, connectionId: number }) {
-                        return makeRequest<void>('/workspace/{workspaceId}/connections/{connectionId}', 'delete', false, params, undefined)
+                post:
+                    function(params: { workspaceId: number }, data: { name: string }) {
+                        return makeRequest<ApiResponse_WorkspaceConnectionsPost>('/workspace/{workspaceId}/connections', 'post', false, params, data)
                     },
             },
         },
-        connect: {
+        connection: {
+            get:
+                function(params: { connectionId: number }) {
+                    return makeRequest<ApiResponse_ConnectionGet>('/connection/{connectionId}', 'get', false, params, undefined)
+                },
+            delete:
+                function(params: { connectionId: number }) {
+                    return makeRequest<void>('/connection/{connectionId}', 'delete', false, params, undefined)
+                },
+        },
+        remoteController: {
+            get:
+                function(params: { remoteControllerId: number }) {
+                    return makeRequest<ApiResponse_RemotecontrollerGet>('/remote-controller/{remoteControllerId}', 'get', false, params, undefined)
+                },
+        },
+        drone: {
+            get:
+                function(params: { droneId: number }) {
+                    return makeRequest<ApiResponse_DroneGet>('/drone/{droneId}', 'get', false, params, undefined)
+                },
+        },
+        link: {
             auth: {
                 check: {
                     get:
                         function() {
-                            return makeRequest<void>('/connect/auth/check', 'get', false, undefined, undefined)
+                            return makeRequest<void>('/link/auth/check', 'get', false, undefined, undefined)
                         },
                 },
                 login: {
                     post:
                         function(data: { id: string, secret: string }) {
-                            return makeRequest<void>('/connect/auth/login', 'post', false, undefined, data)
+                            return makeRequest<void>('/link/auth/login', 'post', false, undefined, data)
                         },
                 },
             },
             myWorkspace: {
                 get:
                     function() {
-                        return makeRequest<ApiResponse_ConnectMyworkspaceGet>('/connect/my-workspace', 'get', false, undefined, undefined)
+                        return makeRequest<ApiResponse_LinkMyworkspaceGet>('/link/my-workspace', 'get', false, undefined, undefined)
                     },
             },
             djiPilot2: {
                 sdkConfig: {
                     get:
                         function() {
-                            return makeRequest<ApiResponse_ConnectDjipilot2SdkconfigGet>('/connect/dji-pilot-2/sdk-config', 'get', false, undefined, undefined)
+                            return makeRequest<ApiResponse_LinkDjipilot2SdkconfigGet>('/link/dji-pilot-2/sdk-config', 'get', false, undefined, undefined)
                         },
                 },
             },
@@ -194,11 +206,13 @@ export type ApiResponse_WorkspaceMyworkspacesGet = { id: number, name: string }[
 export type ApiResponse_WorkspacePost = { id: number }
 export type ApiResponse_WorkspaceGet = { id: number, name: string }
 export type ApiResponse_WorkspacePatch = { id: number, name: string }
-export type ApiResponse_WorkspaceConnectionsListGet = { id: string, remote_controller_id?: number, drone_id?: number }[]
-export type ApiResponse_WorkspaceConnectionsListPost = { id: number }
-export type ApiResponse_WorkspaceConnectionsGet = { id: string, remote_controller_id?: number, drone_id?: number }
-export type ApiResponse_ConnectMyworkspaceGet = { id: string, name: string } | boolean
-export type ApiResponse_ConnectDjipilot2SdkconfigGet = { app_id: string, app_key: string, app_license: string }
+export type ApiResponse_WorkspaceConnectionsGet = { id: number, remote_controller_id?: number, drone_id?: number }[]
+export type ApiResponse_WorkspaceConnectionsPost = { id: number, secret: string }
+export type ApiResponse_ConnectionGet = { id: number, remote_controller_id?: number, drone_id?: number }
+export type ApiResponse_RemotecontrollerGet = { id: number, serial_number: string, type: integer }
+export type ApiResponse_DroneGet = { id: number, serial_number: string, type: integer, name: string }
+export type ApiResponse_LinkMyworkspaceGet = { id: string, name: string } | boolean
+export type ApiResponse_LinkDjipilot2SdkconfigGet = { app_id: string, app_key: string, app_license: string }
 
 
 let apiAuth: String

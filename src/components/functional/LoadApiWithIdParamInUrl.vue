@@ -12,6 +12,10 @@ const props = defineProps<{
     idParams: P
 }>()
 
+const emit = defineEmits<{
+    (e: 'change', v: P)
+}>()
+
 const route = useRoute()
 
 
@@ -53,6 +57,8 @@ async function init(){
     paramsValid.value = true
 
     updateObject(params, newParams)
+
+    emit('change', params as P)
 }
 
 </script>

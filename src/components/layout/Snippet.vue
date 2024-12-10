@@ -13,11 +13,13 @@
 <style scoped lang="scss">
 
 #snippet {
-    display: flex;
+    display: inline-flex;
     flex-direction: column;
     padding: 0.5em 1em;
     border-radius: 0.5em;
-    background: var(--neutral-dark);
+    background: #0004;
+    border-radius: 0.5em;
+    gap: 0.5em;
 }
 
 </style>
