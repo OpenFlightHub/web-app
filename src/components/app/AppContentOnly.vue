@@ -27,7 +27,7 @@ const props = defineProps<{
 <style scoped lang="scss">
 
 #content {
-    flex-grow: 1;
+    min-height: calc(100vh - var(--navbar-size));
     display: flex;
     justify-content: center;
     align-items: center;
@@ -56,8 +56,8 @@ const props = defineProps<{
         flex-direction: column;
         align-items: center;
         position: relative;
-        height: 100%;
-        width: 100%;
+        min-height: 100%;
+        min-width: 100%;
         padding: 2em;
         overflow-y: auto;
         z-index: 90;

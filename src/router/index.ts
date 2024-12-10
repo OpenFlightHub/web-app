@@ -16,7 +16,7 @@ import FinishRegistrationView from '@/views/auth/FinishRegistrationView.vue'
 
 // Hub
 import HubView from '@/views/hub/HubView.vue'
-import HubDevicesView from '@/views/hub/HubDevicesView.vue'
+import HubWorkspaceView from '@/views/hub/HubWorkspaceView.vue'
 import HubConnectView from '@/views/hub/HubConnectView.vue'
 import ConnectDJIPilot2 from '@/views/hub/connect/dji-pilot-2/ConnectDJIPilot2.vue';
 
@@ -156,8 +156,8 @@ export function makeRouter(pinia: Pinia){
                         ]
                     },
                     {
-                        path: 'devices',
-                        component: HubDevicesView
+                        path: 'workspace/:workspace_id',
+                        component: HubWorkspaceView
                     }
                 ]
             },

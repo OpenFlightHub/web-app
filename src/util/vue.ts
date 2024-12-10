@@ -1,3 +1,4 @@
+import { Reactive } from "vue"
 
 /**
  * deletes all existing properties of object, adds all properties from new object
@@ -10,4 +11,13 @@ export function updateObject(current: object, update: object){
     }
 
     Object.assign(current, update)
+}
+
+/**
+ * deletes all existing items in array and ads the new ones
+ */
+export function updateArray(current: Reactive<Array<any>> | Array<any>, update: Array<any>){
+    current.splice(0, current.length)
+
+    current.push(...update)
 }

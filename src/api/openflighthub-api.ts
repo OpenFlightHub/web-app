@@ -98,6 +98,80 @@ function OpenFlightHubApi(baseURL?: string) {
                     },
             },
         },
+        workspace: {
+            myWorkspaces: {
+                get:
+                    function() {
+                        return makeRequest<ApiResponse_WorkspaceMyworkspacesGet>('/workspace/my-workspaces', 'get', false, undefined, undefined)
+                    },
+            },
+            post:
+                function(data: { name: string }) {
+                    return makeRequest<ApiResponse_WorkspacePost>('/workspace', 'post', false, undefined, data)
+                },
+            get:
+                function(params: { workspaceId: number }) {
+                    return makeRequest<ApiResponse_WorkspaceGet>('/workspace/{workspaceId}', 'get', false, params, undefined)
+                },
+            patch:
+                function(params: { workspaceId: number }, data: { name?: string }) {
+                    return makeRequest<ApiResponse_WorkspacePatch>('/workspace/{workspaceId}', 'patch', false, params, data)
+                },
+            delete:
+                function(params: { workspaceId: number }) {
+                    return makeRequest<void>('/workspace/{workspaceId}', 'delete', false, params, undefined)
+                },
+            connections: {
+                list: {
+                    get:
+                        function(params: { workspaceId: number }) {
+                            return makeRequest<ApiResponse_WorkspaceConnectionsListGet>('/workspace/{workspaceId}/connections/list', 'get', false, params, undefined)
+                        },
+                    post:
+                        function(params: { workspaceId: number }, data: { name: string }) {
+                            return makeRequest<ApiResponse_WorkspaceConnectionsListPost>('/workspace/{workspaceId}/connections/list', 'post', false, params, data)
+                        },
+                },
+                get:
+                    function(params: { workspaceId: number, connectionId: number }) {
+                        return makeRequest<ApiResponse_WorkspaceConnectionsGet>('/workspace/{workspaceId}/connections/{connectionId}', 'get', false, params, undefined)
+                    },
+                delete:
+                    function(params: { workspaceId: number, connectionId: number }) {
+                        return makeRequest<void>('/workspace/{workspaceId}/connections/{connectionId}', 'delete', false, params, undefined)
+                    },
+            },
+        },
+        connect: {
+            auth: {
+                check: {
+                    get:
+                        function() {
+                            return makeRequest<void>('/connect/auth/check', 'get', false, undefined, undefined)
+                        },
+                },
+                login: {
+                    post:
+                        function(data: { id: string, secret: string }) {
+                            return makeRequest<void>('/connect/auth/login', 'post', false, undefined, data)
+                        },
+                },
+            },
+            myWorkspace: {
+                get:
+                    function() {
+                        return makeRequest<ApiResponse_ConnectMyworkspaceGet>('/connect/my-workspace', 'get', false, undefined, undefined)
+                    },
+            },
+            djiPilot2: {
+                sdkConfig: {
+                    get:
+                        function() {
+                            return makeRequest<ApiResponse_ConnectDjipilot2SdkconfigGet>('/connect/dji-pilot-2/sdk-config', 'get', false, undefined, undefined)
+                        },
+                },
+            },
+        },
     }
 
 }
@@ -116,6 +190,15 @@ export type ApiResponse_AuthRegisterPost = { id: number }
 export type ApiResponse_UserGet = { id: number, name: string }
 export type ApiResponse_UserPatch = { id: number, name: string, email: string, created_at: string, locale: string, registration_incomplete: boolean }
 export type ApiResponse_UserSelfGet = { id: number, name: string, email: string, created_at: string, locale: string, registration_incomplete: boolean }
+export type ApiResponse_WorkspaceMyworkspacesGet = { id: number, name: string }[]
+export type ApiResponse_WorkspacePost = { id: number }
+export type ApiResponse_WorkspaceGet = { id: number, name: string }
+export type ApiResponse_WorkspacePatch = { id: number, name: string }
+export type ApiResponse_WorkspaceConnectionsListGet = { id: string, remote_controller_id?: number, drone_id?: number }[]
+export type ApiResponse_WorkspaceConnectionsListPost = { id: number }
+export type ApiResponse_WorkspaceConnectionsGet = { id: string, remote_controller_id?: number, drone_id?: number }
+export type ApiResponse_ConnectMyworkspaceGet = { id: string, name: string } | boolean
+export type ApiResponse_ConnectDjipilot2SdkconfigGet = { app_id: string, app_key: string, app_license: string }
 
 
 let apiAuth: String

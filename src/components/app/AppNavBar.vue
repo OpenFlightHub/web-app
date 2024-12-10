@@ -34,6 +34,7 @@ const store = useMainStore()
 <style scoped lang="scss">
 
 #nav-bar {
+    height: var(--navbar-size);
     flex-grow: 0;
     flex-shrink: 0;
     display: flex;

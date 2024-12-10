@@ -17,8 +17,9 @@
 <style scoped lang="scss">
 
 #content {
+    min-height: calc(100vh - var(--navbar-size));
+    overflow-y: auto;
     position: relative;
-    flex-grow: 1;
     background: var(--neutral-darker);
 
     &:after {
@@ -39,8 +40,8 @@
 
     #inner {
         position: relative;
-        height: 100%;
-        width: 100%;
+        min-height: 100%;
+        min-width: 100%;
         z-index: 2;
     }
 }
