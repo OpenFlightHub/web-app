@@ -10,6 +10,9 @@ export type DjiBridgeResponseFail = {
     message: string
 }
 
+
+export type ComponentName = 'api' | 'thing' | 'liveshare' | 'api' | 'ws' | 'map' | 'tsa' | 'media' | 'mission'
+
 export type DjiBridge = {
     /**
      * @param uuid the identifier of the workspace Identifier, the id must be uuid grid format. Example: e3dea0f5-37f2- 4d79-ae58- 490af3228069
@@ -36,10 +39,13 @@ export type DjiBridge = {
 
 
     /**
-     * the api module must be loaded before it can be used
+     * can be called if api component has been loaded at least once (it still works if api component has been unloaded afterwards)
      */
     apiSetToken: (token: string) => DjiBridgeResponse<void>
 
+    /**
+     * can be called if api component has been loaded at least once (it still works if api component has been unloaded afterwards)
+     */
     apiGetToken: () => DjiBridgeResponse<string>
 
 
@@ -48,9 +54,43 @@ export type DjiBridge = {
      */
     platformVerifyLicense: (appId: string, appKey: string, license: string) => DjiBridgeResponse<boolean>
 
+    platformGetRemoteControllerSN: () => DjiBridgeResponse<string>
+
+    platformGetAircraftSN: () => DjiBridgeResponse<string>
+
+    /**
+     * don't immediately call this for api component after you loaded the page or verified the license (i dont know which creates the problems), but the dji pilot app will not be ready and throw an error!
+     *
+     *
+     * components loading seems to be persistent after page reload (maybe not anymore if platform integration is stopped?)
+     *
+     * you can call this even if the component is already loaded, it will then overwrite the existing config/params (at least this works for api component)
+     *
+     */
+    platformLoadComponent: (name: ComponentName, param: string) => DjiBridgeResponse<void>
+
+    platformIsComponentLoaded: (name: ComponentName) => DjiBridgeResponse<boolean>
+
+    /**
+     * if you call unloadComponent mqtt, dont immediately call loadcomeponent mqtt! It does not work and completely blocks the javascript
+     */
+    platformUnloadComponent: (name: ComponentName) => DjiBridgeResponse<void>
+
+    apiGetToken: () => DjiBridgeResponse<string>
+
+
+
+    /**
+     * this function will be called when the user clicks the "sign out" button on the cloud platform (unlinking the the cloud platform from the remote controller and effectively resetting the cloud platform connection and settings)
+     */
+    onStopPlatform?: () => void
+
+    /**
+     * this function will be called when the users presses the back icon on the top left of the the webview (this is NOT the physical back button!).
+     * @returns If you return true, the pilot app will ignore the "back" event
+     */
+    onBackClick?: () => boolean
 /*
-    onBackClick()	Return key callback	When you click the return key in the upper left corner of the webView page, the interface callback will be triggered. If the return value is true, PILOT will not be processed. if it is false or this function is not implemented, PILOT will exit the WebView page, and the effect will be the same as the return key of the remote control entity. Note: The remote controller back button cannot trigger this callback.
-window.djiBridge.onStopPlatform()	Exit cloud platform callback	Before clicking to exit the cloud platform, the js method will be called, and then the APP will continue to perform the action of exiting the platform
 window.djiBridge.platformSetLogEncryptKey(String key) 	Set the log encryption key	Set the public key of the pilot log.
 window.djiBridge.platformClearLogEncryptKey()	Clear the log encryption key	Clear the log encryption key.
 window.djiBridge.platformGetLogPath()	Obtain the log path	Obtain the path for saving pilot logs.

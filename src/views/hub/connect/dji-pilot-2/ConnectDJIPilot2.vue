@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue';
-import { DjiOpenPlatformConnectSDK } from './dji-connect-sdk';
+import { DjiOpenPlatformConnectSDK } from './dji-open-platform-connect-sdk';
+import api from '@/api';
 
 const PLATFORM_UUID = 'e97dd32f-5977-44f9-ab4d-e34205012dcd'
 
@@ -9,22 +10,43 @@ const APP_KEY = 'ca6b89a2db4c280e1e93d22fd8e1e8e'
 const APP_LICENSE = 'Qf0VAs7wVcuPnz0nbISQQUoQgEBpU6U8w2VMj+u95IpoIK5P7VSxacUNMatWIDlv70h336R3a0bxK4OxOJUnvwzJ19v1MRYcmI6Ni6A56+3DaYKEhtMLsTZN4HwkEmRwTc6OSGMWv6giS/7mvoLS686U2P1/LNwQX0Eo1BCBZmg='
 
 
-
+const mqttConnectState = ref(false)
 
 onMounted(()=>{
+
+
     const sdk = new DjiOpenPlatformConnectSDK(APP_ID, APP_KEY, APP_LICENSE)
 
     sdk.addListener('log', msg => {
         logs.push(msg)
     })
 
-
-
     const validLicense = sdk.verifyLicense()
 
-    sdk.platformSetWorkspaceId(PLATFORM_UUID)
+    const apiComponentIsLoaded = sdk.componentApiIsLoaded()
 
-    sdk.platformSetInformation('OpenFlightHub', 'Alex Workspace', 'Description of alex workspace on openflighthub.org')
+    if(!apiComponentIsLoaded){
+        sdk.loadComponentApi('https://dev.openflighthub.org/api', 'test')
+    }
+
+
+    sdk.setWorkspaceId(PLATFORM_UUID)
+
+    sdk.setPlatformInformation('OpenFlightHub', 'Alex Workspace', 'Description of alex workspace on openflighthub.org')
+
+    remoteControllerSerialNumber.value = sdk.getRemoteControllerSN()
+
+
+
+    const mqttComponentIsLoaded = sdk.componentMqttIsLoaded()
+
+    if(!mqttComponentIsLoaded){
+        sdk.loadComponentMqtt('tcp://217.92.71.192:9002', state=>{
+            console.log(state)
+            logs.push('mqtt state changed:', '' + state)
+            mqttConnectState.value = state
+        }, 'test', 'test')
+    }
 
 })
 
@@ -86,11 +108,16 @@ function init(){
                 <span>Aircraft SN:</span>
                 <span>{{ aircraftSerialNumber || '?' }}</span>
             </div>
+
+            <div>
+                <span>MQTT</span>
+                <span id="mqtt-connect-state" :style="'background-color: ' + (mqttConnectState ? 'green' : 'red')">{{ mqttConnectState ? 'connected' : 'disconnected' }}</span>
+            </div>
         </div>
         <div id="right">
             <span>Debug Log</span>
             <div id="logs">
-                <pre v-for="log of logs">{{log}}</pre>
+                <pre v-for="l of logs">{{l}}</pre>
             </div>
         </div>
     </div>
@@ -121,6 +148,8 @@ function init(){
 
     #right {
         flex-grow: 1;
+        max-height: calc(100vh - var(--navbar-size) - 2em);
+        overflow-y: scroll;
     }
 
     #left, #right {
@@ -142,7 +171,16 @@ function init(){
         padding: 0.2em 0.3em;
         background: var(--neutral-darkest);
         color: var(--neutral-lighter);
+        white-space: break-spaces;
+        word-break: break-all;
     }
+}
+
+#mqtt-connect-state {
+    display: block;
+    width: 1em;
+    height: 1em;
+    border-radius: 100%;
 }
 
 </style>
