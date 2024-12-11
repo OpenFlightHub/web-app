@@ -12,7 +12,7 @@ const APP_LICENSE = 'Qf0VAs7wVcuPnz0nbISQQUoQgEBpU6U8w2VMj+u95IpoIK5P7VSxacUNMat
 
 const mqttConnectState = ref(false)
 
-onMounted(()=>{
+onMounted(async()=>{
 
 
     const sdk = new DjiOpenPlatformConnectSDK(APP_ID, APP_KEY, APP_LICENSE)
@@ -23,10 +23,10 @@ onMounted(()=>{
 
     const validLicense = sdk.verifyLicense()
 
-    const apiComponentIsLoaded = sdk.componentApiIsLoaded()
+    const apiComponentIsLoaded = sdk.api_moduleIsLoaded()
 
     if(!apiComponentIsLoaded){
-        sdk.loadComponentApi('https://dev.openflighthub.org/api', 'test')
+        await sdk.api_loadModule('https://dev.openflighthub.org/api', 'test')
     }
 
 
@@ -38,15 +38,28 @@ onMounted(()=>{
 
 
 
-    const mqttComponentIsLoaded = sdk.componentMqttIsLoaded()
+    const mqttComponentIsLoaded = sdk.mqtt_moduleIsLoaded()
 
-    if(!mqttComponentIsLoaded){
-        sdk.loadComponentMqtt('tcp://217.92.71.192:9002', state=>{
-            console.log(state)
-            logs.push('mqtt state changed:', '' + state)
-            mqttConnectState.value = state
-        }, 'test', 'test')
+    if(mqttComponentIsLoaded){
+        await sdk.mqtt_unloadModule()
     }
+
+    await sdk.mqtt_loadModule('tcp://217.92.71.192:9002', 'test', 'test')
+
+    sdk.addListener('mqtt_connection_state', state=>{
+        console.log('connnect-state', state)
+        logs.push('mqtt state changed:', '' + state)
+        mqttConnectState.value = state
+    })
+
+    if(!sdk.mqtt_isConnected()){
+        sdk.mqtt_startWithExistingConfig().then(res => {
+            console.log('start with existing worked', res)
+        }).catch(err => {
+            console.error('start with existing failed', err)
+        })
+    }
+
 
 })
 
@@ -117,7 +130,7 @@ function init(){
         <div id="right">
             <span>Debug Log</span>
             <div id="logs">
-                <pre v-for="l of logs">{{l}}</pre>
+                <pre v-for="the_log, i of logs" :key="i">{{the_log}}</pre>
             </div>
         </div>
     </div>
