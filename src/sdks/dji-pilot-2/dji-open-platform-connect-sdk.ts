@@ -173,7 +173,7 @@ export class DjiOpenPlatformConnectSDK extends EventManager<DjiOpenPlatformConne
 
     mqtt_isConnected = this.wrapWithLog('mqtt_isConnected', ()=>{
 
-        this.guardLicenseIsVerified()
+        this.guardModuleLoaded('thing')
 
         return this.unwrapResponse(
             this.djiBridge.thingGetConnectState()
@@ -214,7 +214,7 @@ export class DjiOpenPlatformConnectSDK extends EventManager<DjiOpenPlatformConne
      *
      * @see mqtt_start()
      */
-    mqtt_startWithExistingConfig = this.wrapWithLog('mqtt_startWithExistingConfig', ()=>{
+    mqtt_startWithExistingConfig = this.wrapWithLog('mqtt_startWithExistingConfig', (username: string, password: string)=>{
         return new Promise<boolean>((resolve, reject)=>{
 
             this.guardModuleLoaded('thing')
@@ -237,7 +237,7 @@ export class DjiOpenPlatformConnectSDK extends EventManager<DjiOpenPlatformConne
                 }
             })
 
-            this.djiBridge.thingConnect(config.username, config.password, JS_CALLBACK_MQTT_CONNECTION_STATE)
+            this.djiBridge.thingConnect(username, password, JS_CALLBACK_MQTT_CONNECTION_STATE)
         })
     })
 

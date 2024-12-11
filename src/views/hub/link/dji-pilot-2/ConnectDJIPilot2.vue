@@ -3,7 +3,7 @@ import { onMounted, reactive, ref } from 'vue';
 import { DjiOpenPlatformConnectSDK } from '@/sdks/dji-pilot-2/dji-open-platform-connect-sdk';
 import api from '@/api';
 
-const PLATFORM_UUID = 'e97dd32f-5977-44f9-ab4d-e34205012dcd'
+const PLATFORM_UUID = 'e97dd32f-5977-44f9-ab4d-e34205012dce'
 
 const APP_ID = '155101'
 const APP_KEY = 'ca6b89a2db4c280e1e93d22fd8e1e8e'
@@ -29,7 +29,6 @@ onMounted(async()=>{
         await sdk.api_loadModule('https://dev.openflighthub.org/api', 'test')
     }
 
-
     sdk.setWorkspaceId(PLATFORM_UUID)
 
     sdk.setPlatformInformation('OpenFlightHub', 'Alex Workspace', 'Description of alex workspace on openflighthub.org')
@@ -40,11 +39,10 @@ onMounted(async()=>{
 
     const mqttComponentIsLoaded = sdk.mqtt_moduleIsLoaded()
 
-    if(mqttComponentIsLoaded){
-        await sdk.mqtt_unloadModule()
-    }
 
-    await sdk.mqtt_loadModule('tcp://217.92.71.192:9002', 'test', 'test')
+    if(!mqttComponentIsLoaded){
+        await sdk.mqtt_loadModule('tcp://217.92.71.192:9002', 'test', 'test')
+    }
 
     sdk.addListener('mqtt_connection_state', state=>{
         console.log('connnect-state', state)
@@ -52,8 +50,12 @@ onMounted(async()=>{
         mqttConnectState.value = state
     })
 
-    if(!sdk.mqtt_isConnected()){
-        sdk.mqtt_startWithExistingConfig().then(res => {
+    const mqttConnected = sdk.mqtt_isConnected()
+
+    mqttConnectState.value = mqttConnected
+
+    if(!mqttConnected){
+        sdk.mqtt_startWithExistingConfig('test', 'test').then(res => {
             console.log('start with existing worked', res)
         }).catch(err => {
             console.error('start with existing failed', err)

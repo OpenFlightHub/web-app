@@ -20,7 +20,9 @@ export type ComponentName = 'api' | 'thing' | 'liveshare' | 'api' | 'ws' | 'map'
 
 export type DjiBridge = {
     /**
-     * @param uuid the identifier of the workspace Identifier, the id must be uuid grid format. Example: e3dea0f5-37f2- 4d79-ae58- 490af3228069
+     * NOTE: sometimes the remote controller has a bug where it somehow bricks the workspace with that UUID (e.g. when playing around with it too much for developing). In that case it will never actually send any mqtt messages out. In that case, you must use a different UUID!
+     *
+     * @param uuid the identifier of the workspace Identifier, the id must be uuid format. Example: e3dea0f5-37f2-4d79-ae58-490af3228069
      */
     platformSetWorkspaceId: (uuid: string) => DjiBridgeResponse<EmptyObject>
 
@@ -86,16 +88,15 @@ export type DjiBridge = {
 
 
 
-
-    thingGetConnectState: () => DjiBridgeResponse<Boolean>
+    thingGetConnectState: () => DjiBridgeResponse<boolean>
     thingConnect: (username: string, password: string, callback: string) => DjiBridgeResponse<EmptyObject>
     thingDisconnect: () => DjiBridgeResponse<EmptyObject>
     thingSetConnectCallback: (callback: string) => DjiBridgeResponse<EmptyObject>
     thingGetConfigs: () => DjiBridgeResponse<{
         connectCallback: string
         host: string
-        password: string
-        username: string
+        password: undefined // i know, the doc says its a string, but its not
+        username: undefined // i know, the doc says its a string, but its not
     }>
 
     /**
