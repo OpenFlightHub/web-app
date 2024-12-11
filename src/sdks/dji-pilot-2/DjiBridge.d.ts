@@ -1,3 +1,6 @@
+
+//Source: https://developer.dji.com/doc/cloud-api-tutorial/en/api-reference/pilot-to-cloud/jsbridge.html#cloud-module
+
 export type DjiBridgeResponse<T> = DjiBridgeResponseSuccess<T> | DjiBridgeResponseFail
 
 export type DjiBridgeResponseSuccess<T> = {
@@ -11,13 +14,15 @@ export type DjiBridgeResponseFail = {
 }
 
 
+export type EmptyObject = Record<string, never>
+
 export type ComponentName = 'api' | 'thing' | 'liveshare' | 'api' | 'ws' | 'map' | 'tsa' | 'media' | 'mission'
 
 export type DjiBridge = {
     /**
      * @param uuid the identifier of the workspace Identifier, the id must be uuid grid format. Example: e3dea0f5-37f2- 4d79-ae58- 490af3228069
      */
-    platformSetWorkspaceId: (uuid: string) => DjiBridgeResponse<void>
+    platformSetWorkspaceId: (uuid: string) => DjiBridgeResponse<EmptyObject>
 
     /**
      *
@@ -26,7 +31,7 @@ export type DjiBridge = {
      * @param desc the description displayed on the "cloud" tile in the pilot 2 app home screen (just below workspaceName)
      *
      */
-    platformSetInformation: (platformName: string, workspaceName: string, desc: string) => DjiBridgeResponse<void>
+    platformSetInformation: (platformName: string, workspaceName: string, desc: string) => DjiBridgeResponse<EmptyObject>
 
     platformGetRemoteControllerSN: () => DjiBridgeResponse<string>
 
@@ -35,13 +40,13 @@ export type DjiBridge = {
     /**
      * Close and exit the platform
      */
-    platformStopSelf: () => DjiBridgeResponse<void>
+    platformStopSelf: () => DjiBridgeResponse<EmptyObject>
 
 
     /**
      * can be called if api component has been loaded at least once (it still works if api component has been unloaded afterwards)
      */
-    apiSetToken: (token: string) => DjiBridgeResponse<void>
+    apiSetToken: (token: string) => DjiBridgeResponse<EmptyObject>
 
     /**
      * can be called if api component has been loaded at least once (it still works if api component has been unloaded afterwards)
@@ -67,18 +72,31 @@ export type DjiBridge = {
      * you can call this even if the component is already loaded, it will then overwrite the existing config/params (at least this works for api component)
      *
      */
-    platformLoadComponent: (name: ComponentName, param: string) => DjiBridgeResponse<void>
+    platformLoadComponent: (name: ComponentName, param: string) => DjiBridgeResponse<EmptyObject>
 
     platformIsComponentLoaded: (name: ComponentName) => DjiBridgeResponse<boolean>
 
     /**
      * if you call unloadComponent mqtt, dont immediately call loadcomeponent mqtt! It does not work and completely blocks the javascript
      */
-    platformUnloadComponent: (name: ComponentName) => DjiBridgeResponse<void>
+    platformUnloadComponent: (name: ComponentName) => DjiBridgeResponse<EmptyObject>
 
     apiGetToken: () => DjiBridgeResponse<string>
 
 
+
+
+
+    thingGetConnectState: () => DjiBridgeResponse<Boolean>
+    thingConnect: (username: string, password: string, callback: string) => DjiBridgeResponse<EmptyObject>
+    thingDisconnect: () => DjiBridgeResponse<EmptyObject>
+    thingSetConnectCallback: (callback: string) => DjiBridgeResponse<EmptyObject>
+    thingGetConfigs: () => DjiBridgeResponse<{
+        connectCallback: string
+        host: string
+        password: string
+        username: string
+    }>
 
     /**
      * this function will be called when the user clicks the "sign out" button on the cloud platform (unlinking the the cloud platform from the remote controller and effectively resetting the cloud platform connection and settings)
@@ -90,6 +108,9 @@ export type DjiBridge = {
      * @returns If you return true, the pilot app will ignore the "back" event
      */
     onBackClick?: () => boolean
+
+
+
 /*
 window.djiBridge.platformSetLogEncryptKey(String key) 	Set the log encryption key	Set the public key of the pilot log.
 window.djiBridge.platformClearLogEncryptKey()	Clear the log encryption key	Clear the log encryption key.
