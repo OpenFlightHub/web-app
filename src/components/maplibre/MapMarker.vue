@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { Cartesian2, Cartesian3, Cartographic, Color, Entity, HeightReference, JulianDate, LabelStyle, SampledPositionProperty, sampleTerrainMostDetailed, VerticalOrigin, Viewer } from 'cesium';
 
 
@@ -12,7 +12,7 @@ const props = defineProps<{
     iconHeight: number
     label?: string
     fontSize?: number
-    showHeightIndicator?: boolean
+    showHeightIndicator?: boolean//TODO implement
 }>()
 
 let marker: Entity
@@ -46,7 +46,13 @@ async function update(){
     await addHeightIndicator()
 }
 
+function heightIsNotZero(){
+    return typeof props.height === 'number' && props.height > 0
+}
+
 function addMarker(){
+
+
 
     marker = props.viewer.entities.add({
         id: 'map-marker-' + myId,
@@ -55,18 +61,17 @@ function addMarker(){
             image: props.iconUrl,
             width: props.iconWidth,
             height: props.iconHeight,
-            // verticalOrigin: VerticalOrigin.BOTTOM,
-            // pixelOffset: new Cartesian2(0, props.iconHeight * -0.5),
-            heightReference: (typeof props.height === 'number' && props.height > 0) ? HeightReference.NONE : HeightReference.CLAMP_TO_TERRAIN,
-            disableDepthTestDistance: Number.POSITIVE_INFINITY
+            color: Color.RED,
+            heightReference: heightIsNotZero() ? HeightReference.NONE : HeightReference.CLAMP_TO_TERRAIN,
+            disableDepthTestDistance: heightIsNotZero() ? 5000000 : Number.POSITIVE_INFINITY
         },
         label: {
             text: props.label,
             font: (typeof props.fontSize === 'number' ? props.fontSize : 14) + 'pt monospace',
             style: LabelStyle.FILL_AND_OUTLINE,
             outlineWidth: 2,
-            heightReference: (typeof props.height === 'number' && props.height > 0) ? HeightReference.NONE : HeightReference.CLAMP_TO_TERRAIN,
-            disableDepthTestDistance: Number.POSITIVE_INFINITY,
+            heightReference: heightIsNotZero() ? HeightReference.NONE : HeightReference.CLAMP_TO_TERRAIN,
+            disableDepthTestDistance: heightIsNotZero() ? 5000000 : Number.POSITIVE_INFINITY,
             verticalOrigin: VerticalOrigin.TOP,
             pixelOffset: new Cartesian2(0, props.iconHeight * 0.5)
         }
@@ -74,7 +79,11 @@ function addMarker(){
 }
 
 function removeMarker(){
+    if(!marker){
+        return
+    }
     props.viewer.entities.remove(marker)
+    marker = undefined
 }
 
 async function addHeightIndicator(){
@@ -84,6 +93,8 @@ async function addHeightIndicator(){
 
     const onGroundPos = inAirPos.clone()
     await sampleTerrainMostDetailed(props.viewer.terrainProvider, [onGroundPos])
+
+    removeHeightIndicator()
 
     heightIndicator = props.viewer.entities.add({
         id: 'map-marker-height-indicator' + myId,
@@ -96,7 +107,11 @@ async function addHeightIndicator(){
 }
 
 function removeHeightIndicator(){
+    if(!heightIndicator){
+        return
+    }
     props.viewer.entities.remove(heightIndicator)
+    heightIndicator = undefined
 }
 
 </script>
