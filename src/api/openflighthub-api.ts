@@ -147,12 +147,24 @@ function OpenFlightHubApi(baseURL?: string) {
                 function(params: { remoteControllerId: number }) {
                     return makeRequest<ApiResponse_RemotecontrollerGet>('/remote-controller/{remoteControllerId}', 'get', false, params, undefined)
                 },
+            lastPosition: {
+                get:
+                    function(params: { remoteControllerId: number }) {
+                        return makeRequest<ApiResponse_RemotecontrollerLastpositionGet>('/remote-controller/{remoteControllerId}/last-position', 'get', false, params, undefined)
+                    },
+            },
         },
         drone: {
             get:
                 function(params: { droneId: number }) {
                     return makeRequest<ApiResponse_DroneGet>('/drone/{droneId}', 'get', false, params, undefined)
                 },
+            lastPosition: {
+                get:
+                    function(params: { droneId: number }) {
+                        return makeRequest<ApiResponse_DroneLastpositionGet>('/drone/{droneId}/last-position', 'get', false, params, undefined)
+                    },
+            },
         },
         link: {
             auth: {
@@ -210,7 +222,9 @@ export type ApiResponse_WorkspaceConnectionsGet = { id: number, remote_controlle
 export type ApiResponse_WorkspaceConnectionsPost = { id: number, secret: string }
 export type ApiResponse_ConnectionGet = { id: number, remote_controller_id?: number, drone_id?: number }
 export type ApiResponse_RemotecontrollerGet = { id: number, serial_number: string, type: integer }
+export type ApiResponse_RemotecontrollerLastpositionGet = { longitude: number, latitude: number, height: number }
 export type ApiResponse_DroneGet = { id: number, serial_number: string, type: integer, name: string }
+export type ApiResponse_DroneLastpositionGet = { longitude: number, latitude: number, height: number }
 export type ApiResponse_LinkMyworkspaceGet = { id: string, name: string } | boolean
 export type ApiResponse_LinkDjipilot2SdkconfigGet = { app_id: string, app_key: string, app_license: string }
 

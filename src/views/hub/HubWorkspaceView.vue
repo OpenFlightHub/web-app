@@ -4,8 +4,10 @@ import api from '@/api';
 import List from '@/components/layout/List.vue';
 
 import LoadApiWithIdParamInUrl from '@/components/functional/LoadApiWithIdParamInUrl.vue';
+import LoadApiArrayWithIdParamInUrl from '@/components/functional/LoadApiArrayWithIdParamInUrl.vue';
 import ConnectionSnippet from '@/components/connection/ConnectionSnippet.vue';
-
+import HubWorkspaceMap from '@/components/workspace/HubWorkspaceMap.vue';
+import { Tabs, TabList, Tab, TabPanels, TabPanel } from 'primevue';
 
 
 </script>
@@ -18,13 +20,26 @@ import ConnectionSnippet from '@/components/connection/ConnectionSnippet.vue';
 
          <h2>Connections</h2>
 
-         <LoadApiWithIdParamInUrl :api-method="api.workspace.connections.get" :id-params="{workspaceId: undefined}" v-slot="connections">
+         <LoadApiArrayWithIdParamInUrl :api-method="api.workspace.connections.get" :id-params="{workspaceId: undefined}" v-slot="connections">
 
-            <List>
-               <ConnectionSnippet v-for="connection in connections.data" :workspace-id="workspace.data.id" :connection-id="connection.id"></ConnectionSnippet>
-            </List>
+            <Tabs value="0">
+               <TabList>
+                  <Tab value="0">Map</Tab>
+                  <Tab value="1">Connections</Tab>
+               </TabList>
+               <TabPanels>
+                  <TabPanel value="0">
+                     <HubWorkspaceMap :connections="connections.data" style="width: 100%; height: 70vh;"></HubWorkspaceMap>
+                  </TabPanel>
+                  <TabPanel value="1">
+                     <List>
+                        <ConnectionSnippet v-for="connection in connections.data" :workspace-id="workspace.data.id" :connection-id="connection.id"></ConnectionSnippet>
+                     </List>
+                  </TabPanel>
+               </TabPanels>
+            </Tabs>
 
-         </LoadApiWithIdParamInUrl>
+         </LoadApiArrayWithIdParamInUrl>
 
       </div>
    </LoadApiWithIdParamInUrl>
