@@ -28,7 +28,7 @@ async function fetchLastPosition(){
 
 <template>
 
-    <MapMarker v-if="typeof lastPosition.height === 'number'" :position="[lastPosition.longitude, lastPosition.latitude]" :height="lastPosition.height" :viewer="props.viewer" :label="'Drone #' + props.droneId" icon-url="/images/drone/icon.png" :icon-width="64" :icon-height="64"></MapMarker>
+    <MapMarker v-if="typeof lastPosition.height === 'number'" :position="[lastPosition.longitude, lastPosition.latitude]" :elevation="lastPosition.height" :viewer="props.viewer" :label="'Drone #' + props.droneId" icon-url="/images/drone/icon.png" :icon-width="64" :icon-height="64"></MapMarker>
 
 </template>
 

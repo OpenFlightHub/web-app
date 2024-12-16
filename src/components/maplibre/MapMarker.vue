@@ -6,7 +6,7 @@ import { Cartesian2, Cartesian3, Cartographic, Color, Entity, HeightReference, J
 const props = defineProps<{
     viewer: Viewer
     position: [number, number]
-    height?: number
+    elevation?: number //if not present, marker will sit on the ground
     iconUrl: string
     iconWidth: number
     iconHeight: number
@@ -21,7 +21,7 @@ let heightIndicator: Entity
 const myId = crypto.randomUUID()
 
 watch(()=>props.position, update, {deep: true})
-watch(()=>props.height, update)
+watch(()=>props.elevation, update)
 
 onMounted(update)
 onBeforeUnmount(()=>{
@@ -47,23 +47,21 @@ async function update(){
 }
 
 function heightIsNotZero(){
-    return typeof props.height === 'number' && props.height > 0
+    return typeof props.elevation === 'number' && props.elevation > 0
 }
 
 function addMarker(){
 
-
-
     marker = props.viewer.entities.add({
         id: 'map-marker-' + myId,
-        position: Cartesian3.fromDegrees(props.position[0], props.position[1], props.height),
+        position: Cartesian3.fromDegrees(props.position[0], props.position[1], props.elevation),
         billboard: {
             image: props.iconUrl,
             width: props.iconWidth,
             height: props.iconHeight,
             color: Color.RED,
             heightReference: heightIsNotZero() ? HeightReference.NONE : HeightReference.CLAMP_TO_TERRAIN,
-            disableDepthTestDistance: heightIsNotZero() ? 5000000 : Number.POSITIVE_INFINITY
+            disableDepthTestDistance: heightIsNotZero() ? 5000000 : Number.POSITIVE_INFINITY // show always above terrain
         },
         label: {
             text: props.label,
@@ -71,7 +69,7 @@ function addMarker(){
             style: LabelStyle.FILL_AND_OUTLINE,
             outlineWidth: 2,
             heightReference: heightIsNotZero() ? HeightReference.NONE : HeightReference.CLAMP_TO_TERRAIN,
-            disableDepthTestDistance: heightIsNotZero() ? 5000000 : Number.POSITIVE_INFINITY,
+            disableDepthTestDistance: heightIsNotZero() ? 5000000 : Number.POSITIVE_INFINITY, // show always above terrain
             verticalOrigin: VerticalOrigin.TOP,
             pixelOffset: new Cartesian2(0, props.iconHeight * 0.5)
         }
@@ -99,7 +97,7 @@ async function addHeightIndicator(){
     heightIndicator = props.viewer.entities.add({
         id: 'map-marker-height-indicator' + myId,
         polyline: {
-            positions: [Cartesian3.fromDegrees(props.position[0], props.position[1], props.height), Cartographic.toCartesian(onGroundPos)],
+            positions: [Cartesian3.fromDegrees(props.position[0], props.position[1], props.elevation), Cartographic.toCartesian(onGroundPos)],
             width: 10,
             material: Color.BLUE
         }
