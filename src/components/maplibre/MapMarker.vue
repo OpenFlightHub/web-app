@@ -66,7 +66,9 @@ function addMarker(){
             style: LabelStyle.FILL_AND_OUTLINE,
             outlineWidth: 2,
             heightReference: (typeof props.height === 'number' && props.height > 0) ? HeightReference.NONE : HeightReference.CLAMP_TO_TERRAIN,
-            disableDepthTestDistance: Number.POSITIVE_INFINITY
+            disableDepthTestDistance: Number.POSITIVE_INFINITY,
+            verticalOrigin: VerticalOrigin.TOP,
+            pixelOffset: new Cartesian2(0, props.iconHeight * 0.5)
         }
     })
 }
