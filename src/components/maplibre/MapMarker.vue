@@ -12,7 +12,7 @@ const props = defineProps<{
     iconHeight: number
     label?: string
     fontSize?: number
-    showHeightIndicator?: boolean//TODO implement
+    showHeightIndicator?: boolean
 }>()
 
 let marker: Entity
@@ -86,6 +86,10 @@ function removeMarker(){
 
 async function addHeightIndicator(){
 
+    if(!props.showHeightIndicator === false){
+        return
+    }
+
     const inAirPos = Cartographic.fromDegrees(props.position[0], props.position[1], undefined, new Cartographic())
 
 
@@ -93,6 +97,10 @@ async function addHeightIndicator(){
     await sampleTerrainMostDetailed(props.viewer.terrainProvider, [onGroundPos])
 
     removeHeightIndicator()
+
+    if(Math.abs(inAirPos.height - onGroundPos.height) < 5){
+        return
+    }
 
     heightIndicator = props.viewer.entities.add({
         id: 'map-marker-height-indicator' + myId,
