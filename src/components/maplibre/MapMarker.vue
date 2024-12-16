@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, watch } from 'vue';
-import { Cartesian2, Cartesian3, Color, Entity, HeightReference, LabelStyle, VerticalOrigin, Viewer } from 'cesium';
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { Cartesian2, Cartesian3, Color, Entity, HeightReference, JulianDate, LabelStyle, SampledPositionProperty, VerticalOrigin, Viewer } from 'cesium';
 
 
 const props = defineProps<{
     viewer: Viewer
     position: [number, number]
-    height: number
+    height?: number
     iconUrl: string
     iconWidth: number
     iconHeight: number
@@ -16,21 +16,23 @@ const props = defineProps<{
 
 let marker: Entity
 
-onMounted(()=>{
-    /*
-    const polygon = props.viewer.entities.add({
-        polygon: {
-            hierarchy: Cartesian3.fromDegreesArray([
-                10.313992402329717, 47.5409938499751,
-                10.313992402329717, 47.5419938499751,
-                10.314992402329717, 47.5409938499751,
-            ]),
-            //height: 2000,
-            material: Color.RED.withAlpha(0.2),
-            outline: true,
-            outlineColor: Color.BLACK
-        }
-    })*/
+watch(()=>props.position, updateMarker, {deep: true})
+watch(()=>props.height, updateMarker)
+
+onMounted(updateMarker)
+onBeforeUnmount(removeMarker)
+
+
+function updateMarker(){
+
+    if(marker){
+        removeMarker()
+    }
+
+    addMarker()
+}
+
+function addMarker(){
 
     marker = props.viewer.entities.add({
         position: Cartesian3.fromDegrees(props.position[0], props.position[1], props.height),
@@ -38,9 +40,9 @@ onMounted(()=>{
             image: props.iconUrl,
             width: props.iconWidth,
             height: props.iconHeight,
-            //heightReference: HeightReference.CLAMP_TO_TERRAIN,
             // verticalOrigin: VerticalOrigin.BOTTOM,
             // pixelOffset: new Cartesian2(0, props.iconHeight * -0.5),
+            heightReference: (typeof props.height === 'number' && props.height > 0) ? HeightReference.NONE : HeightReference.CLAMP_TO_TERRAIN,
             disableDepthTestDistance: Number.POSITIVE_INFINITY
         },
         label: {
@@ -48,55 +50,15 @@ onMounted(()=>{
             font: (typeof props.fontSize === 'number' ? props.fontSize : 14) + 'pt monospace',
             style: LabelStyle.FILL_AND_OUTLINE,
             outlineWidth: 2,
-            //heightReference: HeightReference.CLAMP_TO_TERRAIN,
+            heightReference: (typeof props.height === 'number' && props.height > 0) ? HeightReference.NONE : HeightReference.CLAMP_TO_TERRAIN,
             disableDepthTestDistance: Number.POSITIVE_INFINITY
         }
     })
-})
+}
 
-onBeforeUnmount(()=>{
+function removeMarker(){
     props.viewer.entities.remove(marker)
-})
-
-
-/*
-let marker: maplibregl.Marker
-let markerIsAddedToMap = false
-
-onMounted(()=>{
-
-    marker = new maplibregl.Marker({
-        element: props.markerElement
-    })
-
-})
-
-watch(()=>props.position, updateMarker, {deep: true})
-
-function updateMarker(){
-
-    if(typeof props.position[0] === 'number' && typeof props.position[1] === 'number'){
-        marker.setLngLat(props.position)
-        showMarker()
-    } else {
-        hideMarker()
-    }
 }
-
-function showMarker(){
-    if(!markerIsAddedToMap){
-        marker.addTo(props.viewer)
-        markerIsAddedToMap = true
-    }
-}
-
-function hideMarker(){
-    if(markerIsAddedToMap){
-        marker.remove()
-        markerIsAddedToMap = false
-    }
-}
-    */
 
 </script>
 
