@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
-import { Cartesian2, Cartesian3, Color, Entity, HeightReference, JulianDate, LabelStyle, SampledPositionProperty, VerticalOrigin, Viewer } from 'cesium';
+import { Cartesian2, Cartesian3, Cartographic, Color, Entity, HeightReference, JulianDate, LabelStyle, SampledPositionProperty, sampleTerrainMostDetailed, VerticalOrigin, Viewer } from 'cesium';
 
 
 const props = defineProps<{
@@ -12,29 +12,44 @@ const props = defineProps<{
     iconHeight: number
     label?: string
     fontSize?: number
+    showHeightIndicator?: boolean
 }>()
 
 let marker: Entity
+let heightIndicator: Entity
 
-watch(()=>props.position, updateMarker, {deep: true})
-watch(()=>props.height, updateMarker)
+const myId = crypto.randomUUID()
 
-onMounted(updateMarker)
-onBeforeUnmount(removeMarker)
+watch(()=>props.position, update, {deep: true})
+watch(()=>props.height, update)
+
+onMounted(update)
+onBeforeUnmount(()=>{
+    removeMarker()
+    removeHeightIndicator()
+})
 
 
-function updateMarker(){
+async function update(){
 
     if(marker){
         removeMarker()
     }
 
     addMarker()
+
+
+    if(heightIndicator){
+        removeHeightIndicator()
+    }
+
+    await addHeightIndicator()
 }
 
 function addMarker(){
 
     marker = props.viewer.entities.add({
+        id: 'map-marker-' + myId,
         position: Cartesian3.fromDegrees(props.position[0], props.position[1], props.height),
         billboard: {
             image: props.iconUrl,
@@ -58,6 +73,28 @@ function addMarker(){
 
 function removeMarker(){
     props.viewer.entities.remove(marker)
+}
+
+async function addHeightIndicator(){
+
+    const inAirPos = Cartographic.fromDegrees(props.position[0], props.position[1], undefined, new Cartographic())
+
+
+    const onGroundPos = inAirPos.clone()
+    await sampleTerrainMostDetailed(props.viewer.terrainProvider, [onGroundPos])
+
+    heightIndicator = props.viewer.entities.add({
+        id: 'map-marker-height-indicator' + myId,
+        polyline: {
+            positions: [Cartesian3.fromDegrees(props.position[0], props.position[1], props.height), Cartographic.toCartesian(onGroundPos)],
+            width: 10,
+            material: Color.BLUE
+        }
+    })
+}
+
+function removeHeightIndicator(){
+    props.viewer.entities.remove(heightIndicator)
 }
 
 </script>
