@@ -9,6 +9,11 @@ export default defineComponent({
 
 })
 
+
+// fix cesium static url
+//@ts-ignore
+window.CESIUM_BASE_URL = '/cesiumStatic'
+
 </script>
 
 <template>

@@ -2,8 +2,9 @@
 import { ApiResponse_ConnectionGet } from '@/api/openflighthub-api';
 import { computed, inject, provide, ref, reactive, onMounted } from 'vue';
 
-import * as maplibregl from 'maplibre-gl'
-import 'maplibre-gl/dist/maplibre-gl.css'
+import { Cartesian3, createOsmBuildingsAsync, Ion, Math, Terrain, Viewer, Cartographic } from "cesium";
+import "cesium/Build/Cesium/Widgets/widgets.css";
+
 import HubWorkspaceMapConnection from './HubWorkspaceMapConnection.vue';
 
 const props = defineProps<{
@@ -12,32 +13,37 @@ const props = defineProps<{
 
 const mapContainer = ref(null as HTMLElement)
 
-let map: maplibregl.Map
+let viewer: Viewer
+
+Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI5MTFkYzVkNy03ZmJkLTQyYTAtYTQ5Zi05ZDMxMGQ2YjU5N2QiLCJpZCI6MjYyNzgwLCJpYXQiOjE3MzQzNDM0NDF9.9NxftItZvbyOrcMENhulF4eKoLGI_-7lYjTkia2racg'
 
 onMounted(()=>{
-    map = new maplibregl.Map({
-        container: mapContainer.value,
-        style: 'https://map.flaffipony.rocks/mystyle.json',
-        center: [10.3, 47.5],
-        zoom: 9,
-        pitch: 52,
-        hash: true
+    viewer = new Viewer(mapContainer.value, {
+        terrain: Terrain.fromWorldTerrain()
     })
 
-    map.addControl(
-        new maplibregl.NavigationControl({
-            visualizePitch: true,
-            showZoom: true,
-            showCompass: true
-        })
-    )
+    viewer.camera.flyTo({
+        destination: Cartesian3.fromDegrees(10.31261, 47.48063, 3200),
+        orientation: {
+            heading: Math.toRadians(0),
+            pitch: Math.toRadians(-15)
+        },
+        duration: 1
+    })
 
-    map.addControl(
-        new maplibregl.TerrainControl({
-            source: 'terrainSource',
-            exaggeration: 1
-        })
-    )
+    // Add Cesium OSM Buildings, a global 3D buildings layer.
+    createOsmBuildingsAsync().then(buildingTileset => {
+        viewer.scene.primitives.add(buildingTileset)
+    })
+
+
+    viewer.camera.moveEnd.addEventListener(evt=>{
+        const carto = Cartographic.fromCartesian(viewer.camera.position)
+        console.log('camera.moveEnd', Math.toDegrees(carto.longitude), Math.toDegrees(carto.latitude), carto.height)
+        //TODO append to url
+    })
+
+
 })
 
 </script>
@@ -46,10 +52,11 @@ onMounted(()=>{
 
     <div id="container">
         <div id="map" ref="mapContainer">
-            <template v-if="map">
-                <HubWorkspaceMapConnection v-for="connection in props.connections" :key="connection.id" :connection="connection" :map="map"></HubWorkspaceMapConnection>
-            </template>
         </div>
+
+        <template v-if="viewer">
+            <HubWorkspaceMapConnection v-for="connection in props.connections" :key="connection.id" :connection="connection" :viewer="viewer"></HubWorkspaceMapConnection>
+        </template>
     </div>
 
 </template>

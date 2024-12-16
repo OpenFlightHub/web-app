@@ -3,10 +3,15 @@ import { fileURLToPath, URL } from 'node:url'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 
+//see https://cesium.com/blog/2024/02/13/configuring-vite-or-webpack-for-cesiumjs/
+import {viteStaticCopy} from 'vite-plugin-static-copy'
+//fix cesium statics
+const cesiumSource = "node_modules/cesium/Build/Cesium";
+const cesiumBaseUrl = "/cesiumStatic";
+
 
 
 // https://vitejs.dev/config/
-
 export default defineConfig({
   plugins: [vue(),
     {
@@ -29,7 +34,15 @@ export default defineConfig({
 
         return html.replace(regex, replacer);
       },
-    }
+    },
+    viteStaticCopy({
+      targets: [
+        { src: `${cesiumSource}/ThirdParty`, dest: cesiumBaseUrl },
+        { src: `${cesiumSource}/Workers`, dest: cesiumBaseUrl },
+        { src: `${cesiumSource}/Assets`, dest: cesiumBaseUrl },
+        { src: `${cesiumSource}/Widgets`, dest: cesiumBaseUrl },
+      ],
+    })
   ],
   resolve: {
     alias: {
