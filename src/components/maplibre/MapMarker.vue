@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
-import { Cartesian2, Cartesian3, Cartographic, Color, Entity, HeightReference, JulianDate, LabelStyle, SampledPositionProperty, sampleTerrainMostDetailed, VerticalOrigin, Viewer } from 'cesium';
+import { Cartesian2, Cartesian3, Cartographic, Color, Entity, HeightReference, JulianDate, LabelStyle, PolylineDashMaterialProperty, SampledPositionProperty, sampleTerrainMostDetailed, VerticalOrigin, Viewer } from 'cesium';
 
 
 const props = defineProps<{
@@ -59,7 +59,7 @@ function addMarker(){
             image: props.iconUrl,
             width: props.iconWidth,
             height: props.iconHeight,
-            color: Color.RED,
+            color: Color.CYAN,
             heightReference: heightIsNotZero() ? HeightReference.NONE : HeightReference.CLAMP_TO_TERRAIN,
             disableDepthTestDistance: heightIsNotZero() ? 5000000 : Number.POSITIVE_INFINITY // show always above terrain
         },
@@ -106,8 +106,10 @@ async function addHeightIndicator(){
         id: 'map-marker-height-indicator' + myId,
         polyline: {
             positions: [Cartesian3.fromDegrees(props.position[0], props.position[1], props.elevation), Cartographic.toCartesian(onGroundPos)],
-            width: 10,
-            material: Color.BLUE
+            width: 2,
+            material: new PolylineDashMaterialProperty({
+                color: Color.CYAN
+            })
         }
     })
 }
