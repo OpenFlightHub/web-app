@@ -31,7 +31,7 @@ onMounted(()=>{
     // const openstreetmap = new OpenStreetMapImageryProvider({
     //     url : 'https://tile.openstreetmap.org/'
     // })
-    //viewer.imageryLayers.addImageryProvider(openstreetmap)
+    //viewer.imageryLayers.addImageryProvider(openstreetmap) //TODO add attribution see https://operations.osmfoundation.org/policies/tiles/
 
     viewer.camera.flyTo({
         destination: Cartesian3.fromDegrees(10.31261, 47.48063, 3200),
