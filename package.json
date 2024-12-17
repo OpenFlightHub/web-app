@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@date-io/dayjs": "^3.0.0",
+    "@math.gl/geoid": "^4.1.0",
     "@primevue/themes": "^4.2.4",
     "cesium": "^1.124.0",
     "dayjs": "^1.11.13",

@@ -6,6 +6,7 @@ import { Cartesian3, createOsmBuildingsAsync, Ion, Math, Terrain, Viewer, Cartog
 import "cesium/Build/Cesium/Widgets/widgets.css";
 
 import HubWorkspaceMapConnection from './HubWorkspaceMapConnection.vue';
+import { geoidIsLoaded } from '@/util/geoid';
 
 const props = defineProps<{
     connections: ApiResponse_ConnectionGet[]
@@ -57,7 +58,7 @@ onMounted(()=>{
         <div id="map" ref="mapContainer">
         </div>
 
-        <template v-if="viewer">
+        <template v-if="viewer && geoidIsLoaded">
             <HubWorkspaceMapConnection v-for="connection in props.connections" :key="connection.id" :connection="connection" :viewer="viewer"></HubWorkspaceMapConnection>
         </template>
     </div>

@@ -13,6 +13,9 @@ const pinia = createPinia()
 const app = createApp(Main)
 
 
+import { loadGeoid } from './util/geoid.js'
+loadGeoid()
+
 import PrimeVue from 'primevue/config';
 import Aura from '@primevue/themes/aura';
 
