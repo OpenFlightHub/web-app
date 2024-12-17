@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ApiResponse_ConnectionGet } from '@/api/openflighthub-api';
-import { computed, inject, provide, ref, reactive, onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
 
-import { Cartesian3, createOsmBuildingsAsync, Ion, Math, Terrain, Viewer, Cartographic, JulianDate, Clock, ClockViewModel, ClockStep, Ellipsoid } from "cesium";
+import { Cartesian3, createOsmBuildingsAsync, Ion, Math, Terrain, Viewer, Cartographic, OpenStreetMapImageryProvider } from "cesium";
 import "cesium/Build/Cesium/Widgets/widgets.css";
 
 import HubWorkspaceMapConnection from './HubWorkspaceMapConnection.vue';
@@ -25,6 +25,13 @@ onMounted(()=>{
         animation: false,
         timeline: false
     })
+
+
+    //TODO currently switching to 2D crashes cesium
+    // const openstreetmap = new OpenStreetMapImageryProvider({
+    //     url : 'https://tile.openstreetmap.org/'
+    // })
+    //viewer.imageryLayers.addImageryProvider(openstreetmap)
 
     viewer.camera.flyTo({
         destination: Cartesian3.fromDegrees(10.31261, 47.48063, 3200),
