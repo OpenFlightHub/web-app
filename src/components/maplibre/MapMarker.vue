@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
-import { Cartesian2, Cartesian3, Cartographic, Color, Entity, HeightReference, JulianDate, LabelStyle, PolylineDashMaterialProperty, SampledPositionProperty, sampleTerrainMostDetailed, VerticalOrigin, Viewer } from 'cesium';
+import { Cartesian2, Cartesian3, Cartographic, Color, Ellipsoid, Entity, HeightReference, JulianDate, LabelStyle, PolylineDashMaterialProperty, SampledPositionProperty, sampleTerrainMostDetailed, VerticalOrigin, Viewer } from 'cesium';
+import { getElevationAtPosition } from '@/util/maplibre';
 
 
 const props = defineProps<{
@@ -61,7 +62,7 @@ function addMarker(){
             height: props.iconHeight,
             color: Color.CYAN,
             heightReference: heightIsNotZero() ? HeightReference.NONE : HeightReference.CLAMP_TO_TERRAIN,
-            disableDepthTestDistance: heightIsNotZero() ? 5000000 : Number.POSITIVE_INFINITY // show always above terrain
+            disableDepthTestDistance: heightIsNotZero() ? 5000000 : Number.POSITIVE_INFINITY // show always above terrain https://community.cesium.com/t/points-labels-stuck-under-terrain/11141
         },
         label: {
             text: props.label,
@@ -69,7 +70,7 @@ function addMarker(){
             style: LabelStyle.FILL_AND_OUTLINE,
             outlineWidth: 2,
             heightReference: heightIsNotZero() ? HeightReference.NONE : HeightReference.CLAMP_TO_TERRAIN,
-            disableDepthTestDistance: heightIsNotZero() ? 5000000 : Number.POSITIVE_INFINITY, // show always above terrain
+            disableDepthTestDistance: heightIsNotZero() ? 5000000 : Number.POSITIVE_INFINITY, // show always above terrain https://community.cesium.com/t/points-labels-stuck-under-terrain/11141
             verticalOrigin: VerticalOrigin.TOP,
             pixelOffset: new Cartesian2(0, props.iconHeight * 0.5)
         }
@@ -91,10 +92,7 @@ async function addHeightIndicator(){
     }
 
     const inAirPos = Cartographic.fromDegrees(props.position[0], props.position[1], undefined, new Cartographic())
-
-
-    const onGroundPos = inAirPos.clone()
-    await sampleTerrainMostDetailed(props.viewer.terrainProvider, [onGroundPos])
+    const onGroundPos = await getElevationAtPosition(props.viewer.terrainProvider, props.position[0], props.position[1])
 
     removeHeightIndicator()
 

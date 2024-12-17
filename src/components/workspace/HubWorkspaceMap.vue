@@ -2,7 +2,7 @@
 import { ApiResponse_ConnectionGet } from '@/api/openflighthub-api';
 import { computed, inject, provide, ref, reactive, onMounted } from 'vue';
 
-import { Cartesian3, createOsmBuildingsAsync, Ion, Math, Terrain, Viewer, Cartographic, JulianDate, Clock, ClockViewModel, ClockStep } from "cesium";
+import { Cartesian3, createOsmBuildingsAsync, Ion, Math, Terrain, Viewer, Cartographic, JulianDate, Clock, ClockViewModel, ClockStep, Ellipsoid } from "cesium";
 import "cesium/Build/Cesium/Widgets/widgets.css";
 
 import HubWorkspaceMapConnection from './HubWorkspaceMapConnection.vue';
@@ -24,23 +24,6 @@ onMounted(()=>{
         animation: false,
         timeline: false
     })
-
-
-    /*
-    const polygon = props.viewer.entities.add({
-        polygon: {
-            hierarchy: Cartesian3.fromDegreesArray([
-                10.313992402329717, 47.5409938499751,
-                10.313992402329717, 47.5419938499751,
-                10.314992402329717, 47.5409938499751,
-            ]),
-            //height: 2000,
-            material: Color.RED.withAlpha(0.2),
-            outline: true,
-            outlineColor: Color.BLACK
-        }
-    })*/
-
 
     viewer.camera.flyTo({
         destination: Cartesian3.fromDegrees(10.31261, 47.48063, 3200),
