@@ -3,7 +3,7 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { Cartesian2, Cartesian3, Cartographic, Color, Ellipsoid, Entity, HeightReference, JulianDate, LabelStyle, PolylineDashMaterialProperty, SampledPositionProperty, sampleTerrainMostDetailed, VerticalOrigin, Viewer } from 'cesium';
 import { getElevationAtPosition } from '@/util/maplibre';
 
-
+//TODO if marker elevation is below cesium terrain, clamp it to ground
 const props = defineProps<{
     viewer: Viewer
     position: [number, number]

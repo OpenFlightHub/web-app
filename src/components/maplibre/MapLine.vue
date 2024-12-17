@@ -4,6 +4,7 @@ import { Cartesian2, Cartesian3, Cartographic, Color, Entity, HeightReference, J
 import { getElevationAtPosition } from '@/util/maplibre';
 
 
+//TODO if line elevation is below cesium terrain, clamp it to ground
 const props = defineProps<{
     viewer: Viewer
     from: {
