@@ -15,11 +15,10 @@ import SetNewPasswordView from '@/views/auth/SetNewPasswordView.vue';
 import FinishRegistrationView from '@/views/auth/FinishRegistrationView.vue'
 
 // Hub
-import HubView from '@/views/hub/HubView.vue'
-import HubWorkspaceView from '@/views/hub/HubWorkspaceView.vue'
-import HubConnectionView from '@/views/hub/HubConnectionView.vue';
-import HubLinkView from '@/views/hub/link/HubLinkView.vue'
-import ConnectDJIPilot2 from '@/views/hub/link/dji-pilot-2/ConnectDJIPilot2.vue';
+import WorkspaceView from '@/views/WorkspaceView.vue'
+import ConnectionView from '@/views/ConnectionView.vue';
+import LinkView from '@/views/link/LinkView.vue'
+import ConnectDJIPilot2 from '@/views/link/dji-pilot-2/ConnectDJIPilot2.vue';
 
 
 //Error
@@ -29,7 +28,7 @@ import Error404View from '@/views/error/Error404View.vue'
 
 
 
-const PATH_NAMES_THAT_DO_NOT_REQUIRE_LOGIN = ['home', 'login', 'password-reset', 'password-set-new'] /* this equals a routes "name" property */
+const PATH_NAMES_THAT_DO_NOT_REQUIRE_LOGIN = ['login', 'password-reset', 'password-set-new'] /* this equals a routes "name" property */
 const PATH_NAMES_THAT_DO_NOT_ALLOW_LOGGED_IN = ['password-reset', 'password-set-new'] /* this equals a routes "name" property */
 
 
@@ -142,29 +141,22 @@ export function makeRouter(pinia: Pinia){
             },
 
             {
-                path: '/hub',
-                name: 'hub',
-                component: HubView,
+                path: '/link',
+                component: LinkView,
                 children: [
                     {
-                        path: 'link',
-                        component: HubLinkView,
-                        children: [
-                            {
-                                path: 'dji-pilot-2',
-                                component: ConnectDJIPilot2
-                            }
-                        ]
-                    },
-                    {
-                        path: 'workspace/:workspaceId',
-                        component: HubWorkspaceView
-                    },
-                    {
-                        path: 'connection/:connectionId',
-                        component: HubConnectionView
+                        path: 'dji-pilot-2',
+                        component: ConnectDJIPilot2
                     }
                 ]
+            },
+            {
+                path: '/workspace/:workspaceId',
+                component: WorkspaceView
+            },
+            {
+                path: '/connection/:connectionId',
+                component: ConnectionView
             },
 
             {
