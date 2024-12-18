@@ -45,7 +45,7 @@ onMounted(checkIsDjiRemoteController)
 
             <h3>Your Workspaces:</h3>
 
-            <List>
+            <List horizontal>
                 <WorkspaceSnippet v-for="workspace, index in workspaces" :key="index" :id="workspace.id"></WorkspaceSnippet>
             </List>
 

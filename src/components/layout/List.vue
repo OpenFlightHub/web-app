@@ -18,6 +18,7 @@ const props = defineProps<{
 
 #list {
     display: flex;
+    flex-wrap: wrap;
     gap: 1em;
 }
 
