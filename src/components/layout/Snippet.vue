@@ -1,11 +1,15 @@
 <script setup lang="ts">
+import Padding from './Padding.vue';
+
 
 </script>
 
 <template>
 
     <div id="snippet">
-        <slot></slot>
+        <Padding>
+            <slot></slot>
+        </Padding>
     </div>
 
 </template>
@@ -15,10 +19,8 @@
 #snippet {
     display: inline-flex;
     flex-direction: column;
-    padding: 0.5em 1em;
-    border-radius: 0.5em;
-    background: #0004;
-    border-radius: 0.5em;
+    background: var(--neutral-dark);
+    border-radius: 0.3em;
     gap: 0.5em;
 }
 

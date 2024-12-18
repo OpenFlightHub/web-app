@@ -13,7 +13,7 @@
 <style scoped lang="scss">
 
 #padding {
-    padding: 1em;
+    padding: 0.5em 1em;
 }
 
 </style>
