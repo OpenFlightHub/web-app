@@ -18,6 +18,7 @@
     height: 100vh;
     width: 100vw;
     overflow-y: auto;
+    background: var(--neutral-darker);
 }
 
 </style>

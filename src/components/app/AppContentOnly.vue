@@ -32,7 +32,6 @@ const props = defineProps<{
     justify-content: center;
     align-items: center;
     position: relative;
-    background: var(--neutral-darker);
     padding: 10vh 10vw;
 
     &:after {

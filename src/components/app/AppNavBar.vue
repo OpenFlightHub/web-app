@@ -41,7 +41,6 @@ const store = useMainStore()
     justify-content: space-between;
     align-items: center;
     padding: 10px;
-    background: var(--neutral-darkest);
 
     #left {
         display: flex;

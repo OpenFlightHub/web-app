@@ -20,7 +20,6 @@
     min-height: calc(100vh - var(--navbar-size));
     overflow-y: auto;
     position: relative;
-    background: var(--neutral-darker);
 
     &:after {
         content: '';
