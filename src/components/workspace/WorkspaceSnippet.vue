@@ -14,10 +14,8 @@ const props = defineProps<{
 <template>
 
     <LoadApi :api-method="api.workspace.get" :params="{workspaceId: props.id}" v-slot="scope">
-        <Snippet :min-height="100" :min-width="100" centered>
-            <RouterLink :to="'/workspace/' + props.id">
-                <LinkVue>{{ scope.data.name }}</LinkVue>
-            </RouterLink>
+        <Snippet :min-height="100" :min-width="100" centered :to-url="'/workspace/' + props.id">
+            <LinkVue>{{ scope.data.name }}</LinkVue>
         </Snippet>
     </LoadApi>
 

@@ -8,6 +8,11 @@ import LoadApiArrayWithIdParamInUrl from '@/components/functional/LoadApiArrayWi
 import ConnectionSnippet from '@/components/connection/ConnectionSnippet.vue';
 import HubWorkspaceMap from '@/components/workspace/HubWorkspaceMap.vue';
 import { Tabs, TabList, Tab, TabPanels, TabPanel } from 'primevue';
+import Padding from '@/components/layout/Padding.vue';
+import { useRoute, useRouter } from 'vue-router';
+import { getIdQueryFromRouteOrUseDefault } from '@/util/url';
+
+const router = useRouter()
 
 
 </script>
@@ -15,23 +20,21 @@ import { Tabs, TabList, Tab, TabPanels, TabPanel } from 'primevue';
 <template>
 
    <LoadApiWithIdParamInUrl :api-method="api.workspace.get" :id-params="{workspaceId: undefined}" v-slot="workspace">
-      <div>
+      <Padding>
          <h1>Workspace {{ workspace.data.name }}</h1>
-
-         <h2>Connections</h2>
 
          <LoadApiArrayWithIdParamInUrl :api-method="api.workspace.connections.get" :id-params="{workspaceId: undefined}" v-slot="connections">
 
-            <Tabs value="0">
+            <Tabs :value="getIdQueryFromRouteOrUseDefault('tab', useRoute(), 0)" @update:value="evt=>{router.push({query: {tab:  '' + evt}})}">
                <TabList>
-                  <Tab value="0">Map</Tab>
-                  <Tab value="1">Connections</Tab>
+                  <Tab :value="0">Map</Tab>
+                  <Tab :value="1">Connections</Tab>
                </TabList>
                <TabPanels>
-                  <TabPanel value="0">
+                  <TabPanel :value="0">
                      <HubWorkspaceMap :connections="connections.data" style="width: 100%; height: 70vh;"></HubWorkspaceMap>
                   </TabPanel>
-                  <TabPanel value="1">
+                  <TabPanel :value="1">
                      <List>
                         <ConnectionSnippet v-for="connection in connections.data" :workspace-id="workspace.data.id" :connection-id="connection.id"></ConnectionSnippet>
                      </List>
@@ -41,7 +44,7 @@ import { Tabs, TabList, Tab, TabPanels, TabPanel } from 'primevue';
 
          </LoadApiArrayWithIdParamInUrl>
 
-      </div>
+      </Padding>
    </LoadApiWithIdParamInUrl>
 
 </template>

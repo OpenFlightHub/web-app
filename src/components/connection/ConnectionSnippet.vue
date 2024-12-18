@@ -15,16 +15,12 @@ const props = defineProps<{
 <template>
 
     <LoadApi :api-method="api.connection.get" :params="{connectionId: props.connectionId}" v-slot="scope">
-        <Snippet>
-            <div id="inner">
-                <RouterLink :to="'/connection/' + props.connectionId">
-                    <LinkVue>Connection #{{ scope.data.id }}</LinkVue>
-                </RouterLink>
+        <Snippet :to-url="'/connection/' + props.connectionId">
+            <LinkVue>Connection #{{ scope.data.id }}</LinkVue>
 
-                <RemoteControllerSnippet v-if="typeof scope.data.remote_controller_id === 'number'" :id="scope.data.remote_controller_id"></RemoteControllerSnippet>
+            <RemoteControllerSnippet v-if="typeof scope.data.remote_controller_id === 'number'" :id="scope.data.remote_controller_id"></RemoteControllerSnippet>
 
-                <DroneSnippet v-if="typeof scope.data.drone_id === 'number'" :id="scope.data.drone_id"></DroneSnippet>
-            </div>
+            <DroneSnippet v-if="typeof scope.data.drone_id === 'number'" :id="scope.data.drone_id"></DroneSnippet>
         </Snippet>
     </LoadApi>
 
@@ -32,10 +28,5 @@ const props = defineProps<{
 
 <style scoped lang="scss">
 
-#inner {
-    display: flex;
-    flex-direction: column;
-    gap: 1em;
-}
 
 </style>

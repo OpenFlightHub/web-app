@@ -32,3 +32,11 @@ export function getIdQueryFromRoute(queryParamName: string, route: RouteLocation
 
     return id
 }
+
+export function getIdQueryFromRouteOrUseDefault(queryParamName: string, route: RouteLocationNormalizedLoadedGeneric, defaultValue: number){
+    try {
+        return getIdQueryFromRoute(queryParamName, route)
+    } catch (err){
+        return defaultValue
+    }
+}

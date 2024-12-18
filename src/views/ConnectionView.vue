@@ -4,26 +4,32 @@ import api from '@/api';
 import LoadApiWithIdParamInUrl from '@/components/functional/LoadApiWithIdParamInUrl.vue';
 import RemoteControllerSnippet from '@/components/remote_controller/RemoteControllerSnippet.vue';
 import DroneSnippet from '@/components/drone/DroneSnippet.vue';
-
-
+import Padding from '@/components/layout/Padding.vue';
+import List from '@/components/layout/List.vue';
 
 </script>
 
 <template>
 
    <LoadApiWithIdParamInUrl :api-method="api.connection.get" :id-params="{connectionId: undefined}" v-slot="connection">
-      <div id="inner">
+      <Padding>
          <h1>Connection {{ connection.data.id }}</h1>
 
-         <h2>Remote Controller</h2>
-         <RemoteControllerSnippet v-if="typeof connection.data.remote_controller_id === 'number'" :id="connection.data.remote_controller_id"></RemoteControllerSnippet>
-         <span v-else>-</span>
+         <List>
+            <div>
+               <h2>Remote Controller</h2>
+               <RemoteControllerSnippet v-if="typeof connection.data.remote_controller_id === 'number'" :id="connection.data.remote_controller_id"></RemoteControllerSnippet>
+               <span v-else>-</span>
+            </div>
 
-         <h2>Drone</h2>
-         <DroneSnippet v-if="typeof connection.data.drone_id === 'number'" :id="connection.data.drone_id"></DroneSnippet>
-         <span v-else>-</span>
+            <div>
+               <h2>Drone</h2>
+               <DroneSnippet v-if="typeof connection.data.drone_id === 'number'" :id="connection.data.drone_id"></DroneSnippet>
+               <span v-else>-</span>
+            </div>
+         </List>
 
-      </div>
+      </Padding>
    </LoadApiWithIdParamInUrl>
 
 </template>
