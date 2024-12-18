@@ -2,7 +2,6 @@
 import api from '@/api';
 
 import LoadApiWithIdParamInUrl from '@/components/functional/LoadApiWithIdParamInUrl.vue';
-import ConnectionSnippet from '@/components/connection/ConnectionSnippet.vue';
 import RemoteControllerSnippet from '@/components/remote_controller/RemoteControllerSnippet.vue';
 import DroneSnippet from '@/components/drone/DroneSnippet.vue';
 
