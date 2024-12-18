@@ -1,8 +1,5 @@
 <script setup lang="ts">
 
-import App from '@/components/app/App.vue';
-import AppNavBar from '@/components/app/AppNavBar.vue';
-import AppContent from '@/components/app/AppContent.vue';
 import { useRouter } from 'vue-router';
 import { computed, onMounted, reactive, ref } from 'vue';
 import api from '@/api';
@@ -38,32 +35,23 @@ onMounted(checkIsDjiRemoteController)
 </script>
 
 <template>
-    <App>
-        <AppNavBar>
-        </AppNavBar>
 
-        <AppContent>
+    <div v-if="isDjiRemoteController">
+        <RouterLink to="/link/dji-pilot-2">{{ $t("connect.connectable_device_connect_now")}}</RouterLink>
+    </div>
 
-            <div v-if="isDjiRemoteController">
-                <RouterLink to="/link/dji-pilot-2">{{ $t("connect.connectable_device_connect_now")}}</RouterLink>
-            </div>
+    <div v-else>
+        <Padding>
 
-            <div v-else>
-                <Padding>
+            <h3>Your Workspaces:</h3>
 
-                    <h3>Your Workspaces:</h3>
+            <List>
+                <WorkspaceSnippet v-for="workspace, index in workspaces" :key="index" :id="workspace.id"></WorkspaceSnippet>
+            </List>
 
-                    <List>
-                        <WorkspaceSnippet v-for="workspace, index in workspaces" :key="index" :id="workspace.id"></WorkspaceSnippet>
-                    </List>
+        </Padding>
 
-                </Padding>
-
-            </div>
-
-        </AppContent>
-
-    </App>
+    </div>
 
 </template>
 

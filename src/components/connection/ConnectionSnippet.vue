@@ -4,7 +4,7 @@ import Snippet from '../layout/Snippet.vue';
 import LoadApi from '../functional/LoadApi.vue';
 import RemoteControllerSnippet from '../remote_controller/RemoteControllerSnippet.vue';
 import DroneSnippet from '../drone/DroneSnippet.vue';
-
+import LinkVue from '../general/LinkVue.vue';
 
 const props = defineProps<{
     connectionId: number
@@ -17,7 +17,9 @@ const props = defineProps<{
     <LoadApi :api-method="api.connection.get" :params="{connectionId: props.connectionId}" v-slot="scope">
         <Snippet>
             <div id="inner">
-                <RouterLink :to="'/hub/connection/' + props.connectionId">Connection #{{ scope.data.id }}</RouterLink>
+                <RouterLink :to="'/connection/' + props.connectionId">
+                    <LinkVue>Connection #{{ scope.data.id }}</LinkVue>
+                </RouterLink>
 
                 <RemoteControllerSnippet v-if="typeof scope.data.remote_controller_id === 'number'" :id="scope.data.remote_controller_id"></RemoteControllerSnippet>
 

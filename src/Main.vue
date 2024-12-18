@@ -3,9 +3,14 @@
 import { defineComponent } from 'vue';
 import { RouterView } from 'vue-router'
 
+
+import App from '@/components/app/App.vue';
+import AppNavBar from '@/components/app/AppNavBar.vue';
+import AppContent from '@/components/app/AppContent.vue';
+
 export default defineComponent({
 
-    components: { RouterView }
+    components: { RouterView, App, AppNavBar, AppContent }
 
 })
 
@@ -17,7 +22,13 @@ window.CESIUM_BASE_URL = '/cesiumStatic'
 </script>
 
 <template>
+    <App>
+        <AppNavBar>
+        </AppNavBar>
 
-    <RouterView/>
+        <AppContent>
+            <RouterView/>
+        </AppContent>
+    </App>
 
 </template>
