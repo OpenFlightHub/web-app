@@ -1,5 +1,6 @@
 @import '_reset.scss';
 @import '_colors.scss';
+@import '_fonts.scss';
 
 @import '/icons/bootstrap/bootstrap-icons.css';//TODO linking this to /fonts creates warnings in vite
 
@@ -9,7 +10,7 @@
     height: 100vh;
     width: 100vw;
     overflow: hidden;
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: 'Open Sans', Helvetica, sans-serif;
 }
 
 :root {
