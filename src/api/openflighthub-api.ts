@@ -222,9 +222,9 @@ export type ApiResponse_WorkspaceConnectionsGet = { id: number, remote_controlle
 export type ApiResponse_WorkspaceConnectionsPost = { id: number, secret: string }
 export type ApiResponse_ConnectionGet = { id: number, remote_controller_id?: number, drone_id?: number }
 export type ApiResponse_RemotecontrollerGet = { id: number, serial_number: string, type: integer }
-export type ApiResponse_RemotecontrollerLastpositionGet = { longitude: number, latitude: number, height: number }
+export type ApiResponse_RemotecontrollerLastpositionGet = { longitude: number, latitude: number, height: number, reported_at: string }
 export type ApiResponse_DroneGet = { id: number, serial_number: string, type: integer, name: string }
-export type ApiResponse_DroneLastpositionGet = { longitude: number, latitude: number, height: number }
+export type ApiResponse_DroneLastpositionGet = { longitude: number, latitude: number, height: number, reported_at: string }
 export type ApiResponse_LinkMyworkspaceGet = { id: string, name: string } | boolean
 export type ApiResponse_LinkDjipilot2SdkconfigGet = { app_id: string, app_key: string, app_license: string }
 
@@ -683,7 +683,7 @@ export function makeLiveSessionSocket(sessionId: number) {
 
 
 
-interface ApiStatusEvents {
+export interface ApiStatusEvents {
     connected: undefined
     disconnected: 'logout' | 'tcp_reset' | null
 }

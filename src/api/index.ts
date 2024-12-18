@@ -1,4 +1,4 @@
-import OpenFlightHubApi from './openflighthub-api';
+import OpenFlightHubApi from './openflighthub-api.js';
 
 const api = OpenFlightHubApi()
 
