@@ -429,7 +429,17 @@ export class DjiOpenPlatformConnectSDK extends EventManager<DjiOpenPlatformConne
         return this.unwrapResponse(this.djiBridge.liveshareGetStatus())
     })
 
+    private guard_stream_hasConfig(){
+        const conf = this.stream_getConfig()
+
+        if(typeof conf.type !== 'number'){
+            throw new Error('stream config must be set first')
+        }
+    }
+
     stream_start = this.wrapWithLog('stream_start', ()=>{
+        this.guard_stream_hasConfig()
+
         return this.unwrapResponse(this.djiBridge.liveshareStartLive())
     })
 

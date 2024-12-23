@@ -35,12 +35,12 @@ export class OpenFlightHubConnectLinkManager {
 
     async deviceIsLinked(): Promise<false | OpenFlightHubConnectLinkClient<string>>{
         try {
-            await api.connectionLink.auth.check.get()
-
-            return this.initClient()
+            await api.connectionLink.auth.check.get()//TODO at least for pilot 2 sdk, read token from api module and try to login with that
         } catch (err){
             return false
         }
+
+        return await this.initClient()
     }
 
     getLinkableWorkspaces(){
@@ -53,7 +53,7 @@ export class OpenFlightHubConnectLinkManager {
             secret
         })
 
-        return this.initClient()
+        return await this.initClient()
     }
 
     private async initClient(): Promise<OpenFlightHubConnectLinkClient<string>>{
@@ -153,6 +153,17 @@ export class OpenFlightHubConnectLinkClient_DjiPilot2 extends OpenFlightHubConne
 
         if(!this.sdk.mqtt_isConnected()){
             await this.sdk.mqtt_startWithExistingConfig(mqttUsername, mqttPassword)
+        }
+
+
+        // Live Stream
+
+        if(!this.sdk.stream_moduleIsLoaded()){
+            await this.sdk.stream_loadModule('mixed')
+        }
+
+        if(!this.sdk.stream_isStreamRunningAndConnected()){//TODO set stream config
+            this.sdk.stream_start()
         }
     }
 

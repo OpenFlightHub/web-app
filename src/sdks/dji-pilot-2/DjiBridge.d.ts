@@ -136,7 +136,7 @@ export type DjiBridge = {
     }>
 
 
-    liveshareGetConfig: () => DjiBridgeResponse<LiveShareConfig>
+    liveshareGetConfig: () => DjiBridgeResponse<LiveShareConfig<LiveShareConfigType>>
     liveshareSetConfig: <T extends LiveShareConfigType>(type: T, params: T extends 1 ? LiveShareConfig_Agora : T extends 2 ? LiveShareConfig_RTMP : T extends 3 ? LiveShareConfig_RTSP : T extends 4 ? LiveShareConfig_GB28181: {}) => DjiBridgeResponse<EmptyObject>
 
     liveshareGetStatus: () => DjiBridgeResponse<boolean>
