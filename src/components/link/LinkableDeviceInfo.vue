@@ -44,7 +44,7 @@ onMounted(async ()=>{
                 <RouterLink v-if="linkType === 'dji-pilot-2'" to="/link/dji-pilot-2">{{ $t("link.manage_connectable_device_now")}}</RouterLink>
             </template>
             <template v-else>
-                <RouterLink to="/link">{{ $t("link.connectable_device_connect_now")}}</RouterLink>
+                <RouterLink to="/link/dji-pilot-2">{{ $t("link.connectable_device_connect_now")}}</RouterLink>
             </template>
         </template>
     </InfoPanel>
