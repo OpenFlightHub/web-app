@@ -54,7 +54,7 @@ async function addLine(){
     const toPos = toHeightIsNotZero() ? Cartographic.fromDegrees(props.to.position[0], props.to.position[1], props.to.elevation) : await getElevationAtPosition(props.viewer.terrainProvider, props.to.position[0], props.to.position[1])
 
     line = props.viewer.entities.add({
-        id: 'map-marker-' + myId,
+        id: 'map-line-' + myId,
 
         polyline: {
             positions: [Cartographic.toCartesian(fromPos), Cartographic.toCartesian(toPos)],
@@ -73,6 +73,8 @@ function removeLine(){
     props.viewer.entities.remove(line)
     line = undefined
 }
+
+onBeforeUnmount(removeLine)
 
 </script>
 

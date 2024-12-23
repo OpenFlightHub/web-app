@@ -53,9 +53,6 @@ function heightIsNotZero(){
 }
 
 function addMarker(){
-
-    props.viewer.entities.removeById('map-marker-' + myId)// fix bug with vue hot reload TODO this does not work
-
     marker = props.viewer.entities.add({
         id: 'map-marker-' + myId,
         position: Cartesian3.fromDegrees(props.position[0], props.position[1], props.elevation),
@@ -102,8 +99,6 @@ async function addHeightIndicator(){
     if(Math.abs(inAirPos.height - onGroundPos.height) < 5){
         return
     }
-
-    props.viewer.entities.removeById('map-marker-height-indicator' + myId)// fix bug with vue hot reload TODO this does not work
 
     heightIndicator = props.viewer.entities.add({
         id: 'map-marker-height-indicator' + myId,
