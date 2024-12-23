@@ -42,10 +42,12 @@ onMounted(()=>{
         duration: 1
     })
 
+    /*
     // Add Cesium OSM Buildings, a global 3D buildings layer.
     createOsmBuildingsAsync().then(buildingTileset => {
         viewer.scene.primitives.add(buildingTileset)
     })
+    */
 
 
     viewer.camera.moveEnd.addEventListener(evt=>{
