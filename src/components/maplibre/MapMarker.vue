@@ -66,7 +66,7 @@ function addMarker(){
             disableDepthTestDistance: heightIsNotZero() ? 5000000 : Number.POSITIVE_INFINITY // show always above terrain https://community.cesium.com/t/points-labels-stuck-under-terrain/11141
         },
         label: {
-            text: props.label + ' ' + convertEllisoidalHeightToOrthometricHeight(props.position[0], props.position[1], props.elevation) + 'm MSL',
+            text: props.label + ' ' + Math.floor(convertEllisoidalHeightToOrthometricHeight(props.position[0], props.position[1], props.elevation)) + 'm MSL',
             font: (typeof props.fontSize === 'number' ? props.fontSize : 14) + 'pt monospace',
             style: LabelStyle.FILL_AND_OUTLINE,
             outlineWidth: 2,
