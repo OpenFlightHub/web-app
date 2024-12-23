@@ -82,7 +82,7 @@ async function unlinkWorkspace(){
 
 
 const remoteControllerSerialNumber = ref('')
-const aircraftSerialNumber = ref('')
+const aircraftSerialNumber = ref<false | string>('')
 
 
 const connectionState = reactive({} as ConnectionState<string>)

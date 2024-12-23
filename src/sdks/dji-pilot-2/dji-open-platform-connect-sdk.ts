@@ -144,13 +144,20 @@ export class DjiOpenPlatformConnectSDK extends EventManager<DjiOpenPlatformConne
         )
     })
 
+    /**
+     * @returns false if aircraft is not connected to remote controller
+     */
     getAircraftSN = this.wrapWithLog('getAircraftSN', ()=>{
 
         this.guardLicenseIsVerified()
 
-        return this.unwrapResponse(
-            this.djiBridge.platformGetAircraftSN()
-        )
+        try {
+            return this.unwrapResponse(
+                this.djiBridge.platformGetAircraftSN()
+            )
+        } catch (err){
+            return false
+        }
     })
 
 
