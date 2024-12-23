@@ -226,7 +226,7 @@ export type ApiResponse_RemotecontrollerLastpositionGet = { longitude: number, l
 export type ApiResponse_DroneGet = { id: number, serial_number: string, type: integer, name: string }
 export type ApiResponse_DroneLastpositionGet = { longitude: number, latitude: number, height: number, reported_at: string }
 export type ApiResponse_ConnectionlinkConfigGet = { platform_name: string, platform_url: string, workspace_id: string, workspace_name: string, secret: string }
-export type ApiResponse_ConnectionlinkDjipilot2SdkconfigGet = { app_id: string, app_key: string, app_license: string, mqtt_url: string }
+export type ApiResponse_ConnectionlinkDjipilot2SdkconfigGet = { app_id: string, app_key: string, app_license: string, mqtt_url: string, rtmp_url: string }
 
 
 let apiAuth: String
@@ -330,20 +330,24 @@ async function makeRequest<T>(url: string, method: method, isFormData: boolean, 
 
             if (response.ok) {
                 if (response.body) {
-                    response.text().then(text=>{
-                        if(text.length > 0){
+                    response.text().then(text => {
+                        if (text.length === 0) {
+                            resolve(undefined as T)
+                        } else {
                             try {
                                 const parsed = JSON.parse(text)
                                 resolve(parsed)
-                            } catch (err){
-                                reject('Failed to parse server response (expected JSON): ' + (err as Error).message)
+                            } catch (err) {
+                                reject(err)
                             }
-                        } else {
-                            resolve(undefined)
                         }
-                    }).catch(reject)
+
+                    }).catch(err => {
+                        console.error('error while response.text()', err)
+                        reject(err)
+                    })
                 } else {
-                    resolve(undefined)
+                    resolve(undefined as T)
                     return
                 }
             } else {
