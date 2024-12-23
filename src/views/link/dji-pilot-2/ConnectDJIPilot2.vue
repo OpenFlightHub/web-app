@@ -1,26 +1,82 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue';
-import { DjiOpenPlatformConnectSDK } from '@/sdks/dji-pilot-2/dji-open-platform-connect-sdk';
 import api from '@/api';
-
-const PLATFORM_UUID = 'e97dd32f-5977-44f9-ab4d-e34205012dce'
-
-const APP_ID = '155101'
-const APP_KEY = 'ca6b89a2db4c280e1e93d22fd8e1e8e'
-const APP_LICENSE = 'Qf0VAs7wVcuPnz0nbISQQUoQgEBpU6U8w2VMj+u95IpoIK5P7VSxacUNMatWIDlv70h336R3a0bxK4OxOJUnvwzJ19v1MRYcmI6Ni6A56+3DaYKEhtMLsTZN4HwkEmRwTc6OSGMWv6giS/7mvoLS686U2P1/LNwQX0Eo1BCBZmg='
-
+import { OpenFlightHubConnectLinkClient_DjiPilot2, OpenFlightHubConnectLinkManager, ConnectionState } from '@/sdks/openflighthub-connect-link-sdk';
+import LoginAndComeBackButton from '@/components/general/LoginAndComeBackButton.vue';
+import List from '@/components/layout/List.vue';
+import { ApiResponse_WorkspaceGet } from '@/api/openflighthub-api';
+import { updateArray, updateObject } from '@/util/vue';
+import { Button, IftaLabel, InputText } from 'primevue';
+import Snippet from '@/components/layout/Snippet.vue';
+import Padding from '@/components/layout/Padding.vue';
 
 const mqttConnectState = ref(false)
 
+const mustLoginFirst = ref(false)
+const mustLinkFirst = ref(false)
+
+let connectLinkManager: OpenFlightHubConnectLinkManager
+
+let connectLinkClient: OpenFlightHubConnectLinkClient_DjiPilot2
+const connectLinkClientIsLoaded = ref(false)
+
+const availableWorkspaces = reactive([] as ApiResponse_WorkspaceGet[])
+
+
 onMounted(async()=>{
 
+    connectLinkManager = new OpenFlightHubConnectLinkManager()
 
-    const sdk = new DjiOpenPlatformConnectSDK(APP_ID, APP_KEY, APP_LICENSE)
+    let connect = await connectLinkManager.deviceIsLinked()
 
-    sdk.addListener('log', msg => {
-        logs.push(msg)
+    if(connect === false){
+        if(!connectLinkManager.deviceCanBeLinked()){
+            mustLoginFirst.value = true
+            return
+        }
+
+        updateArray(availableWorkspaces, await connectLinkManager.getLinkableWorkspaces())
+
+        mustLinkFirst.value = true
+    } else {
+        initConnectLinkClient(connect as OpenFlightHubConnectLinkClient_DjiPilot2)
+    }
+
+})
+
+
+const selectedWorkspaceToLinkTo = ref(-1)
+const connectionName = ref('')
+
+async function linkToWorkspace(){
+
+    const ret = await api.workspace.connections.post({
+        workspaceId: selectedWorkspaceToLinkTo.value
+    }, {
+        name: connectionName.value
     })
 
+    initConnectLinkClient(await connectLinkManager.linkToOpenFlightHub(ret.connection_id, ret.secret) as OpenFlightHubConnectLinkClient_DjiPilot2)
+
+    //TODO handle and show error
+}
+
+function initConnectLinkClient(client: OpenFlightHubConnectLinkClient_DjiPilot2){
+
+    connectLinkClient = client
+    connectLinkClientIsLoaded.value = true
+
+    connectLinkClient.addListener('connected-changed', refreshConnectionState)
+
+    refreshConnectionState()
+}
+
+async function unlinkWorkspace(){
+    connectLinkClient.unlink()
+}
+
+function todo(){
+    /*
     const validLicense = sdk.verifyLicense()
 
     const apiComponentIsLoaded = sdk.api_moduleIsLoaded()
@@ -62,140 +118,97 @@ onMounted(async()=>{
         })
     }
 
-
-})
+    */
+};
 
 
 const remoteControllerSerialNumber = ref('')
 const aircraftSerialNumber = ref('')
 
-const logs = reactive<string[]>([])
 
-/*
-function init(){
-    const r1 = guardDjiResponseWithLog('verify license', window.djiBridge.platformVerifyLicense(APP_ID, APP_KEY, APP_LICENSE))
+const connectionState = reactive({} as ConnectionState<string>)
 
-    guardDjiResponseWithLog('get remote controller sn', window.djiBridge.platformGetRemoteControllerSN()).then(sn => {
-        remoteControllerSerialNumber.value = sn as string
-    })
-
-    guardDjiResponseWithLog('platform set information', window.djiBridge.platformSetInformation('Open Flight Hub', 'OFH Workspace', 'Alex Prototype'))
-
-    guardDjiResponseWithLog('platform set workspace id', window.djiBridge.platformSetWorkspaceId(PLATFORM_UUID))
-
-    guardDjiResponseWithLog('platform load component api', window.djiBridge.platformLoadComponent('api', JSON.stringify({
-        host: 'https://local.alexh.rocks/api/dji/',
-        token: 'mytoken'
-    })))
-
-    guardDjiResponseWithLog('platform component is loaded cloud', window.djiBridge.platformIsComponentLoaded('thing')).then(loaded => {
-        if(loaded){
-            unload
-        }
-    })
-
-
-    guardDjiResponseWithLog('platform load component cloud', window.djiBridge.platformLoadComponent('thing', JSON.stringify({
-        host: 'tcp://local.alexh.rocks:8081',
-        connectCallback: res=>{
-            printLog('cloud component is connected', res)
-        },
-        username: 'abc',
-        password: '1234'
-    })))
-
-    printLog('init done')
+async function refreshConnectionState(){
+    updateObject(connectionState, await connectLinkClient.isConnected())
 }
-    */
-
 
 </script>
 
 <template>
 
-    <div id="container">
-        <div id="left">
-            <div>
-                <span>Remote Controller SN:</span>
-                <span>{{ remoteControllerSerialNumber || '?' }}</span>
-            </div>
-            <div>
-                <span>Aircraft SN:</span>
-                <span>{{ aircraftSerialNumber || '?' }}</span>
-            </div>
+    <Padding>
+        <template v-if="mustLoginFirst">
+            {{ $t("link.must_login_before_can_link")}}
 
-            <div>
-                <span>MQTT</span>
-                <span id="mqtt-connect-state" :style="'background-color: ' + (mqttConnectState ? 'green' : 'red')">{{ mqttConnectState ? 'connected' : 'disconnected' }}</span>
-            </div>
-        </div>
-        <div id="right">
-            <span>Debug Log</span>
-            <div id="logs">
-                <pre v-for="the_log, i of logs" :key="i">{{the_log}}</pre>
-            </div>
-        </div>
-    </div>
+            <LoginAndComeBackButton></LoginAndComeBackButton>
+        </template>
+        <template v-else>
+
+            <template v-if="mustLinkFirst">
+                <h2>{{ $t("link.select_workspace")}}</h2>
+
+                <List>
+                    <template v-if="selectedWorkspaceToLinkTo === -1">
+                        <Snippet v-for="workspace of availableWorkspaces" :key="workspace.id" class="workspace" @click="selectedWorkspaceToLinkTo = workspace.id">
+                            <h3>{{ workspace.name }}</h3>
+                        </Snippet>
+                    </template>
+                    <template v-else>
+                        <IftaLabel>
+                            <InputText id="connection-name" v-model="connectionName"/>
+                            <label for="connection-name">{{ $t("link.connection_name")}}</label>
+                        </IftaLabel>
+
+                        <Button :disabled="connectionName.length === 0" @click="linkToWorkspace">{{ $t("actions.confirm") }}</Button>
+                    </template>
+                </List>
+            </template>
+            <template v-else>
+                <template v-if="connectLinkClientIsLoaded">
+                    <h2>{{ $t("link.linked_to", {workspace: connectLinkClient.getWorkspaceName(), platform: connectLinkClient.getPlatformName()}) }}</h2>
+
+                    <h3>State: <span v-if="connectionState.connected">{{ $t("link.is_connected") }}</span><span v-else>{{ $t("link.is_not_connected") }}</span></h3>
+                    <div class="connection_state">
+                        <div v-for="module_state of connectionState.modules" :key="module_state.name" :class="['module_state', {connected: module_state.connected}]">{{ module_state.name }}</div>
+                    </div>
+
+                    <Button @click="unlinkWorkspace" severity="danger">{{ $t("link.unlink_workspace") }}</Button>
+                </template>
+                <template v-else>
+                    Loading ...
+                </template>
+            </template>
+
+        </template>
+    </Padding>
 
 </template>
 
 <style scoped lang="scss">
 
-#container {
-    display: flex;
-    width: 100%;
-    height: 100%;
-    padding: 1em;
-    gap: 1em;
-
-    #left {
-        display: flex;
-        flex-direction: column;
-        gap: 1em;
-        flex-grow: 0;
-        flex-shrink: 0;
-
-        div {
-            display: flex;
-            flex-direction: column;
-        }
-    }
-
-    #right {
-        flex-grow: 1;
-        max-height: calc(100vh - var(--navbar-size) - 2em);
-        overflow-y: scroll;
-    }
-
-    #left, #right {
-        background: var(--neutral-dark);
-        color: var(--neutral-lighter);
-        border-radius: 0.3em;
-        padding: 0.5em;
-    }
-}
-
-#logs {
+.connection_state {
     display: flex;
     flex-direction: column;
-    gap: 0.2em;
-    max-height: 100%;
-    overflow-y: auto;
+    margin-bottom: 1em;
 
-    pre {
-        padding: 0.2em 0.3em;
-        background: var(--neutral-darkest);
-        color: var(--neutral-lighter);
-        white-space: break-spaces;
-        word-break: break-all;
+    .module_state {
+        display: flex;
+        align-items: center;
+
+        &:before {
+            content: '';
+            display: block;
+            height: 1em;
+            width: 1em;
+            border-radius: 10000px;
+            margin-right: 0.5em;
+            background: var(--error);
+        }
+
+        &.connected:before {
+            background: var(--success);
+        }
     }
-}
-
-#mqtt-connect-state {
-    display: block;
-    width: 1em;
-    height: 1em;
-    border-radius: 100%;
 }
 
 </style>

@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import WIP from '@/components/WIP.vue';
 
 import { useRouter } from 'vue-router';
 import { computed } from 'vue';
+import LinkableDeviceInfo from '@/components/link/LinkableDeviceInfo.vue';
 
 const router = useRouter()
 
 const isMainView = computed(()=>{
-    return router.currentRoute.value.name === 'hub'
+   return router.currentRoute.value.name === 'link'
 })
 
 </script>
@@ -15,11 +15,11 @@ const isMainView = computed(()=>{
 <template>
 
    <div v-if="isMainView">
-      <h1>Hub Connect</h1>
 
-      <RouterLink to="/hub/connect/dji-pilot-2">Connect your DJI Remote Controller now</RouterLink>
+      <h1>Connect Link</h1>
 
-      <WIP></WIP>
+      <LinkableDeviceInfo :inline="true"></LinkableDeviceInfo>
+
    </div>
    <RouterView v-else>
 

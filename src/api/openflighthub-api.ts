@@ -166,32 +166,32 @@ function OpenFlightHubApi(baseURL?: string) {
                     },
             },
         },
-        link: {
+        connectionLink: {
             auth: {
                 check: {
                     get:
                         function() {
-                            return makeRequest<void>('/link/auth/check', 'get', false, undefined, undefined)
+                            return makeRequest<void>('/connection-link/auth/check', 'get', false, undefined, undefined)
                         },
                 },
                 login: {
                     post:
-                        function(data: { id: string, secret: string }) {
-                            return makeRequest<void>('/link/auth/login', 'post', false, undefined, data)
+                        function(data: { connection_id: string, secret: string }) {
+                            return makeRequest<void>('/connection-link/auth/login', 'post', false, undefined, data)
                         },
                 },
             },
-            myWorkspace: {
+            config: {
                 get:
                     function() {
-                        return makeRequest<ApiResponse_LinkMyworkspaceGet>('/link/my-workspace', 'get', false, undefined, undefined)
+                        return makeRequest<ApiResponse_ConnectionlinkConfigGet>('/connection-link/config', 'get', false, undefined, undefined)
                     },
             },
             djiPilot2: {
                 sdkConfig: {
                     get:
                         function() {
-                            return makeRequest<ApiResponse_LinkDjipilot2SdkconfigGet>('/link/dji-pilot-2/sdk-config', 'get', false, undefined, undefined)
+                            return makeRequest<ApiResponse_ConnectionlinkDjipilot2SdkconfigGet>('/connection-link/dji-pilot-2/sdk-config', 'get', false, undefined, undefined)
                         },
                 },
             },
@@ -219,14 +219,14 @@ export type ApiResponse_WorkspacePost = { id: number }
 export type ApiResponse_WorkspaceGet = { id: number, name: string }
 export type ApiResponse_WorkspacePatch = { id: number, name: string }
 export type ApiResponse_WorkspaceConnectionsGet = { id: number, remote_controller_id?: number, drone_id?: number }[]
-export type ApiResponse_WorkspaceConnectionsPost = { id: number, secret: string }
+export type ApiResponse_WorkspaceConnectionsPost = { connection_id: string, secret: string }
 export type ApiResponse_ConnectionGet = { id: number, remote_controller_id?: number, drone_id?: number }
 export type ApiResponse_RemotecontrollerGet = { id: number, serial_number: string, type: integer }
 export type ApiResponse_RemotecontrollerLastpositionGet = { longitude: number, latitude: number, height: number, reported_at: string }
 export type ApiResponse_DroneGet = { id: number, serial_number: string, type: integer, name: string }
 export type ApiResponse_DroneLastpositionGet = { longitude: number, latitude: number, height: number, reported_at: string }
-export type ApiResponse_LinkMyworkspaceGet = { id: string, name: string } | boolean
-export type ApiResponse_LinkDjipilot2SdkconfigGet = { app_id: string, app_key: string, app_license: string }
+export type ApiResponse_ConnectionlinkConfigGet = { platform_name: string, platform_url: string, workspace_id: string, workspace_name: string, secret: string }
+export type ApiResponse_ConnectionlinkDjipilot2SdkconfigGet = { app_id: string, app_key: string, app_license: string, mqtt_url: string }
 
 
 let apiAuth: String
@@ -330,7 +330,18 @@ async function makeRequest<T>(url: string, method: method, isFormData: boolean, 
 
             if (response.ok) {
                 if (response.body) {
-                    response.json().then(resolve).catch(reject)
+                    response.text().then(text=>{
+                        if(text.length > 0){
+                            try {
+                                const parsed = JSON.parse(text)
+                                resolve(parsed)
+                            } catch (err){
+                                reject('Failed to parse server response (expected JSON): ' + (err as Error).message)
+                            }
+                        } else {
+                            resolve(undefined)
+                        }
+                    }).catch(reject)
                 } else {
                     resolve(undefined)
                     return

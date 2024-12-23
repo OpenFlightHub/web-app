@@ -143,6 +143,7 @@ export function makeRouter(pinia: Pinia){
             {
                 path: '/link',
                 component: LinkView,
+                name: 'link',
                 children: [
                     {
                         path: 'dji-pilot-2',

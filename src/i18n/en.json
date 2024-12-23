@@ -11,16 +11,25 @@
         "logout": "Logout"
     },
 
-    "connect": {
-        "connectable_device_connect_now": "Seems like you are on a connectable device. Do you want to connect your device now?",
-        "dji-pilot-2": {
-
-        }
-    },
-
     "hub": {
         "hub": "Hub",
         "go_to_hub": "Go to the Hub"
+    },
+
+    "link": {
+        "linked_to": "Linked to Workspace \"{workspace}\" on {platform}",
+        "select_workspace": "Select workspace to link to",
+        "connection_name": "Connection Name",
+        "unlink_workspace": "Unlink Workspace",
+        "is_connected": "Connected",
+        "is_not_connected": "Not connected",
+        "must_login_before_can_link": "You have to login first before you can link this device.",
+
+        "connectable_device_connect_now": "Seems like you are on a connectable device. Do you want to connect your device now?",
+        "manage_connectable_device_now": "Manage connection now",
+        "dji-pilot-2": {
+
+        }
     },
 
 
@@ -70,5 +79,9 @@
 
     "clipboard": {
         "added_to": "Added to clipboard"
+    },
+
+    "info_panel": {
+        "information": "Information"
     }
 }

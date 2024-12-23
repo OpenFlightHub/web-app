@@ -1,4 +1,4 @@
-import { ComponentName, DjiBridge, DjiBridgeResponse, DjiBridgeResponseFail, DjiBridgeResponseSuccess, EmptyObject } from "./DjiBridge"
+import { ComponentName, DjiBridge, DjiBridgeResponse, DjiBridgeResponseFail, DjiBridgeResponseSuccess, EmptyObject } from "./DjiBridge.js"
 
 
 type ModuleName = ComponentName
@@ -7,7 +7,7 @@ export function deviceSupportsSDK(){
     return !!window['djiBridge']
 }
 
-class EventManager<M extends { [key: string]: any }> {
+export class EventManager<M extends { [key: string]: any }> {
     private listeners = new Map<String, Function[]>()
 
     addListener<E extends keyof M>(eventName: E, callback: (data: M[E]) => void) {
@@ -97,6 +97,8 @@ export class DjiOpenPlatformConnectSDK extends EventManager<DjiOpenPlatformConne
         this.registerJsCallback(JS_CALLBACK_MQTT_CONNECTION_STATE, (connectState: boolean)=>{
             this.dispatch('mqtt_connection_state', connectState)
         })
+
+        this.updateMqttConnectionStateOnce()
     }
 
     // -- GENERAL --
@@ -109,12 +111,18 @@ export class DjiOpenPlatformConnectSDK extends EventManager<DjiOpenPlatformConne
         return ret
     })
 
-    setWorkspaceId = this.wrapWithLog('setWorkspaceId', (uuid: string)=>{
+    /**
+     * @param id this is any positive integer
+     *
+     * internally this number will be converted into an UUID 80b38820-xxxx-42ae-84e6-xxxxxxxxxxxx where x are digits of the id
+     * e.g. id 366 will be converted into 80b38820-0000-42ae-84e6-000000000366
+     */
+    setWorkspaceId = this.wrapWithLog('setWorkspaceId', (id: number)=>{
 
         this.guardLicenseIsVerified()
 
         return this.unwrapResponse(
-            this.djiBridge.platformSetWorkspaceId(uuid)
+            this.djiBridge.platformSetWorkspaceId(this.convertPositiveIntegerIntoCustomUUID(id))
         )
     })
 
@@ -206,6 +214,8 @@ export class DjiOpenPlatformConnectSDK extends EventManager<DjiOpenPlatformConne
             })
 
             this.djiBridge.thingConnect(username, password, JS_CALLBACK_MQTT_CONNECTION_STATE)
+
+            this.updateMqttConnectionStateOnce()
         })
     })
 
@@ -230,6 +240,7 @@ export class DjiOpenPlatformConnectSDK extends EventManager<DjiOpenPlatformConne
                     promiseIsDone = true
 
                     if(connectState){
+                        console.log('mqtt is connected')
                         resolve(true)
                     } else {
                         reject('could not connect')
@@ -238,8 +249,17 @@ export class DjiOpenPlatformConnectSDK extends EventManager<DjiOpenPlatformConne
             })
 
             this.djiBridge.thingConnect(username, password, JS_CALLBACK_MQTT_CONNECTION_STATE)
+
+            this.updateMqttConnectionStateOnce()
         })
     })
+
+    private updateMqttConnectionStateOnce(){
+        setTimeout(()=>{
+            const response = this.unwrapResponse(this.djiBridge.thingGetConnectState())
+            this.dispatch('mqtt_connection_state', response)
+        }, 500)
+    }
 
 
     mqtt_Stop = this.wrapWithLog('mqtt_Stop', ()=>{
@@ -289,11 +309,6 @@ export class DjiOpenPlatformConnectSDK extends EventManager<DjiOpenPlatformConne
         return this.unloadModule('api')
     }
 
-
-    /**
-     *
-     * @returns
-     */
     api_getCurrentToken = this.wrapWithLog('api_getCurrentToken', ()=>{
 
         this.guardLicenseIsVerified()
@@ -309,6 +324,15 @@ export class DjiOpenPlatformConnectSDK extends EventManager<DjiOpenPlatformConne
 
         return this.unwrapResponse(
             this.djiBridge.apiSetToken(token)
+        )
+    })
+
+    api_getCurrentHost = this.wrapWithLog('api_getCurrentHost', ()=>{
+
+        this.guardLicenseIsVerified()
+
+        return this.unwrapResponse(
+            this.djiBridge.apiGetHost()
         )
     })
 
@@ -452,8 +476,38 @@ export class DjiOpenPlatformConnectSDK extends EventManager<DjiOpenPlatformConne
     }
 
     private log(...args){
-        console.log.apply(null, args)
+        console.debug.apply(null, args)
         this.dispatch('log', args.map(a => '' + a).join(' '))
+    }
+
+    /**
+     * @param int must be a positive integer
+     *
+    * int will be converted into an UUID 80b38820-xxxx-42ae-84e6-xxxxxxxxxxxx where x are digits of the id
+    * e.g. id 366 will be converted into 80b38820-0000-42ae-84e6-000000000366
+    */
+    private convertPositiveIntegerIntoCustomUUID(int: number){
+        let digits = '' + Math.floor(int)
+
+        while(digits.length < 16){
+          digits = '0' + digits
+        }
+
+        return '80b38820-' + digits.substring(0, 4) + '-42ae-84e6-' + digits.substring(4)
+    }
+
+
+    /**
+     * @see convertPositiveIntegerIntoCustomUUID()
+     */
+    private convertCustomUUIDIntoPositiveInteger(uuid: string){
+        const split = uuid.split('-')
+
+        if(split.length !== 5){
+            throw new Error('invalid uuid: ' + uuid)
+        }
+
+        return parseInt(split[1]) * 1000000000000 + parseInt(split[4])
     }
 
 }

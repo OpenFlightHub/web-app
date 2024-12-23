@@ -7,8 +7,9 @@ import {ApiResponse_WorkspaceMyworkspacesGet} from '@/api/openflighthub-api'
 import { updateArray } from '@/util/vue';
 import WorkspaceSnippet from '@/components/workspace/WorkspaceSnippet.vue';
 import List from '@/components/layout/List.vue';
-import { deviceSupportsSDK } from '@/sdks/dji-pilot-2/dji-open-platform-connect-sdk';
+import { deviceSupportsOpenFlightHubConnectLink, OpenFlightHubConnectLinkManager } from '@/sdks/openflighthub-connect-link-sdk';
 import Padding from '@/components/layout/Padding.vue';
+import LinkableDeviceInfo from '@/components/link/LinkableDeviceInfo.vue';
 
 const router = useRouter()
 
@@ -23,35 +24,38 @@ onMounted(async ()=>{
     updateArray(workspaces, await api.workspace.myWorkspaces.get())
 })
 
-const isDjiRemoteController = ref(false)
+const supportsOpenFlightHubConnectLink = ref(false)
+const isLinkedToOpenFlightHubConnect = ref(false)
 
-function checkIsDjiRemoteController(){
-    isDjiRemoteController.value = deviceSupportsSDK()
-}
+onMounted(async ()=>{
+    const supports = deviceSupportsOpenFlightHubConnectLink()
+    if(supports){
 
-onMounted(checkIsDjiRemoteController)
+        const manager = new OpenFlightHubConnectLinkManager()
+        if(await manager.deviceIsLinked()){
+            isLinkedToOpenFlightHubConnect.value = true
+        }
+
+        supportsOpenFlightHubConnectLink.value = supports
+    }
+})
 
 
 </script>
 
 <template>
 
-    <div v-if="isDjiRemoteController">
-        <RouterLink to="/link/dji-pilot-2">{{ $t("connect.connectable_device_connect_now")}}</RouterLink>
-    </div>
+    <LinkableDeviceInfo></LinkableDeviceInfo>
 
-    <div v-else>
-        <Padding>
+    <Padding>
 
-            <h3>Your Workspaces:</h3>
+        <h3>Your Workspaces:</h3>
 
-            <List horizontal>
-                <WorkspaceSnippet v-for="workspace, index in workspaces" :key="index" :id="workspace.id"></WorkspaceSnippet>
-            </List>
+        <List horizontal>
+            <WorkspaceSnippet v-for="workspace, index in workspaces" :key="index" :id="workspace.id"></WorkspaceSnippet>
+        </List>
 
-        </Padding>
-
-    </div>
+    </Padding>
 
 </template>
 

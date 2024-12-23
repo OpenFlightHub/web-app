@@ -85,6 +85,7 @@ export type DjiBridge = {
 
     apiGetToken: () => DjiBridgeResponse<string>
 
+    apiGetHost: () => DjiBridgeResponse<string>
 
 
 
