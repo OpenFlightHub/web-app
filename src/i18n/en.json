@@ -27,6 +27,7 @@
 
         "connectable_device_connect_now": "Seems like you are on a connectable device. Do you want to connect your device now?",
         "manage_connectable_device_now": "Manage connection now",
+        "device_not_supported": "This devices does not support the OpenFlightHub connect link",
         "dji-pilot-2": {
 
         }

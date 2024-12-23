@@ -205,64 +205,47 @@ export class DjiOpenPlatformConnectSDK extends EventManager<DjiOpenPlatformConne
     })
 
     /**
-     * requires the mqtt module to be loaded already
-     * @see mqtt_startWithExistingConfig()
+     * requires the mqtt module to be loaded already. Will throw if could not successfully connected within 5 seconds
+     * @see mqtt_startWithExistingConfig()     *
      */
     mqtt_start = this.wrapWithLog('mqtt_start', (username: string, password: string)=>{
-        return new Promise((resolve, reject)=>{
+        return new Promise<void>((resolve, reject)=>{
 
             this.guardModuleLoaded('thing')
 
             let promiseIsDone = false
 
-            this.addListenOnce('mqtt_connection_state', (connectState: boolean)=>{
+            const callback = (connectState: boolean)=>{
 
                 if(!promiseIsDone){
 
-                    promiseIsDone = true
-
                     if(connectState){
-                        resolve(true)
+
+                        promiseIsDone = true
+                        resolve()
+
+                        this.removeListener('mqtt_connection_state', callback)
                     } else {
-                        reject('could not connect')
+                        //ignore unreliable dji event
                     }
                 }
-            })
+            }
 
-            this.djiBridge.thingConnect(username, password, JS_CALLBACK_MQTT_CONNECTION_STATE)
+            this.addListener('mqtt_connection_state', callback)
 
-            this.updateMqttConnectionStateOnce()
-        })
-    })
-
-    /**
-     * requires the mqtt module to be loaded already
-     *
-     * @see mqtt_start()
-     */
-    mqtt_startWithExistingConfig = this.wrapWithLog('mqtt_startWithExistingConfig', (username: string, password: string)=>{
-        return new Promise<boolean>((resolve, reject)=>{
-
-            this.guardModuleLoaded('thing')
-
-            let promiseIsDone = false
-
-            const config = this.mqtt_GetCurrentConfig()
-
-            this.addListenOnce('mqtt_connection_state', (connectState: boolean)=>{
-
+            setTimeout(()=>{
                 if(!promiseIsDone){
+                    const isConnected = this.mqtt_isConnected()
 
                     promiseIsDone = true
 
-                    if(connectState){
-                        console.log('mqtt is connected')
-                        resolve(true)
+                    if(!isConnected){
+                        reject('mqtt not connected after 5 seconds')
                     } else {
-                        reject('mqtt: could not connect')
+                        resolve()
                     }
                 }
-            })
+            }, 1000 * 5)
 
             this.djiBridge.thingConnect(username, password, JS_CALLBACK_MQTT_CONNECTION_STATE)
 
@@ -475,7 +458,7 @@ export class DjiOpenPlatformConnectSDK extends EventManager<DjiOpenPlatformConne
 
             setTimeout(()=>{
                 resolve(ret)
-            }, 100)//wait to give dji app to do some stuff
+            }, 300)//wait to give dji app to do some stuff
         })
     })
 

@@ -11,6 +11,8 @@ export function deviceSupportsOpenFlightHubConnectLink_DJI_Pilot_2(){
     return deviceSupportsSDK()
 }
 
+export type OpenFlightHubConnectLinkType = 'dji-pilot-2'
+
 export class OpenFlightHubConnectLinkManager {
 
 
@@ -33,11 +35,20 @@ export class OpenFlightHubConnectLinkManager {
         }
     }
 
-    async deviceIsLinked(): Promise<false | OpenFlightHubConnectLinkClient<string>>{
+    async deviceIsLinked(): Promise<false | OpenFlightHubConnectLinkType>{
         try {
             await api.connectionLink.auth.check.get()//TODO at least for pilot 2 sdk, read token from api module and try to login with that
+
+            return 'dji-pilot-2'
         } catch (err){
             return false
+        }
+    }
+
+    async getLink(): Promise<OpenFlightHubConnectLinkClient<string>>{
+
+        if(await this.deviceIsLinked() === false){
+            throw new Error('device is not linked')
         }
 
         return await this.initClient()
@@ -127,6 +138,8 @@ export class OpenFlightHubConnectLinkClient_DjiPilot2 extends OpenFlightHubConne
     protected mqttIsConnected = false
 
     async init(){
+        console.debug('initializing OpenFlightHubConnectLinkClient_DjiPilot2 ...')
+
         const sdkConfig = await api.connectionLink.djiPilot2.sdkConfig.get()
 
         this.sdk = new DjiOpenPlatformConnectSDK(sdkConfig.app_id, sdkConfig.app_key, sdkConfig.app_license)
@@ -137,6 +150,7 @@ export class OpenFlightHubConnectLinkClient_DjiPilot2 extends OpenFlightHubConne
 
         this.sdk.setWorkspaceId(parseInt(this.platformConfig.workspace_id))
 
+        console.debug('  setup mqtt ...')
 
         // MQTT
         this.sdk.addListener('mqtt_connection_state', state => {
@@ -144,27 +158,38 @@ export class OpenFlightHubConnectLinkClient_DjiPilot2 extends OpenFlightHubConne
             this.dispatch('connected-changed', undefined)
         })
 
-        const mqttUsername = this.platformConfig.workspace_id
-        const mqttPassword = this.platformConfig.secret
+        const mqttUsername = 'test' //this.platformConfig.workspace_id
+        const mqttPassword = 'test' //this.platformConfig.secret
+
+        if(this.sdk.mqtt_moduleIsLoaded()){
+            await this.sdk.mqtt_unloadModule()
+        }
 
         if(!this.sdk.mqtt_moduleIsLoaded()){
-            await this.sdk.mqtt_loadModule(this.platformConfig.platform_url, mqttUsername, mqttPassword)
+            await this.sdk.mqtt_loadModule('tcp://217.92.71.192:9002', mqttUsername, mqttPassword)
         }
 
         if(!this.sdk.mqtt_isConnected()){
-            await this.sdk.mqtt_startWithExistingConfig(mqttUsername, mqttPassword)
+            await this.sdk.mqtt_start(mqttUsername, mqttPassword)
         }
 
+
+        console.debug('  setup live stream ...')
 
         // Live Stream
 
-        if(!this.sdk.stream_moduleIsLoaded()){
-            await this.sdk.stream_loadModule('mixed')
+        if(this.sdk.stream_moduleIsLoaded()){
+            await this.sdk.stream_unloadModule()
         }
+        // if(!this.sdk.stream_moduleIsLoaded()){
+        //     await this.sdk.stream_loadModule('mixed')
+        // }
 
-        if(!this.sdk.stream_isStreamRunningAndConnected()){//TODO set stream config
-            this.sdk.stream_start()
-        }
+        // if(!this.sdk.stream_isStreamRunningAndConnected()){//TODO set stream config
+        //     this.sdk.stream_start()
+        // }
+
+        console.debug('init done')
     }
 
     async isConnected(): Promise<ConnectionState<OpenFlightHubConnectLinkClient_DjiPilot2_ModuleName>>{

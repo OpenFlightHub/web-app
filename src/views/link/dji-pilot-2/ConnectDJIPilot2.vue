@@ -27,9 +27,9 @@ onMounted(async()=>{
 
     connectLinkManager = new OpenFlightHubConnectLinkManager()
 
-    let connect = await connectLinkManager.deviceIsLinked()
+    let deviceIsLinked = await connectLinkManager.deviceIsLinked()
 
-    if(connect === false){
+    if(deviceIsLinked === false){
         if(!connectLinkManager.deviceCanBeLinked()){
             mustLoginFirst.value = true
             return
@@ -39,7 +39,7 @@ onMounted(async()=>{
 
         mustLinkFirst.value = true
     } else {
-        initConnectLinkClient(connect as OpenFlightHubConnectLinkClient_DjiPilot2)
+        initConnectLinkClient(await connectLinkManager.getLink() as OpenFlightHubConnectLinkClient_DjiPilot2)
     }
 
 })
@@ -62,7 +62,6 @@ async function linkToWorkspace(){
 }
 
 function initConnectLinkClient(client: OpenFlightHubConnectLinkClient_DjiPilot2){
-
     connectLinkClient = client
     connectLinkClientIsLoaded.value = true
 

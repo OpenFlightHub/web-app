@@ -13,21 +13,19 @@ const isLinkedToOpenFlightHubConnect = ref(false)
 const linkType = ref<undefined | 'dji-pilot-2'>()
 
 onMounted(async ()=>{
-    const supports = deviceSupportsOpenFlightHubConnectLink()
-    if(supports){
+    const supportsLink = deviceSupportsOpenFlightHubConnectLink()
+    if(supportsLink){
 
         const manager = new OpenFlightHubConnectLinkManager()
 
-        const connect = await manager.deviceIsLinked()
-        if(connect !== false){
+        const deviceLinkType = await manager.deviceIsLinked()
+        if(deviceLinkType !== false){
             isLinkedToOpenFlightHubConnect.value = true
 
-            if(connect instanceof OpenFlightHubConnectLinkClient_DjiPilot2){
-                linkType.value = 'dji-pilot-2'
-            }
+            linkType.value = deviceLinkType
         }
 
-        supportsOpenFlightHubConnectLink.value = supports
+        supportsOpenFlightHubConnectLink.value = supportsLink
     }
 })
 
@@ -36,7 +34,7 @@ onMounted(async ()=>{
 
 <template>
 
-    <InfoPanel :inline="props.inline">
+    <InfoPanel :inline="props.inline" v-if="supportsOpenFlightHubConnectLink || props.inline">
         <template v-if="supportsOpenFlightHubConnectLink">
             <template v-if="isLinkedToOpenFlightHubConnect">
                 <p>Device is linked to OpenFlightHub.</p>
@@ -46,6 +44,9 @@ onMounted(async ()=>{
             <template v-else>
                 <RouterLink to="/link/dji-pilot-2">{{ $t("link.connectable_device_connect_now")}}</RouterLink>
             </template>
+        </template>
+        <template v-else>
+            {{ $t("link.device_not_supported")}}
         </template>
     </InfoPanel>
 
