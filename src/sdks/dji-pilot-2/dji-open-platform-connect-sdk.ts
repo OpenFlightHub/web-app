@@ -259,7 +259,7 @@ export class DjiOpenPlatformConnectSDK extends EventManager<DjiOpenPlatformConne
                         console.log('mqtt is connected')
                         resolve(true)
                     } else {
-                        reject('could not connect')
+                        reject('mqtt: could not connect')
                     }
                 }
             })
