@@ -68,58 +68,17 @@ function initConnectLinkClient(client: OpenFlightHubConnectLinkClient_DjiPilot2)
 
     connectLinkClient.addListener('connected-changed', refreshConnectionState)
 
+
+    remoteControllerSerialNumber.value = connectLinkClient.getRemoteControllerSerialNumber()
+    aircraftSerialNumber.value = connectLinkClient.getAircraftSerialNumber()
+
+
     refreshConnectionState()
 }
 
 async function unlinkWorkspace(){
     connectLinkClient.unlink()
 }
-
-function todo(){
-    /*
-    const validLicense = sdk.verifyLicense()
-
-    const apiComponentIsLoaded = sdk.api_moduleIsLoaded()
-
-    if(!apiComponentIsLoaded){
-        await sdk.api_loadModule('https://dev.openflighthub.org/api', 'test')
-    }
-
-    sdk.setWorkspaceId(PLATFORM_UUID)
-
-    sdk.setPlatformInformation('OpenFlightHub', 'Alex Workspace', 'Description of alex workspace on openflighthub.org')
-
-    remoteControllerSerialNumber.value = sdk.getRemoteControllerSN()
-
-
-
-    const mqttComponentIsLoaded = sdk.mqtt_moduleIsLoaded()
-
-
-    if(!mqttComponentIsLoaded){
-        await sdk.mqtt_loadModule('tcp://217.92.71.192:9002', 'test', 'test')
-    }
-
-    sdk.addListener('mqtt_connection_state', state=>{
-        console.log('connnect-state', state)
-        logs.push('mqtt state changed:', '' + state)
-        mqttConnectState.value = state
-    })
-
-    const mqttConnected = sdk.mqtt_isConnected()
-
-    mqttConnectState.value = mqttConnected
-
-    if(!mqttConnected){
-        sdk.mqtt_startWithExistingConfig('test', 'test').then(res => {
-            console.log('start with existing worked', res)
-        }).catch(err => {
-            console.error('start with existing failed', err)
-        })
-    }
-
-    */
-};
 
 
 const remoteControllerSerialNumber = ref('')
@@ -166,6 +125,21 @@ async function refreshConnectionState(){
             <template v-else>
                 <template v-if="connectLinkClientIsLoaded">
                     <h2>{{ $t("link.linked_to", {workspace: connectLinkClient.getWorkspaceName(), platform: connectLinkClient.getPlatformName()}) }}</h2>
+
+                    <table>
+                        <tbody>
+                            <tr>
+                                <td>Remote Controller SN</td>
+                                <td>{{ remoteControllerSerialNumber || '?' }}</td>
+                            </tr>
+                            <tr>
+                                <td>Aircraft SN</td>
+                                <td>{{ aircraftSerialNumber || '?' }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <br>
 
                     <h3>State: <span v-if="connectionState.connected">{{ $t("link.is_connected") }}</span><span v-else>{{ $t("link.is_not_connected") }}</span></h3>
                     <div class="connection_state">

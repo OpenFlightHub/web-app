@@ -61,3 +61,20 @@ a {
         color: var(--neutral-medium);
     }
 }
+
+
+$table_border_radius: 0.5em;
+
+table {
+    border-collapse: collapse;
+    border-radius: 0.2em;
+    border-style: hidden;
+    box-shadow: 0 0 0 1px var(--neutral-dark);
+
+    td {
+        padding: 0.2em 0.5em;
+        border: 0.1em solid  var(--neutral-dark);
+    }
+
+}
+
