@@ -63,10 +63,12 @@ interface DjiOpenPlatformConnectSDKEvents {
     log: string
     unlinked: undefined //cloud platform connection is disabled and all config is reset
     mqtt_connection_state: boolean
+    stream_connection_state: boolean
 }
 
 const JS_CALLBACK_PREFIX = 'dji_open_platform_connect_sdk_js_callback_'
 const JS_CALLBACK_MQTT_CONNECTION_STATE = JS_CALLBACK_PREFIX + 'mqtt_connection_state'
+const JS_CALLBACK_LIVESHARE_CONNECTION_STATE = JS_CALLBACK_PREFIX + 'liveshare_connection_state'
 
 
 export class DjiOpenPlatformConnectSDK extends EventManager<DjiOpenPlatformConnectSDKEvents> {
@@ -92,13 +94,20 @@ export class DjiOpenPlatformConnectSDK extends EventManager<DjiOpenPlatformConne
             this.dispatch('unlinked', undefined)
         }
 
-        // setup callbacks
+        // MQTT
 
         this.registerJsCallback(JS_CALLBACK_MQTT_CONNECTION_STATE, (connectState: boolean)=>{
             this.dispatch('mqtt_connection_state', connectState)
         })
 
         this.updateMqttConnectionStateOnce()
+
+        // live share
+
+        this.registerJsCallback(JS_CALLBACK_LIVESHARE_CONNECTION_STATE, (connectState: boolean)=>{
+            this.dispatch('stream_connection_state', connectState)
+        })
+
     }
 
     // -- GENERAL --
@@ -342,6 +351,93 @@ export class DjiOpenPlatformConnectSDK extends EventManager<DjiOpenPlatformConne
             this.djiBridge.apiGetHost()
         )
     })
+
+
+
+    // Live stream
+
+    /**
+     *
+     * @param videoPublishType on-demand: control server can control and configure the stream via mqtt, manual: params are being set via this JS sdk and only remote controller can control the stream, mixed: both can control the stream
+     * @returns
+     */
+    stream_loadModule(videoPublishType: 'on-demand' | 'manual' | 'mixed'){
+        return this.loadModule('liveshare', {
+            videoPublishType,
+            statusCallback: JS_CALLBACK_LIVESHARE_CONNECTION_STATE
+        })
+    }
+
+
+    stream_moduleIsLoaded(){
+        return this.moduleIsLoaded('liveshare')
+    }
+
+    stream_unloadModule(){
+        return this.unloadModule('liveshare')
+    }
+
+    stream_getConfig = this.wrapWithLog('stream_getConfig', ()=>{
+        this.guardLicenseIsVerified()
+
+        return this.unwrapResponse(this.djiBridge.liveshareGetConfig())
+    })
+
+    stream_setConfig_Agora = this.wrapWithLog('stream_setConfig_Agora', (uid: string, channelId: string, token: string)=>{
+        this.guardModuleLoaded('liveshare')
+
+        this.djiBridge.liveshareSetConfig(1, {
+            uid,
+            channelId,
+            token
+        })
+    })
+
+    stream_setConfig_RTMP = this.wrapWithLog('stream_setConfig_RTMP', (url: string)=>{
+        this.guardModuleLoaded('liveshare')
+
+        this.djiBridge.liveshareSetConfig(2, {
+            url
+        })
+    })
+
+    stream_setConfig_RTSP = this.wrapWithLog('stream_setConfig_RTSP', (port: string, userName: string, password: string)=>{
+        this.guardModuleLoaded('liveshare')
+
+        this.djiBridge.liveshareSetConfig(3, {
+            port,
+            userName,
+            password
+        })
+    })
+
+    stream_setConfig_GB28181 = this.wrapWithLog('stream_setConfig_GB28181', (serverIp: string, serverPort: string, serverId: string, agentId: string, password: string, agentPort: string, agentChannel: string)=>{
+        this.guardModuleLoaded('liveshare')
+
+        this.djiBridge.liveshareSetConfig(4, {
+            serverIp,
+            serverPort,
+            serverId,
+            agentId,
+            password,
+            agentPort,
+            agentChannel,
+        })
+    })
+
+    stream_isStreamRunningAndConnected = this.wrapWithLog('stream_isStreamRunningAndConnected', ()=>{
+        return this.unwrapResponse(this.djiBridge.liveshareGetStatus())
+    })
+
+    stream_start = this.wrapWithLog('stream_start', ()=>{
+        return this.unwrapResponse(this.djiBridge.liveshareStartLive())
+    })
+
+    stream_stop = this.wrapWithLog('stream_stop', ()=>{
+        return this.unwrapResponse(this.djiBridge.liveshareStopLive())
+    })
+
+
 
 
     // internal stuff

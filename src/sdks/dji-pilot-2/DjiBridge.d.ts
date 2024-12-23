@@ -18,6 +18,41 @@ export type EmptyObject = Record<string, never>
 
 export type ComponentName = 'api' | 'thing' | 'liveshare' | 'api' | 'ws' | 'map' | 'tsa' | 'media' | 'mission'
 
+
+export type LiveShareConfigType = 1 | 2 | 3 | 4
+
+export type LiveShareConfig_Agora = {
+    uid: string
+    token: string
+    channelId: string
+}
+
+export type LiveShareConfig_RTMP = {
+    url: string
+}
+
+export type LiveShareConfig_RTSP = {
+    userName: string,
+    password: string,
+    port: string
+}
+
+export type LiveShareConfig_GB28181 = {
+    serverIp: string,
+    serverPort: string,
+    serverId: string,
+    agentId: string,
+    password: string,
+    agentPort: string,
+    agentChannel: string,
+}
+
+
+export type LiveShareConfig<T extends LiveShareConfigType> = {
+    type: T
+    params: T extends 1 ? LiveShareConfig_Agora : T extends 2 ? LiveShareConfig_RTMP : T extends 3 ? LiveShareConfig_RTSP : T extends 4 ? LiveShareConfig_GB28181 : {}
+}
+
 export type DjiBridge = {
     /**
      * NOTE: sometimes the remote controller has a bug where it somehow bricks the workspace with that UUID (e.g. when playing around with it too much for developing). In that case it will never actually send any mqtt messages out. In that case, you must use a different UUID!
@@ -99,6 +134,16 @@ export type DjiBridge = {
         password: undefined // i know, the doc says its a string, but its not
         username: undefined // i know, the doc says its a string, but its not
     }>
+
+
+    liveshareGetConfig: () => DjiBridgeResponse<LiveShareConfig>
+    liveshareSetConfig: <T extends LiveShareConfigType>(type: T, params: T extends 1 ? LiveShareConfig_Agora : T extends 2 ? LiveShareConfig_RTMP : T extends 3 ? LiveShareConfig_RTSP : T extends 4 ? LiveShareConfig_GB28181: {}) => DjiBridgeResponse<EmptyObject>
+
+    liveshareGetStatus: () => DjiBridgeResponse<boolean>
+    liveshareStartLive: () => DjiBridgeResponse<EmptyObject>
+    liveshareStopLive: () => DjiBridgeResponse<EmptyObject>
+
+
 
     /**
      * this function will be called when the user clicks the "sign out" button on the cloud platform (unlinking the the cloud platform from the remote controller and effectively resetting the cloud platform connection and settings)
