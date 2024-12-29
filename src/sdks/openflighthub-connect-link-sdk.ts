@@ -197,8 +197,8 @@ export class OpenFlightHubConnectLinkClient_DjiPilot2 extends OpenFlightHubConne
 
         const streamStatus = this.sdk.stream_isStreamRunningAndConnected()
         console.log(streamStatus, typeof streamStatus)
-        if(!streamStatus || streamStatus.status === 0){//TODO set stream config
-            this.sdk.stream_setConfig_RTMP('rtmp://stream.alexh.rocks/ofh/gurr')//sdkConfig.rtmp_url)
+        if(!streamStatus || streamStatus.status === 0){
+            this.sdk.stream_setConfig_RTMP(sdkConfig.rtmp_url)
             this.sdk.stream_start()
         }
 
