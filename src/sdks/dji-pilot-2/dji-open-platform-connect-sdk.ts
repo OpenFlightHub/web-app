@@ -341,10 +341,10 @@ export class DjiOpenPlatformConnectSDK extends EventManager<DjiOpenPlatformConne
 
     /**
      *
-     * @param videoPublishType on-demand: control server can control and configure the stream via mqtt, manual: params are being set via this JS sdk and only remote controller can control the stream, mixed: both can control the stream
+     * @param videoPublishType on-demand: control server can control and configure the stream via mqtt, js: params are being set via this JS sdk and only remote controller can control the stream, mixed: both can control the stream
      * @returns
      */
-    stream_loadModule(videoPublishType: 'on-demand' | 'manual' | 'mixed'){
+    stream_loadModule(videoPublishType: 'on-demand' | 'js-manual' | 'mixed'){
 
         let vType: string
 
@@ -353,7 +353,7 @@ export class DjiOpenPlatformConnectSDK extends EventManager<DjiOpenPlatformConne
                 vType = 'video-on-demand'
             }; break;
 
-            case 'manual': {
+            case 'js-manual': {
                 vType = 'video-by-manual'
             }; break;
 
