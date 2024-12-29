@@ -13,6 +13,10 @@ export type DjiBridgeResponseFail = {
     message: string
 }
 
+export type DjiBridgeEncapsulatedResponse<T> = {
+    code: 0
+    data: T
+}
 
 export type EmptyObject = Record<string, never>
 
@@ -136,10 +140,26 @@ export type DjiBridge = {
     }>
 
 
-    liveshareGetConfig: () => DjiBridgeResponse<LiveShareConfig<LiveShareConfigType>>
-    liveshareSetConfig: <T extends LiveShareConfigType>(type: T, params: T extends 1 ? LiveShareConfig_Agora : T extends 2 ? LiveShareConfig_RTMP : T extends 3 ? LiveShareConfig_RTSP : T extends 4 ? LiveShareConfig_GB28181: {}) => DjiBridgeResponse<EmptyObject>
+    liveshareGetConfig: () => DjiBridgeEncapsulatedResponse<LiveShareConfig<LiveShareConfigType>>
 
-    liveshareGetStatus: () => DjiBridgeResponse<boolean>
+    /**
+     * @type 1, 2, 3 or 4
+     * @param params JSON string. Depends on param type.:1 = LiveShareConfig_Agora, 2 = LiveShareConfig_RTMP, 3 = LiveShareConfig_RTSP, 4 = LiveShareConfig_GB28181
+     * @returns
+     */
+    liveshareSetConfig: (type: T, params: string) => DjiBridgeResponse<EmptyObject>
+
+    liveshareGetStatus: () => DjiBridgeEncapsulatedResponse<{
+        audioBitRate: number // -1 if not connected
+        dropRate: number // -1 if not connected
+        fps: number // -1 if not connected
+        jitter: number // -1 if not connected
+        quality: 0 | number // 0 if not connected
+        rtt: number // -1 if not connected
+        status: number // 0 if not connected
+        type: number
+        videoBitRate: number // -1 if not connected
+    }>
     liveshareStartLive: () => DjiBridgeResponse<EmptyObject>
     liveshareStopLive: () => DjiBridgeResponse<EmptyObject>
 

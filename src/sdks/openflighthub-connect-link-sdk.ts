@@ -129,15 +129,17 @@ export class OpenFlightHubConnectLinkClient<ModuleName extends string> extends E
     }
 }
 
-export type OpenFlightHubConnectLinkClient_DjiPilot2_ModuleName = 'api' | 'mqtt'
+export type OpenFlightHubConnectLinkClient_DjiPilot2_ModuleName = 'api' | 'mqtt' | 'stream'
 
 export class OpenFlightHubConnectLinkClient_DjiPilot2 extends OpenFlightHubConnectLinkClient<OpenFlightHubConnectLinkClient_DjiPilot2_ModuleName> {
 
     protected sdk: DjiOpenPlatformConnectSDK
 
     protected mqttIsConnected = false
+    protected streamIsConnected = false
 
     async init(){
+
         console.debug('initializing OpenFlightHubConnectLinkClient_DjiPilot2 ...')
 
         const sdkConfig = await api.connectionLink.djiPilot2.sdkConfig.get()
@@ -166,7 +168,7 @@ export class OpenFlightHubConnectLinkClient_DjiPilot2 extends OpenFlightHubConne
         }
 
         if(!this.sdk.mqtt_moduleIsLoaded()){
-            await this.sdk.mqtt_loadModule('tcp://217.92.71.192:9002', mqttUsername, mqttPassword)
+            await this.sdk.mqtt_loadModule(sdkConfig.mqtt_url, mqttUsername, mqttPassword)
         }
 
         if(!this.sdk.mqtt_isConnected()){
@@ -178,16 +180,28 @@ export class OpenFlightHubConnectLinkClient_DjiPilot2 extends OpenFlightHubConne
 
         // Live Stream
 
+        this.sdk.addListener('stream_connection_state', connectState => {
+            this.streamIsConnected = connectState
+            this.dispatch('connected-changed', undefined)
+        })
+
+
         if(this.sdk.stream_moduleIsLoaded()){
+            this.sdk.stream_getConfig()
             await this.sdk.stream_unloadModule()
         }
-        // if(!this.sdk.stream_moduleIsLoaded()){
-        //     await this.sdk.stream_loadModule('mixed')
-        // }
 
-        // if(!this.sdk.stream_isStreamRunningAndConnected()){//TODO set stream config
-        //     this.sdk.stream_start()
-        // }
+        if(!this.sdk.stream_moduleIsLoaded()){
+            await this.sdk.stream_loadModule('manual')
+        }
+
+        const streamStatus = this.sdk.stream_isStreamRunningAndConnected()
+        console.log(streamStatus, typeof streamStatus)
+        if(!streamStatus || streamStatus.status === 0){//TODO set stream config
+            this.sdk.stream_setConfig_RTMP('rtmp://stream.alexh.rocks/ofh/gurr')//sdkConfig.rtmp_url)
+            this.sdk.stream_getConfig()
+            this.sdk.stream_start()
+        }
 
         console.debug('init done')
     }
@@ -199,6 +213,11 @@ export class OpenFlightHubConnectLinkClient_DjiPilot2 extends OpenFlightHubConne
         modules.push({
             name: "mqtt",
             connected: this.mqttIsConnected
+        })
+
+        modules.push({
+            name: 'stream',
+            connected: this.streamIsConnected
         })
 
         //TODO api

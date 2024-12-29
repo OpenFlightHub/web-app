@@ -1,4 +1,4 @@
-import { ComponentName, DjiBridge, DjiBridgeResponse, DjiBridgeResponseFail, DjiBridgeResponseSuccess, EmptyObject } from "./DjiBridge.js"
+import { ComponentName, DjiBridge, DjiBridgeEncapsulatedResponse, DjiBridgeResponse, DjiBridgeResponseFail, DjiBridgeResponseSuccess, EmptyObject } from "./DjiBridge.js"
 
 
 type ModuleName = ComponentName
@@ -345,8 +345,29 @@ export class DjiOpenPlatformConnectSDK extends EventManager<DjiOpenPlatformConne
      * @returns
      */
     stream_loadModule(videoPublishType: 'on-demand' | 'manual' | 'mixed'){
+
+        let vType: string
+
+        switch(videoPublishType){
+            case 'on-demand': {
+                vType = 'video-on-demand'
+            }; break;
+
+            case 'manual': {
+                vType = 'video-by-manual'
+            }; break;
+
+            case 'mixed': {
+                vType = 'video-demand-aux-manual'
+            }; break;
+
+            default: {
+                throw new Error('videoPublishType not supported: ' + videoPublishType)
+            }
+        }
+
         return this.loadModule('liveshare', {
-            videoPublishType,
+            videoPublishType: vType,
             statusCallback: JS_CALLBACK_LIVESHARE_CONNECTION_STATE
         })
     }
@@ -363,41 +384,41 @@ export class DjiOpenPlatformConnectSDK extends EventManager<DjiOpenPlatformConne
     stream_getConfig = this.wrapWithLog('stream_getConfig', ()=>{
         this.guardLicenseIsVerified()
 
-        return this.unwrapResponse(this.djiBridge.liveshareGetConfig())
+        return this.unwrapEncapsulatedResponse(this.djiBridge.liveshareGetConfig())
     })
 
     stream_setConfig_Agora = this.wrapWithLog('stream_setConfig_Agora', (uid: string, channelId: string, token: string)=>{
         this.guardModuleLoaded('liveshare')
 
-        this.djiBridge.liveshareSetConfig(1, {
+        this.djiBridge.liveshareSetConfig(1, JSON.stringify({
             uid,
             channelId,
             token
-        })
+        }))
     })
 
     stream_setConfig_RTMP = this.wrapWithLog('stream_setConfig_RTMP', (url: string)=>{
         this.guardModuleLoaded('liveshare')
 
-        this.djiBridge.liveshareSetConfig(2, {
+        this.djiBridge.liveshareSetConfig(2, JSON.stringify({
             url
-        })
+        }))
     })
 
     stream_setConfig_RTSP = this.wrapWithLog('stream_setConfig_RTSP', (port: string, userName: string, password: string)=>{
         this.guardModuleLoaded('liveshare')
 
-        this.djiBridge.liveshareSetConfig(3, {
+        this.djiBridge.liveshareSetConfig(3, JSON.stringify({
             port,
             userName,
             password
-        })
+        }))
     })
 
     stream_setConfig_GB28181 = this.wrapWithLog('stream_setConfig_GB28181', (serverIp: string, serverPort: string, serverId: string, agentId: string, password: string, agentPort: string, agentChannel: string)=>{
         this.guardModuleLoaded('liveshare')
 
-        this.djiBridge.liveshareSetConfig(4, {
+        this.djiBridge.liveshareSetConfig(4, JSON.stringify({
             serverIp,
             serverPort,
             serverId,
@@ -405,11 +426,11 @@ export class DjiOpenPlatformConnectSDK extends EventManager<DjiOpenPlatformConne
             password,
             agentPort,
             agentChannel,
-        })
+        }))
     })
 
     stream_isStreamRunningAndConnected = this.wrapWithLog('stream_isStreamRunningAndConnected', ()=>{
-        return this.unwrapResponse(this.djiBridge.liveshareGetStatus())
+        return this.unwrapEncapsulatedResponse(this.djiBridge.liveshareGetStatus())
     })
 
     private guard_stream_hasConfig(){
@@ -447,20 +468,13 @@ export class DjiOpenPlatformConnectSDK extends EventManager<DjiOpenPlatformConne
         }
     }
 
-    private loadModule = this.wrapWithLog('loadModule', (moduleName: ModuleName, params: object)=>{
-        return new Promise<EmptyObject>((resolve)=>{
+    private loadModule = this.wrapWithWaitAfterFinished(this.wrapWithLog('loadModule', (moduleName: ModuleName, params: object)=>{
+        this.guardLicenseIsVerified()
 
-            this.guardLicenseIsVerified()
-
-            const ret = this.unwrapResponse(
-                this.djiBridge.platformLoadComponent(moduleName, JSON.stringify(params))
-            )
-
-            setTimeout(()=>{
-                resolve(ret)
-            }, 300)//wait to give dji app to do some stuff
-        })
-    })
+        return this.unwrapResponse(
+            this.djiBridge.platformLoadComponent(moduleName, JSON.stringify(params))
+        )
+    }), 300)// wait to give dji to do some stuff
 
     private moduleIsLoaded = this.wrapWithLog('moduleIsLoaded', (moduleName: ModuleName)=>{
 
@@ -471,19 +485,13 @@ export class DjiOpenPlatformConnectSDK extends EventManager<DjiOpenPlatformConne
         )
     })
 
-    private unloadModule = this.wrapWithLog('unloadModule', (ModuleName: ModuleName)=>{
-        return new Promise<EmptyObject>((resolve)=>{
-            this.guardLicenseIsVerified()
+    private unloadModule = this.wrapWithWaitAfterFinished(this.wrapWithLog('unloadModule', (ModuleName: ModuleName)=>{
+        this.guardLicenseIsVerified()
 
-            const ret = this.unwrapResponse(
-                this.djiBridge.platformUnloadComponent(ModuleName)
-            )
-
-            setTimeout(()=>{
-                resolve(ret)
-            }, 100)//wait to give dji app to do some stuff
-        })
-    })
+        return this.unwrapResponse(
+            this.djiBridge.platformUnloadComponent(ModuleName)
+        )
+    }), 300)// wait to give dji to do some stuff
 
 
     // helpers
@@ -557,6 +565,30 @@ export class DjiOpenPlatformConnectSDK extends EventManager<DjiOpenPlatformConne
     }
 
     /**
+     * only waits if func ran without throwing any error
+     * @param waitTime in milliseconds
+     */
+    private wrapWithWaitAfterFinished<F extends (...args: any) => any>(func: F, waitTime: number){
+        return (...args: Parameters<F>) => {
+            return new Promise<ReturnType<F>>((resolve, reject)=>{
+                const res = func.apply(this, args)
+
+                if(res instanceof Promise){
+                    res.then(r => {
+                        setTimeout(()=>{
+                            resolve(r)
+                        }, waitTime)
+                    }).catch(reject)
+                } else {
+                    setTimeout(()=>{
+                        resolve(res)
+                    }, waitTime)
+                }
+            })
+        }
+    }
+
+    /**
      *
      * @param response is actually a string, but we hack something togethere here ok?
      */
@@ -568,6 +600,18 @@ export class DjiOpenPlatformConnectSDK extends EventManager<DjiOpenPlatformConne
             return (parsed as DjiBridgeResponseSuccess<T>).data
         } else {
             throw new Error('Failed with code ' + parsed.code +  ': ' + (parsed as DjiBridgeResponseFail).message)
+        }
+    }
+//TODO typing does not work :()
+    private unwrapEncapsulatedResponse<X>(response: DjiBridgeEncapsulatedResponse<X>): X{
+        const str = this.unwrapResponse(response as DjiBridgeResponse<string>)
+
+        try {
+            const parsed = JSON.parse(str) as X
+
+            return parsed
+        } catch (err){
+            throw new Error('Failed to parse encapsulated data ' + str)
         }
     }
 
