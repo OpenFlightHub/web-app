@@ -11,6 +11,7 @@ import { Tabs, TabList, Tab, TabPanels, TabPanel } from 'primevue';
 import Padding from '@/components/layout/Padding.vue';
 import { useRoute, useRouter } from 'vue-router';
 import { getIdQueryFromRouteOrUseDefault } from '@/util/url';
+import LiveVideo from '@/components/video/LiveVideo.vue';
 
 const router = useRouter()
 
@@ -29,6 +30,7 @@ const router = useRouter()
                <TabList>
                   <Tab :value="0">Map</Tab>
                   <Tab :value="1">Connections</Tab>
+                  <Tab :value="2">Streams</Tab>
                </TabList>
                <TabPanels>
                   <TabPanel :value="0">
@@ -37,6 +39,14 @@ const router = useRouter()
                   <TabPanel :value="1">
                      <List>
                         <ConnectionSnippet v-for="connection in connections.data" :workspace-id="workspace.data.id" :connection-id="connection.id"></ConnectionSnippet>
+                     </List>
+                  </TabPanel>
+                  <TabPanel :value="2">
+                     <List :horizontal="true">
+                        <div v-for="connection in connections.data" style="width: 300px; height: 200px">
+                           <span>Connection {{ connection.id }}</span>
+                           <LiveVideo :ws-url="'wss://stream.alexh.rocks:3333/ofh/' + connection.id"></LiveVideo>
+                        </div>
                      </List>
                   </TabPanel>
                </TabPanels>
