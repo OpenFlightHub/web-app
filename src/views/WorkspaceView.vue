@@ -43,9 +43,9 @@ const router = useRouter()
                   </TabPanel>
                   <TabPanel :value="2">
                      <List :horizontal="true">
-                        <div v-for="connection in connections.data" style="width: 300px; height: 200px">
+                        <div v-for="connection in connections.data" style="width: 300px; height: 200px" :key="connection.id">
                            <span>Connection {{ connection.id }}</span>
-                           <LiveVideo :ws-url="'wss://stream.alexh.rocks:3333/ofh/' + connection.id"></LiveVideo>
+                           <LiveVideo :ws-url="'wss://www.openflighthub.org:3334/app/' + connection.id"></LiveVideo>
                         </div>
                      </List>
                   </TabPanel>

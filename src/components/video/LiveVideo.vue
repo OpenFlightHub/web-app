@@ -63,15 +63,34 @@ function setupPlayer(){
 <template>
 
     <template v-if="notSupported">Your device does not support WebRTC!</template>
-    <template v-else>
-        <div class="video" ref="video">
+    <div id="container" v-else>
+        <div id="video" ref="video">
 
         </div>
-    </template>
+        <div id="cover" v-if="!isPlaying">
+            loading ...
+        </div>
+    </div>
 
 </template>
 
 <style scoped lang="scss">
 
+#container {
+    position: relative;
+
+    #cover {
+        position: absolute;
+        z-index: 100;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #222;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+}
 
 </style>
