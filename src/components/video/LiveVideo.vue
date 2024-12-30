@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { computed, inject, provide, ref, reactive, onMounted } from 'vue';
 import * as ovenplayer from 'ovenplayer'
+import IconVue from '../general/IconVue.vue';
 
 
 const props = defineProps<{
     wsUrl: string // e.g. ws://stream.rocks:3333/app/key
+    hideControls?: boolean
 }>()
 
 const myId = crypto.randomUUID()
@@ -37,6 +39,7 @@ function setupPlayer(){
         autoStart: true,
         autoFallback: true,
         mute: true,
+        controls: props.hideControls !== true,
         sources: [{
             type: 'webrtc',
             file: props.wsUrl
@@ -63,12 +66,17 @@ function setupPlayer(){
 <template>
 
     <template v-if="notSupported">Your device does not support WebRTC!</template>
-    <div id="container" v-else>
+    <div id="container" v-else :class="[{hide_controls: props.hideControls === true}]">
         <div id="video" ref="video">
 
         </div>
-        <div id="cover" v-if="!isPlaying">
-            loading ...
+        <div id="info-overlay" v-if="isPlaying">
+            <div id="live">
+                <IconVue name="record2"></IconVue>live
+            </div>
+        </div>
+        <div id="disconnected-cover" v-else>
+            <IconVue name="arrow-repeat"></IconVue> connecting ...
         </div>
     </div>
 
@@ -79,18 +87,42 @@ function setupPlayer(){
 #container {
     position: relative;
 
-    #cover {
+    #disconnected-cover, #info-overlay {
         position: absolute;
         z-index: 100;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
+    }
+
+    #disconnected-cover {
         background: #222;
         display: flex;
         justify-content: center;
         align-items: center;
     }
+
+    #info-overlay {
+        padding: 0.5em;
+
+        #live {
+            font-size: 0.8em;
+            display: inline-flex;
+            padding: 0.1em 0.4em 0.1em 0.2em;
+            color: red;
+            border: 0.1em solid red;
+            border-radius: 0.2em;
+        }
+    }
+}
+
+</style>
+
+<style lang="scss">
+
+#container.hide_controls .up-ui {
+    display: none !important;
 }
 
 </style>
