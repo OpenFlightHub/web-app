@@ -81,6 +81,12 @@ function OpenFlightHubApi(baseURL?: string) {
                         return makeRequest<void>('/auth/logout', 'post', false, undefined, undefined)
                     },
             },
+            streamToken: {
+                get:
+                    function() {
+                        return makeRequest<ApiResponse_AuthStreamtokenGet>('/auth/stream-token', 'get', false, undefined, undefined)
+                    },
+            },
         },
         user: {
             get:
@@ -211,6 +217,7 @@ export type ApiResponse_AuthLoginPost = { id: number }
 export type ApiResponse_AuthLoginwithtokenPost = { id: number }
 export type ApiResponse_AuthCheckGet = { id: number }
 export type ApiResponse_AuthRegisterPost = { id: number }
+export type ApiResponse_AuthStreamtokenGet = { token: string }
 export type ApiResponse_UserGet = { id: number, name: string }
 export type ApiResponse_UserPatch = { id: number, name: string, email: string, created_at: string, locale: string, registration_incomplete: boolean }
 export type ApiResponse_UserSelfGet = { id: number, name: string, email: string, created_at: string, locale: string, registration_incomplete: boolean }
@@ -279,7 +286,10 @@ async function makeRequest<T>(url: string, method: method, isFormData: boolean, 
 
         const headers: { [key: string]: string } = {
             'Accept': 'application/json',
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
         }
 
         if (apiAuth) {
