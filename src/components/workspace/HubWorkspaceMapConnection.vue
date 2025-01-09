@@ -71,7 +71,7 @@ const showInfo = ref(false)
 
     <MapLine v-if="isValidLastDronePosition && isValidLastRemoteControllerPosition" :map-container="props.mapContainer" :from="{position: [lastDronePosition.longitude, lastDronePosition.latitude], elevation: lastDronePosition.height}" :to="{position: [lastRemoteControllerPosition.longitude, lastRemoteControllerPosition.latitude], elevation: lastRemoteControllerPosition.height}" :viewer="props.viewer" :color="Color.RED"></MapLine>
 
-    <div v-if="showInfo" id="info">
+    <div v-show="showInfo" id="info">
 
         <div id="close" @click="showInfo = false">
             close
