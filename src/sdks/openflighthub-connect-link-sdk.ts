@@ -37,7 +37,7 @@ export class OpenFlightHubConnectLinkManager {
 
     async deviceIsLinked(): Promise<false | OpenFlightHubConnectLinkType>{
         try {
-            await api.connectionLink.auth.check.get()//TODO at least for pilot 2 sdk, read token from api module and try to login with that
+            await api.connectionLink.auth.check.get()//TODO at least for pilot 2 sdk, read token from api module and try to login with that (this is not that easy, since all the data we need for that (e.g. verifiying license first) is stored on the api server and can only be retrieved if credentials are provided. We should check, how long the session cookie is stored on the remote control)
 
             return 'dji-pilot-2'
         } catch (err){
