@@ -60,14 +60,20 @@ async function fetchLastRemoteControllerPosition(){
 }
 
 const showInfo = ref(false)
+const infoHasBeenShownAtLeastOnce = ref(false)
+
+function clickMarker(){
+    showInfo.value = true
+    infoHasBeenShownAtLeastOnce.value = true // so stream is not loaded without need
+}
 
 </script>
 
 <template>
 
-    <MapMarker v-if="isValidLastDronePosition" :map-container="props.mapContainer" :position="[lastDronePosition.longitude, lastDronePosition.latitude]" :elevation="lastDronePosition.height" :viewer="props.viewer" :label="'Drone #' + props.connection.drone_id" icon-url="/images/drone/icon_simple.png" :icon-width="32" :icon-height="32" @click="showInfo = true"></MapMarker>
+    <MapMarker v-if="isValidLastDronePosition" :map-container="props.mapContainer" :position="[lastDronePosition.longitude, lastDronePosition.latitude]" :elevation="lastDronePosition.height" :viewer="props.viewer" :label="'Drone #' + props.connection.drone_id" icon-url="/images/drone/icon_simple.png" :icon-width="32" :icon-height="32" @click="clickMarker"></MapMarker>
 
-    <MapMarker v-if="isValidLastRemoteControllerPosition" :map-container="props.mapContainer" :position="[lastRemoteControllerPosition.longitude, lastRemoteControllerPosition.latitude]" :elevation="lastRemoteControllerPosition.height" :viewer="props.viewer" :label="'RC #' + props.connection.remote_controller_id" icon-url="/images/remote_controller/icon_simple.png" :icon-width="32" :icon-height="32" @click="showInfo = true"></MapMarker>
+    <MapMarker v-if="isValidLastRemoteControllerPosition" :map-container="props.mapContainer" :position="[lastRemoteControllerPosition.longitude, lastRemoteControllerPosition.latitude]" :elevation="lastRemoteControllerPosition.height" :viewer="props.viewer" :label="'RC #' + props.connection.remote_controller_id" icon-url="/images/remote_controller/icon_simple.png" :icon-width="32" :icon-height="32" @click="clickMarker"></MapMarker>
 
     <MapLine v-if="isValidLastDronePosition && isValidLastRemoteControllerPosition" :map-container="props.mapContainer" :from="{position: [lastDronePosition.longitude, lastDronePosition.latitude], elevation: lastDronePosition.height}" :to="{position: [lastRemoteControllerPosition.longitude, lastRemoteControllerPosition.latitude], elevation: lastRemoteControllerPosition.height}" :viewer="props.viewer" :color="Color.RED"></MapLine>
 
@@ -82,7 +88,7 @@ const showInfo = ref(false)
 
             <br/>
 
-            <LiveStream :id="props.connection.id"></LiveStream>
+            <LiveStream v-if="infoHasBeenShownAtLeastOnce" :id="props.connection.id"></LiveStream>
         </div>
 
     </div>
