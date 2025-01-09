@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import WIP from '@/components/WIP.vue';
 import api from '@/api';
 import List from '@/components/layout/List.vue';
 
@@ -11,7 +10,7 @@ import { Tabs, TabList, Tab, TabPanels, TabPanel } from 'primevue';
 import Padding from '@/components/layout/Padding.vue';
 import { useRoute, useRouter } from 'vue-router';
 import { getIdQueryFromRouteOrUseDefault } from '@/util/url';
-import LiveVideo from '@/components/video/LiveVideo.vue';
+import LiveStream from '@/components/video/LiveStream.vue';
 
 const router = useRouter()
 
@@ -45,7 +44,7 @@ const router = useRouter()
                      <List :horizontal="true">
                         <div v-for="connection in connections.data" style="width: 300px; height: 200px" :key="connection.id">
                            <span>Connection {{ connection.id }}</span>
-                           <LiveVideo :ws-url="'wss://stream.openflighthub.org:3334/ofh/' + connection.id" :hide-controls="true"></LiveVideo>
+                           <LiveStream :id="connection.id"></LiveStream>
                         </div>
                      </List>
                   </TabPanel>

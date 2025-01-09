@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, inject, provide, ref, reactive, onMounted } from 'vue';
+import { computed, inject, provide, ref, reactive, onMounted, onBeforeUnmount } from 'vue';
 import * as ovenplayer from 'ovenplayer'
 import IconVue from '../general/IconVue.vue';
 
@@ -26,6 +26,16 @@ onMounted(()=>{
 
     setupPlayer()
 })
+
+onBeforeUnmount(()=>{
+    if(player.value){
+        player.value.remove()
+    }
+
+    clearTimeout(timeoutHandle)
+})
+
+let timeoutHandle: any
 
 function setupPlayer(){
 
@@ -54,7 +64,7 @@ function setupPlayer(){
         isPlaying.value = evt.newstate === 'playing'
     })
 
-    setTimeout(()=>{
+    timeoutHandle = setTimeout(()=>{
         if(!isPlaying.value){
             setupPlayer()//retry
         }

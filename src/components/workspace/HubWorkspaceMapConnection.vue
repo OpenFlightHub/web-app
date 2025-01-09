@@ -1,13 +1,17 @@
 <script setup lang="ts">
 import { ApiResponse_ConnectionGet, ApiResponse_DroneLastpositionGet, ApiResponse_RemotecontrollerLastpositionGet } from '@/api/openflighthub-api';
-import MapMarker from '../maplibre/MapMarker.vue';
-import { Color, combine, Viewer } from 'cesium';
-import { computed, onMounted, reactive } from 'vue';
+import MapMarker from '../cesium/MapMarker.vue';
+import { Color, Viewer } from 'cesium';
+import { computed, onMounted, reactive, ref } from 'vue';
 import { updateObject } from '@/util/vue';
 import api from '@/api';
-import MapLine from '../maplibre/MapLine.vue';
+import MapLine from '../cesium/MapLine.vue';
+import Padding from '../layout/Padding.vue';
+import LiveStream from '../video/LiveStream.vue';
+import IconVue from '../general/IconVue.vue';
 
 const props = defineProps<{
+    mapContainer: HTMLElement
     viewer: Viewer
     connection: ApiResponse_ConnectionGet
 }>()
@@ -55,21 +59,67 @@ async function fetchLastRemoteControllerPosition(){
     }))
 }
 
+const showInfo = ref(false)
 
 </script>
 
 <template>
 
-    <MapMarker v-if="isValidLastDronePosition" :position="[lastDronePosition.longitude, lastDronePosition.latitude]" :elevation="lastDronePosition.height" :viewer="props.viewer" :label="'Drone #' + props.connection.drone_id" icon-url="/images/drone/icon_simple.png" :icon-width="32" :icon-height="32"></MapMarker>
+    <MapMarker v-if="isValidLastDronePosition" :map-container="props.mapContainer" :position="[lastDronePosition.longitude, lastDronePosition.latitude]" :elevation="lastDronePosition.height" :viewer="props.viewer" :label="'Drone #' + props.connection.drone_id" icon-url="/images/drone/icon_simple.png" :icon-width="32" :icon-height="32" @click="showInfo = true"></MapMarker>
 
-    <MapMarker v-if="isValidLastRemoteControllerPosition" :position="[lastRemoteControllerPosition.longitude, lastRemoteControllerPosition.latitude]" :elevation="lastRemoteControllerPosition.height" :viewer="props.viewer" :label="'RC #' + props.connection.remote_controller_id" icon-url="/images/remote_controller/icon_simple.png" :icon-width="32" :icon-height="32"></MapMarker>
+    <MapMarker v-if="isValidLastRemoteControllerPosition" :map-container="props.mapContainer" :position="[lastRemoteControllerPosition.longitude, lastRemoteControllerPosition.latitude]" :elevation="lastRemoteControllerPosition.height" :viewer="props.viewer" :label="'RC #' + props.connection.remote_controller_id" icon-url="/images/remote_controller/icon_simple.png" :icon-width="32" :icon-height="32" @click="showInfo = true"></MapMarker>
 
-    <MapLine v-if="isValidLastDronePosition && isValidLastRemoteControllerPosition" :from="{position: [lastDronePosition.longitude, lastDronePosition.latitude], elevation: lastDronePosition.height}" :to="{position: [lastRemoteControllerPosition.longitude, lastRemoteControllerPosition.latitude], elevation: lastRemoteControllerPosition.height}" :viewer="props.viewer" :color="Color.RED"></MapLine>
+    <MapLine v-if="isValidLastDronePosition && isValidLastRemoteControllerPosition" :map-container="props.mapContainer" :from="{position: [lastDronePosition.longitude, lastDronePosition.latitude], elevation: lastDronePosition.height}" :to="{position: [lastRemoteControllerPosition.longitude, lastRemoteControllerPosition.latitude], elevation: lastRemoteControllerPosition.height}" :viewer="props.viewer" :color="Color.RED"></MapLine>
+
+    <div v-if="showInfo" id="info">
+
+        <div id="close" @click="showInfo = false">
+            close
+        </div>
+
+        <div id="inner">
+            <span>Connection ID: {{ props.connection.id }}</span>
+
+            <br/>
+
+            <LiveStream :id="props.connection.id"></LiveStream>
+        </div>
+
+    </div>
 
 </template>
 
 <style scoped lang="scss">
 
+#info {
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100%;
+    min-width: 300px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    background: var(--neutral-darkest);
 
+    #close {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        padding: 0.5em;
+        background: var(--neutral-dark);
+        cursor: pointer;
+        transform: all 0.2s ease;
+
+        &:hover {
+            background: var(--neutral-darker);
+        }
+    }
+
+    #inner {
+        padding: 1em;
+    }
+}
 
 </style>

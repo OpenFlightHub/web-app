@@ -3,9 +3,11 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { Cartesian2, Cartesian3, Cartographic, Color, Ellipsoid, Entity, HeightReference, JulianDate, LabelStyle, PolylineDashMaterialProperty, SampledPositionProperty, sampleTerrainMostDetailed, VerticalOrigin, Viewer } from 'cesium';
 import { getElevationAtPosition } from '@/util/maplibre';
 import { convertEllisoidalHeightToOrthometricHeight } from '@/util/geoid';
+import { cleanupClickMyEntity, ClickMyEntityHandle, setupClickMyEntity } from '@/util/cesium';
 
 //TODO if marker elevation is below cesium terrain, clamp it to ground
 const props = defineProps<{
+    mapContainer: HTMLElement
     viewer: Viewer
     position: [number, number]
     elevation?: number //if not present, marker will sit on the ground
@@ -17,7 +19,13 @@ const props = defineProps<{
     showHeightIndicator?: boolean
 }>()
 
+
+const emit = defineEmits<{
+    click: [value:undefined]
+}>()
+
 let marker: Entity
+let markerClickMyEntityHandle: ClickMyEntityHandle
 let heightIndicator: Entity
 
 const myId = crypto.randomUUID()
@@ -26,6 +34,7 @@ watch(()=>props.position, update, {deep: true})
 watch(()=>props.elevation, update)
 
 onMounted(update)
+
 onBeforeUnmount(()=>{
     removeMarker()
     removeHeightIndicator()
@@ -75,14 +84,23 @@ function addMarker(){
             pixelOffset: new Cartesian2(0, props.iconHeight * 0.5)
         }
     })
+
+    markerClickMyEntityHandle = setupClickMyEntity(props.mapContainer, props.viewer, marker, ()=>{
+        emit('click', undefined)
+    })
+
 }
 
 function removeMarker(){
-    if(!marker){
-        return
+
+    if(markerClickMyEntityHandle){
+        cleanupClickMyEntity(markerClickMyEntityHandle)
     }
-    props.viewer.entities.remove(marker)
-    marker = undefined
+
+    if(marker){
+        props.viewer.entities.remove(marker)
+        marker = undefined
+    }
 }
 
 async function addHeightIndicator(){

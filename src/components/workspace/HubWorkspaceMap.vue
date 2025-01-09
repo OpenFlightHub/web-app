@@ -16,6 +16,7 @@ const mapContainer = ref(null as HTMLElement)
 
 let viewer: Viewer
 
+//TODO dont hardcode this token
 Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI5MTFkYzVkNy03ZmJkLTQyYTAtYTQ5Zi05ZDMxMGQ2YjU5N2QiLCJpZCI6MjYyNzgwLCJpYXQiOjE3MzQzNDM0NDF9.9NxftItZvbyOrcMENhulF4eKoLGI_-7lYjTkia2racg'
 
 onMounted(()=>{
@@ -68,7 +69,7 @@ onMounted(()=>{
         </div>
 
         <template v-if="viewer && geoidIsLoaded">
-            <HubWorkspaceMapConnection v-for="connection in props.connections" :key="connection.id" :connection="connection" :viewer="viewer"></HubWorkspaceMapConnection>
+            <HubWorkspaceMapConnection v-for="connection in props.connections" :key="connection.id" :map-container="mapContainer" :connection="connection" :viewer="viewer"></HubWorkspaceMapConnection>
         </template>
     </div>
 
@@ -76,10 +77,13 @@ onMounted(()=>{
 
 <style scoped lang="scss">
 
-#map {
-    height: 100%;
-    width: 100%;
+#container {
+    position: relative;
+
+    #map {
+        height: 100%;
+        width: 100%;
+    }
+
 }
-
-
 </style>
