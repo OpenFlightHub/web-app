@@ -86,7 +86,7 @@ function setupPlayer(){
             </div>
         </div>
         <div id="disconnected-cover" v-else>
-            <IconVue name="arrow-repeat"></IconVue> connecting ...
+            <IconVue name="arrow-repeat"></IconVue>&nbsp;connecting ...
         </div>
     </div>
 
