@@ -79,6 +79,10 @@ async function unlinkWorkspace(){
     connectLinkClient.unlink()
 }
 
+async function resetLink(){
+    connectLinkManager.resetClients()
+}
+
 
 const remoteControllerSerialNumber = ref('')
 const aircraftSerialNumber = ref<false | string>('')
@@ -149,6 +153,8 @@ async function refreshConnectionState(){
                 </template>
                 <template v-else>
                     Loading ...
+
+                    <Button @click="resetLink" severity="danger">{{ $t("link.reset") }}</Button>
                 </template>
             </template>
 

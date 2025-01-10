@@ -494,6 +494,18 @@ export class DjiOpenPlatformConnectSDK extends EventManager<DjiOpenPlatformConne
     }), 300)// wait to give dji to do some stuff
 
 
+    async unloadAllModules(){
+        if(this.api_moduleIsLoaded()){
+            await this.api_unloadModule()
+        }
+
+        if(this.mqtt_moduleIsLoaded()){
+            await this.mqtt_unloadModule()
+        }
+
+        //TODO add all other modules
+    }
+
     // helpers
 
     /**

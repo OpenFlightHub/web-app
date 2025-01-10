@@ -72,6 +72,26 @@ export class OpenFlightHubConnectLinkManager {
         await client.init()
         return client
     }
+
+    /**
+     * this will reset the client sdk (if any weird errors happen, e.g. with dji sdk mqtt does not connect after playing around too much in dev mode with it). After this function finished executing, you must restart the dji remote controller!
+     */
+    async resetClients(){
+        const config = await api.connectionLink.config.get()
+
+
+        const sdkConfig = await api.connectionLink.djiPilot2.sdkConfig.get()
+
+        const sdk = new DjiOpenPlatformConnectSDK(sdkConfig.app_id, sdkConfig.app_key, sdkConfig.app_license)
+
+        sdk.verifyLicense()
+
+        sdk.setWorkspaceId(parseInt(config.workspace_id))
+
+        await sdk.unloadAllModules()
+
+        sdk.setWorkspaceId(0)
+    }
 }
 
 
@@ -160,8 +180,8 @@ export class OpenFlightHubConnectLinkClient_DjiPilot2 extends OpenFlightHubConne
             this.dispatch('connected-changed', undefined)
         })
 
-        const mqttUsername = 'test' //this.platformConfig.workspace_id
-        const mqttPassword = 'test' //this.platformConfig.secret
+        const mqttUsername = this.platformConfig.connection_id
+        const mqttPassword = this.platformConfig.secret
 
         if(this.sdk.mqtt_moduleIsLoaded()){
             await this.sdk.mqtt_unloadModule()
