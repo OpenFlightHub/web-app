@@ -72,7 +72,7 @@ function initConnectLinkClient(client: OpenFlightHubConnectLinkClient_DjiPilot2)
     aircraftSerialNumber.value = connectLinkClient.getAircraftSerialNumber()
 
 
-    refreshConnectionState()
+    refreshConnectionState()//TODO this never triggers to hide the "confirm" button and actually show the "is connected" view, you have to manually reload the page
 }
 
 async function unlinkWorkspace(){
