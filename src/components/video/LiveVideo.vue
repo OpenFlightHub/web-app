@@ -43,6 +43,10 @@ function setupPlayer(){
         player.value.remove()
     }
 
+    if(timeoutHandle !== undefined){
+        clearTimeout(timeoutHandle)
+    }
+
     isPlaying.value = false
 
     player.value = ovenplayer.create(myId, {
@@ -68,7 +72,7 @@ function setupPlayer(){
         if(!isPlaying.value){
             setupPlayer()//retry
         }
-    }, 1000 * 5)
+    }, 1000 * 10)
 }
 
 </script>
