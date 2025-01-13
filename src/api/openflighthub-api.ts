@@ -171,6 +171,12 @@ function OpenFlightHubApi(baseURL?: string) {
                         return makeRequest<ApiResponse_DroneLastpositionGet>('/drone/{droneId}/last-position', 'get', false, params, undefined)
                     },
             },
+            lastBattery: {
+                get:
+                    function(params: { droneId: number }) {
+                        return makeRequest<ApiResponse_DroneLastbatteryGet>('/drone/{droneId}/last-battery', 'get', false, params, undefined)
+                    },
+            },
         },
         connectionLink: {
             auth: {
@@ -232,6 +238,7 @@ export type ApiResponse_RemotecontrollerGet = { id: number, serial_number: strin
 export type ApiResponse_RemotecontrollerLastpositionGet = { longitude: number, latitude: number, height: number, reported_at: string }
 export type ApiResponse_DroneGet = { id: number, serial_number: string, type: integer, name: string }
 export type ApiResponse_DroneLastpositionGet = { longitude: number, latitude: number, height: number, reported_at: string }
+export type ApiResponse_DroneLastbatteryGet = { capacity_percent_left: number, reported_at: string }
 export type ApiResponse_ConnectionlinkConfigGet = { connection_id: string, platform_name: string, platform_url: string, workspace_id: string, workspace_name: string, secret: string }
 export type ApiResponse_ConnectionlinkDjipilot2SdkconfigGet = { app_id: string, app_key: string, app_license: string, mqtt_url: string, rtmp_url: string }
 
