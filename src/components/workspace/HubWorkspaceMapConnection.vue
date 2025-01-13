@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ApiResponse_ConnectionGet, ApiResponse_DroneLastpositionGet, ApiResponse_RemotecontrollerLastpositionGet } from '@/api/openflighthub-api';
+import { ApiResponse_ConnectionGet, ApiResponse_DroneLastpositionGet, ApiResponse_RemotecontrollerLastpositionGet, ApiResponse_DroneLastbatteryGet } from '@/api/openflighthub-api';
 import MapMarker from '../cesium/MapMarker.vue';
 import { Color, Viewer } from 'cesium';
 import { computed, onMounted, reactive, ref } from 'vue';
@@ -67,6 +67,36 @@ function clickMarker(){
     infoHasBeenShownAtLeastOnce.value = true // so stream is not loaded without need
 }
 
+const currentBatteryPercent = ref(0)
+
+const lastDroneBattery = reactive({} as ApiResponse_DroneLastbatteryGet)
+const isValidLastDroneBattery = computed(()=>{
+    return typeof lastDroneBattery.capacity_percent_left === 'number'
+})
+
+const currentBatteryPercentString = computed(()=>{
+    if(typeof lastDroneBattery.capacity_percent_left === 'number'){
+        return Math.floor(lastDroneBattery.capacity_percent_left) + ' %'
+    } else {
+        return '?'
+    }
+})
+
+onMounted(()=>{
+    setInterval(fetchLastDroneBattery, 1000 * 1)
+})
+
+async function fetchLastDroneBattery(){
+    if(typeof props.connection.remote_controller_id !== 'number'){
+        return
+    }
+
+
+    updateObject(lastDroneBattery, await api.drone.lastBattery.get({
+        droneId: props.connection.drone_id
+    }))
+}
+
 </script>
 
 <template>
@@ -85,6 +115,12 @@ function clickMarker(){
 
         <div id="inner">
             <span>Connection ID: {{ props.connection.id }}</span>
+
+            <br/>
+
+            <span>
+                Drone Battery: {{ currentBatteryPercentString }}
+            </span>
 
             <br/>
 
