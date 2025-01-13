@@ -205,7 +205,7 @@ export class DjiOpenPlatformConnectSDK extends EventManager<DjiOpenPlatformConne
     })
 
     /**
-     * requires the mqtt module to be loaded already. Will throw if could not successfully connected within 5 seconds
+     * requires the mqtt module to be loaded already. Will throw if could not successfully connected within 15 seconds
      * @see mqtt_startWithExistingConfig()     *
      */
     mqtt_start = this.wrapWithLog('mqtt_start', (username: string, password: string)=>{
@@ -240,12 +240,12 @@ export class DjiOpenPlatformConnectSDK extends EventManager<DjiOpenPlatformConne
                     promiseIsDone = true
 
                     if(!isConnected){
-                        reject('mqtt not connected after 5 seconds')
+                        reject('mqtt not connected after 15 seconds')
                     } else {
                         resolve()
                     }
                 }
-            }, 1000 * 5)
+            }, 1000 * 15)
 
             this.djiBridge.thingConnect(username, password, JS_CALLBACK_MQTT_CONNECTION_STATE)
 
