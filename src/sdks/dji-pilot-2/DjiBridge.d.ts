@@ -55,7 +55,7 @@ export type LiveShareConfig_GB28181 = {
 export type LiveShareConfig<T extends LiveShareConfigType> = {
     type: T
     params: T extends 1 ? LiveShareConfig_Agora : T extends 2 ? LiveShareConfig_RTMP : T extends 3 ? LiveShareConfig_RTSP : T extends 4 ? LiveShareConfig_GB28181 : {}
-}
+} | { type: 0 }
 
 export type DjiBridge = {
     /**
@@ -135,16 +135,20 @@ export type DjiBridge = {
     thingGetConfigs: () => DjiBridgeResponse<{
         connectCallback: string
         host: string
-        password: undefined // i know, the doc says its a string, but its not
-        username: undefined // i know, the doc says its a string, but its not
+        password: undefined | string // undefined if authentication/connection failed
+        username: undefined | string // undefined if authentication/connection failed
     }>
 
 
+    /**
+     * result might be {type: 0} if authentication/connection failed //TODO check if it was type: 0 or type: 2
+     * @returns
+     */
     liveshareGetConfig: () => DjiBridgeEncapsulatedResponse<LiveShareConfig<LiveShareConfigType>>
 
     /**
      * @type 1, 2, 3 or 4
-     * @param params JSON string. Depends on param type.:1 = LiveShareConfig_Agora, 2 = LiveShareConfig_RTMP, 3 = LiveShareConfig_RTSP, 4 = LiveShareConfig_GB28181
+     * @param params JSON string. Depends on param type: 1 = LiveShareConfig_Agora, 2 = LiveShareConfig_RTMP, 3 = LiveShareConfig_RTSP, 4 = LiveShareConfig_GB28181
      * @returns
      */
     liveshareSetConfig: (type: T, params: string) => DjiBridgeResponse<EmptyObject>
