@@ -5,8 +5,11 @@ import api from "@/api";
 
 import IconVue from "@/components/general/IconVue.vue";
 import { Button, Password, InputText, IftaLabel } from "primevue";
+import { useRouter } from "vue-router";
 
 const store = useMainStore()
+
+const router = useRouter()
 
 const username = ref('')
 const password = ref('')
@@ -18,11 +21,13 @@ const isLoggingIn = ref(false)
 async function login(){
     isLoggingIn.value = true
 
-    api.auth.login.post({
-        username: username.value,
-        password: password.value
-    }).then(()=>{
-        document.location.reload()
+    store.login(username.value, password.value).then(()=>{
+
+        router.push({
+            name: 'home',
+            query: router.currentRoute.value.query
+        })
+
     }).catch(err => {
         loginError.value = true
         isLoggingIn.value = false
