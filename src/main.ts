@@ -37,6 +37,7 @@ const MyPreset = definePreset(Aura, {
     }
 })
 
+//@ts-ignore
 app.use(PrimeVue, {
     theme: {
         preset: MyPreset
@@ -90,8 +91,8 @@ app.config.globalProperties.AbortSignal = AbortSignal
 
 // internationalisation
 
-import * as en from './i18n/en.json'
-import * as de from './i18n/de.json'
+import * as en from './i18n/en.json' assert { type:  'json' }
+import * as de from './i18n/de.json' assert { type:  'json' }
 import { definePreset } from '@primevue/themes'
 
 const FALLBACK_LOCALE = 'en'
@@ -100,6 +101,7 @@ export const i18nInstance = createI18n({
     locale: FALLBACK_LOCALE,
     fallbackLocale: FALLBACK_LOCALE,
     messages: {
+        //@ts-ignore
         en, de
     }
 })
