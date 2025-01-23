@@ -9,7 +9,7 @@ const props = defineProps<{
 const name = computed(()=>{
     switch(props.type){
         case 0: return 'DJI RC Pro Enterprise'
-        case 0: return 'DJI RC Plus'
+        case 1: return 'DJI RC Plus'
 
         default: return 'unknown'
     }
