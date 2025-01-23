@@ -5,7 +5,7 @@ FROM node:18 as build-web-app
 WORKDIR /app
 
 # Install app dependencies
-COPY package*.json ./
+COPY package.json ./
 
 RUN npm install
 
