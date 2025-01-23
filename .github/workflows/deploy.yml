@@ -31,4 +31,4 @@ jobs:
         run: docker rm ${{ env.PROJECT_NAME }} || true
 
       - name: Start new docker container
-        run: docker run --restart unless-stopped --name ${{ env.PROJECT_NAME }} -p 127.0.0.1:9000:80 -d ${{ env.PROJECT_NAME }}
+        run: docker run --restart unless-stopped --name ${{ env.PROJECT_NAME }} -p 127.0.0.1:8080:80 -d ${{ env.PROJECT_NAME }}
