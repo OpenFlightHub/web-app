@@ -40,7 +40,7 @@ const translated = i18n.t("my.key")
 
 ### How to use in standalone ts files
 ```ts
-import {i18nInstance} from "../main"
+import {i18nInstance} from "@/main.js"
 
 function abc(){
     const i18n = i18nInstance.global //must be in a function or something (can not be right after the import!)

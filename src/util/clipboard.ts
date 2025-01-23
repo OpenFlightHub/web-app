@@ -1,11 +1,10 @@
-import { showToast } from "./toast"
 
-import {i18nInstance} from "../main"
+import {i18nInstance} from "@/main.js"
 
 export function writeToClipboard(text: string){
     const i18n = i18nInstance.global
 
-    showToast(i18n.t("clipboard.added_to"))
+    // TODO showToast(i18n.t("clipboard.added_to"))
     return navigator.clipboard.writeText(text)
 }
 
