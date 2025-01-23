@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { Cartesian2, Cartesian3, Cartographic, Color, Entity, HeightReference, JulianDate, LabelStyle, PolylineDashMaterialProperty, SampledPositionProperty, sampleTerrainMostDetailed, VerticalOrigin, Viewer, Ellipsoid } from 'cesium';
-import { getElevationAtPosition } from '@/util/maplibre';
+import { getElevationAtPosition } from '@/util/terrain';
 
 
 //TODO if line elevation is below cesium terrain, clamp it to ground
@@ -50,8 +50,8 @@ function toHeightIsNotZero(){
 
 async function addLine(){
 
-    const fromPos = fromHeightIsNotZero() ? Cartographic.fromDegrees(props.from.position[0], props.from.position[1], props.from.elevation) : await getElevationAtPosition(props.viewer.terrainProvider, props.from.position[0], props.from.position[1])
-    const toPos = toHeightIsNotZero() ? Cartographic.fromDegrees(props.to.position[0], props.to.position[1], props.to.elevation) : await getElevationAtPosition(props.viewer.terrainProvider, props.to.position[0], props.to.position[1])
+    const fromPos = fromHeightIsNotZero() ? Cartographic.fromDegrees(props.from.position[0], props.from.position[1], props.from.elevation) : await getElevationAtPosition(props.viewer, props.from.position[0], props.from.position[1])
+    const toPos = toHeightIsNotZero() ? Cartographic.fromDegrees(props.to.position[0], props.to.position[1], props.to.elevation) : await getElevationAtPosition(props.viewer, props.to.position[0], props.to.position[1])
 
     line = props.viewer.entities.add({
         id: 'map-line-' + myId,

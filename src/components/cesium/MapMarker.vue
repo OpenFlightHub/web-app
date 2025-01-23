@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { Cartesian2, Cartesian3, Cartographic, Color, Ellipsoid, Entity, HeightReference, JulianDate, LabelStyle, PolylineDashMaterialProperty, SampledPositionProperty, sampleTerrainMostDetailed, VerticalOrigin, Viewer } from 'cesium';
-import { getElevationAtPosition } from '@/util/maplibre';
+import { getElevationAtPosition } from '@/util/terrain';
 import { convertEllisoidalHeightToOrthometricHeight } from '@/util/geoid';
 import { cleanupClickMyEntity, ClickMyEntityHandle, setupClickMyEntity } from '@/util/cesium';
 
