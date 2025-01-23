@@ -1,12 +1,12 @@
-import { Cartographic, sampleTerrainMostDetailed, TerrainProvider } from "cesium"
+import { Cartographic, sampleTerrainMostDetailed, TerrainProvider, Viewer } from "cesium"
 
-export async function getElevationAtPosition(terrainProvider: TerrainProvider, longitude: number, latitude: number){
+export async function getElevationAtPosition(viewer: Viewer, longitude: number, latitude: number){
 
     const inAirPos = Cartographic.fromDegrees(longitude, latitude, undefined, new Cartographic())
 
 
     const onGroundPos = inAirPos.clone()
-    await sampleTerrainMostDetailed(terrainProvider, [onGroundPos])
+    await sampleTerrainMostDetailed(viewer.terrainProvider, [onGroundPos])
 
     return onGroundPos
 }

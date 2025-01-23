@@ -12,7 +12,7 @@ function OpenFlightHubApi(baseURL?: string) {
 
     apiBaseUrl = baseURL
 
-    setupLiveUpdate()
+    setupLive()
 
     return {
         API_VERSION: '1'
@@ -20,6 +20,8 @@ function OpenFlightHubApi(baseURL?: string) {
         CLIENT_SDK_VERSION: '1.0.0'
         ,
         listenToLiveUpdate: listenTo
+        ,
+        listenToLiveDrone: listenToLiveDrone
         ,
         status: apiStatus
         ,
@@ -255,12 +257,12 @@ async function makeRequest<T>(url: string, method: method, isFormData: boolean, 
         const urlWithParams = url.replace(/\{([^\}]+)\}/g, (match, p1) => {
             if (!params) {
                 reject('url contains param "' + p1 + '" but no params are defined')
-                return
+                return ''
             }
 
             if (typeof params[p1] !== 'string' && typeof params[p1] !== 'number') {
                 reject('url contains param "' + p1 + '" but no valid value for this param was provided (string or number)')
-                return
+                return ''
             }
 
             return '' + params[p1]
@@ -268,7 +270,7 @@ async function makeRequest<T>(url: string, method: method, isFormData: boolean, 
 
         if (method === 'patch' && data instanceof Object && Object.keys(data).length === 0) {
             reject('you can not perform a patch operation with empty data')
-            return
+            return ''
         }
 
 
@@ -543,29 +545,36 @@ export class ReconnectingWebSocket extends EventManager<ReconnectingWebSocketEve
 
 
 
-// live update
+// live
 
 const liveUpdatelisteners = new Map<string, Map<number, Function[]>>()
+const droneListeners = new Map<number, Function[]>()
 
 let socketLiveUpdate: ReconnectingWebSocket
-function setupLiveUpdate() {
+function setupLive() {
     socketLiveUpdate = new ReconnectingWebSocket(
         document.location.hostname === 'localhost' ? 'ws://localhost:9001/live' : ('wss://' + document.location.hostname + '/api/live')
     )
 
     const setup = () => {
 
-        for (const tableEntry of liveUpdatelisteners.entries()) {
+        for (const tableEntry of liveUpdatelisteners) {
             const tableName = tableEntry[0]
 
             const idEntries = tableEntry[1]
 
-            for (const idEntry of idEntries.entries()) {
+            for (const idEntry of idEntries) {
                 const id = idEntry[0]
 
                 registerListen(tableName, id)
 
             }
+        }
+
+        for (const tableEntry of droneListeners) {
+            const droneId = tableEntry[0]
+
+            registerLiveDrone(droneId)
         }
     }
 
@@ -573,6 +582,7 @@ function setupLiveUpdate() {
         console.log('live', 'socket open')
         setup()
     })
+
     socketLiveUpdate.addListener("reconnected", () => {
         console.log('live', 'socket reconnected')
         setup()
@@ -634,6 +644,29 @@ function setupLiveUpdate() {
                 console.error('live', 'server reported error', parsed.data)
             } break
 
+
+            case 'live_drone': {
+
+                const droneId: number = parsed.data.id
+                const position: {
+                    reported_at: string
+                    latitude: number
+                    longitude: number
+                    height: number
+                } = parsed.data.position
+
+                if (droneListeners.has(droneId)) {
+                    for (const cb of droneListeners.get(droneId)!) {
+                        try {
+                            cb(droneId, position)
+                        } catch (err) {
+                            console.error(err)
+                        }
+                    }
+                }
+
+            } break
+
             default: {
                 throw new Error('live: unsupported message type: ' + parsed.type)
             }
@@ -649,7 +682,7 @@ const pendingMessages: { messageId: number, resolve: (value: unknown) => void, r
 
 let messageIdCounter = 1
 
-type WebSocketMessageClientType = 'listen'
+type WebSocketMessageClientType = 'listen' | 'subscribe-live-drone'
 function sendToWebSocket(type: WebSocketMessageClientType, data: any) {
 
     return new Promise((resolve, reject) => {
@@ -670,7 +703,7 @@ function sendToWebSocket(type: WebSocketMessageClientType, data: any) {
     })
 }
 
-type SupportedListenTables = 'sessions' | 'challenges' | 'challenge_participants' //TODO support more?
+type SupportedListenTables = string
 
 function listenTo(tableName: SupportedListenTables, id: number, changeCallback: (tableName: string, id: number) => void) {
     if (!liveUpdatelisteners.has(tableName)) {
@@ -695,6 +728,28 @@ function registerListen(tableName: string, id: number) {
     })
 }
 
+
+function listenToLiveDrone(droneId: number, callback: (droneId: number, position: {
+    reported_at: string
+    latitude: number
+    longitude: number
+    height: number
+}
+) => void) {
+    if (!droneListeners.has(droneId)) {
+        droneListeners.set(droneId, [])
+    }
+
+    droneListeners.get(droneId)!.push(callback)
+
+    registerLiveDrone(droneId)
+}
+
+async function registerLiveDrone(droneId: number) {
+    sendToWebSocket('subscribe-live-drone', {
+        drone_id: droneId
+    })
+}
 
 
 // live session

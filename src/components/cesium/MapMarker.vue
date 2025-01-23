@@ -41,7 +41,7 @@ onBeforeUnmount(()=>{
 })
 
 
-async function update(){
+async function update(){//TODO cesium fails to repaint polygons (height marker) if we update it too quickly (e.g. every 10ms)
 
     if(marker){
         removeMarker()
@@ -56,6 +56,7 @@ async function update(){
 
     await addHeightIndicator()
 }
+
 
 function heightIsNotZero(){
     return typeof props.elevation === 'number' && props.elevation > 0
@@ -109,25 +110,25 @@ async function addHeightIndicator(){
         return
     }
 
-    const inAirPos = Cartographic.fromDegrees(props.position[0], props.position[1], undefined, new Cartographic())
-    const onGroundPos = await getElevationAtPosition(props.viewer.terrainProvider, props.position[0], props.position[1])
-
-    removeHeightIndicator()
-
-    if(Math.abs(inAirPos.height - onGroundPos.height) < 5){
-        return
-    }
+    // TODO reenable this code
+    // if(Math.abs(inAirPos.height - onGroundPos.height) < 5){
+    //     return
+    // }
 
     heightIndicator = props.viewer.entities.add({
         id: 'map-marker-height-indicator' + myId,
         polyline: {
-            positions: [Cartesian3.fromDegrees(props.position[0], props.position[1], props.elevation), Cartographic.toCartesian(onGroundPos)],
+            positions: makeHeightIndicatorPositions(props.position, props.elevation),
             width: 2,
             material: new PolylineDashMaterialProperty({
                 color: Color.CYAN
             })
         }
     })
+}
+
+function makeHeightIndicatorPositions(latLon: [number, number], elevation: number){
+    return [Cartesian3.fromDegrees(latLon[0], latLon[1], elevation), Cartesian3.fromDegrees(latLon[0], latLon[1], 0)]
 }
 
 function removeHeightIndicator(){

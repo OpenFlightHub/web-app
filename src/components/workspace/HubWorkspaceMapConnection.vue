@@ -24,8 +24,13 @@ const isValidLastDronePosition = computed(()=>{
     return typeof lastDronePosition.height === 'number'
 })
 
-onMounted(()=>{
-    setInterval(fetchLastDronePosition, 1000 * 1)
+
+onMounted(async ()=>{
+    await fetchLastDronePosition()
+
+    api.listenToLiveDrone(props.connection.drone_id, (_, data)=>{
+        updateObject(lastDronePosition, data)
+    })
 })
 
 async function fetchLastDronePosition(){
