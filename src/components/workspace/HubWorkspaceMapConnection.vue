@@ -28,7 +28,7 @@ const isValidLastDronePosition = computed(()=>{
 onMounted(async ()=>{
     await fetchLastDronePosition()
 
-    api.live.addEventListener('drone', '' + props.connection.drone_id, (_, filter, data)=>{
+    api.live.subscribeToDrone(props.connection.drone_id, (_, __, data)=>{
         updateObject(lastDronePosition, data.position)
     })
 })
