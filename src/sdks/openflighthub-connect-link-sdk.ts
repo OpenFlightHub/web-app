@@ -27,7 +27,7 @@ export class OpenFlightHubConnectLinkManager {
      */
     async deviceCanBeLinked(){
         try {
-            await api.auth.check.get()
+            await api.rest.auth.check.get()
 
             return true
         } catch (err){//not authorized
@@ -37,7 +37,7 @@ export class OpenFlightHubConnectLinkManager {
 
     async deviceIsLinked(): Promise<false | OpenFlightHubConnectLinkType>{
         try {
-            await api.connectionLink.auth.check.get()//TODO at least for pilot 2 sdk, read token from api module and try to login with that (this is not that easy, since all the data we need for that (e.g. verifiying license first) is stored on the api server and can only be retrieved if credentials are provided. We should check, how long the session cookie is stored on the remote control)
+            await api.rest.connectionLink.auth.check.get()//TODO at least for pilot 2 sdk, read token from api module and try to login with that (this is not that easy, since all the data we need for that (e.g. verifiying license first) is stored on the api server and can only be retrieved if credentials are provided. We should check, how long the session cookie is stored on the remote control)
 
             return 'dji-pilot-2'
         } catch (err){
@@ -55,11 +55,11 @@ export class OpenFlightHubConnectLinkManager {
     }
 
     getLinkableWorkspaces(){
-        return api.workspace.myWorkspaces.get()
+        return api.rest.workspace.myWorkspaces.get()
     }
 
     async linkToOpenFlightHub(connectionId: string, secret: string){
-        await api.connectionLink.auth.login.post({
+        await api.rest.connectionLink.auth.login.post({
             connection_id: connectionId,
             secret
         })
@@ -68,7 +68,7 @@ export class OpenFlightHubConnectLinkManager {
     }
 
     private async initClient(): Promise<OpenFlightHubConnectLinkClient<string>>{
-        const client = new OpenFlightHubConnectLinkClient_DjiPilot2(await api.connectionLink.config.get())
+        const client = new OpenFlightHubConnectLinkClient_DjiPilot2(await api.rest.connectionLink.config.get())
         await client.init()
         return client
     }
@@ -77,10 +77,10 @@ export class OpenFlightHubConnectLinkManager {
      * this will reset the client sdk (if any weird errors happen, e.g. with dji sdk mqtt does not connect after playing around too much in dev mode with it). After this function finished executing, you must restart the dji remote controller!
      */
     async resetClients(){
-        const config = await api.connectionLink.config.get()
+        const config = await api.rest.connectionLink.config.get()
 
 
-        const sdkConfig = await api.connectionLink.djiPilot2.sdkConfig.get()
+        const sdkConfig = await api.rest.connectionLink.djiPilot2.sdkConfig.get()
 
         const sdk = new DjiOpenPlatformConnectSDK(sdkConfig.app_id, sdkConfig.app_key, sdkConfig.app_license)
 
@@ -162,7 +162,7 @@ export class OpenFlightHubConnectLinkClient_DjiPilot2 extends OpenFlightHubConne
 
         console.debug('initializing OpenFlightHubConnectLinkClient_DjiPilot2 ...')
 
-        const sdkConfig = await api.connectionLink.djiPilot2.sdkConfig.get()
+        const sdkConfig = await api.rest.connectionLink.djiPilot2.sdkConfig.get()
 
         this.sdk = new DjiOpenPlatformConnectSDK(sdkConfig.app_id, sdkConfig.app_key, sdkConfig.app_license)
 

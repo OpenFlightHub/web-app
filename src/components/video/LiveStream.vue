@@ -10,7 +10,7 @@ const props = defineProps<{
 const myStreamToken = ref('')
 
 onMounted(async()=>{
-    myStreamToken.value = (await api.auth.streamToken.get()).token
+    myStreamToken.value = (await api.rest.auth.streamToken.get()).token
 })
 
 </script>

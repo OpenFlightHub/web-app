@@ -1,5 +1,5 @@
-import api from '@/api/index';
-import { ApiResponse_AuthLoginPost, ApiResponse_UserSelfGet } from '@/api/openflighthub-api';
+import api from '@/api/index.js';
+import { ApiResponse_AuthLoginPost, ApiResponse_UserSelfGet } from 'openflighthub-api-client-sdk';
 import { defineStore } from 'pinia'
 
 /**
@@ -33,32 +33,32 @@ export const useMainStore = defineStore('main', {
     actions:{
 
         async logout(){
-            await api.auth.logout.post()
+            await api.rest.auth.logout.post()
             this.userSelf = null
             this.user = null
         },
 
         async login(username: string, password: string){
-            const user = await api.auth.login.post({
+            const user = await api.rest.auth.login.post({
                 username,
                 password
             })
-            this.userSelf = await api.user.self.get()
+            this.userSelf = await api.rest.user.self.get()
             this.user = user
         },
 
         async loginWithToken(token: string){
-            const user = await api.auth.loginWithToken.post({
+            const user = await api.rest.auth.loginWithToken.post({
                 token
             })
-            this.userSelf = await api.user.self.get()
+            this.userSelf = await api.rest.user.self.get()
             this.user = user
         },
 
         async loginCheck(){
             try {
-                const user = await api.auth.check.get()
-                this.userSelf = await api.user.self.get()
+                const user = await api.rest.auth.check.get()
+                this.userSelf = await api.rest.user.self.get()
                 this.user = user
                 return true
             } catch(err) {

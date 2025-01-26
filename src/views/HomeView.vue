@@ -2,7 +2,7 @@
 
 import { onMounted, reactive } from 'vue';
 import api from '@/api';
-import {ApiResponse_WorkspaceMyworkspacesGet} from '@/api/openflighthub-api'
+import {ApiResponse_WorkspaceMyworkspacesGet} from 'openflighthub-api-client-sdk'
 import { updateArray } from '@/util/vue';
 import WorkspaceSnippet from '@/components/workspace/WorkspaceSnippet.vue';
 import List from '@/components/layout/List.vue';
@@ -13,7 +13,7 @@ import LinkableDeviceInfo from '@/components/link/LinkableDeviceInfo.vue';
 const workspaces = reactive<ApiResponse_WorkspaceMyworkspacesGet>([])
 
 onMounted(async ()=>{
-    updateArray(workspaces, await api.workspace.myWorkspaces.get())
+    updateArray(workspaces, await api.rest.workspace.myWorkspaces.get())
 })
 
 </script>

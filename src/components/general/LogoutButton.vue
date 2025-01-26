@@ -3,7 +3,7 @@ import api from '@/api';
 import { Button } from 'primevue';
 
 async function logout(){
-    await api.auth.logout.post().then(()=>{
+    await api.rest.auth.logout.post().then(()=>{
         document.location = '/'
     }).catch(()=>{
         //TODO

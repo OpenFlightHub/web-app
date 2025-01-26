@@ -4,7 +4,7 @@ import api from '@/api';
 import { OpenFlightHubConnectLinkClient_DjiPilot2, OpenFlightHubConnectLinkManager, ConnectionState } from '@/sdks/openflighthub-connect-link-sdk';
 import LoginAndComeBackButton from '@/components/general/LoginAndComeBackButton.vue';
 import List from '@/components/layout/List.vue';
-import { ApiResponse_WorkspaceGet } from '@/api/openflighthub-api';
+import { ApiResponse_WorkspaceGet } from 'openflighthub-api-client-sdk';
 import { updateArray, updateObject } from '@/util/vue';
 import { Button, IftaLabel, InputText } from 'primevue';
 import Snippet from '@/components/layout/Snippet.vue';
@@ -50,7 +50,7 @@ const connectionName = ref('')
 
 async function linkToWorkspace(){
 
-    const ret = await api.workspace.connections.post({
+    const ret = await api.rest.workspace.connections.post({
         workspaceId: selectedWorkspaceToLinkTo.value
     }, {
         name: connectionName.value

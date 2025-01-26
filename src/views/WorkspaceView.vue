@@ -19,11 +19,11 @@ const router = useRouter()
 
 <template>
 
-   <LoadApiWithIdParamInUrl :api-method="api.workspace.get" :id-params="{workspaceId: undefined}" v-slot="workspace">
+   <LoadApiWithIdParamInUrl :api-method="api.rest.workspace.get" :id-params="{workspaceId: undefined}" v-slot="workspace">
       <Padding>
          <h1>Workspace {{ workspace.data.name }}</h1>
 
-         <LoadApiArrayWithIdParamInUrl :api-method="api.workspace.connections.get" :id-params="{workspaceId: undefined}" v-slot="connections">
+         <LoadApiArrayWithIdParamInUrl :api-method="api.rest.workspace.connections.get" :id-params="{workspaceId: undefined}" v-slot="connections">
 
             <Tabs :value="getIdQueryFromRouteOrUseDefault('tab', useRoute(), 0)" @update:value="evt=>{router.push({query: {tab:  '' + evt}})}">
                <TabList>

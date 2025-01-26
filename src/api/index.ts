@@ -1,5 +1,5 @@
-import OpenFlightHubApi from './openflighthub-api.js';
+import {OpenFlightHubApi} from 'openflighthub-api-client-sdk';
 
-const api = OpenFlightHubApi()
+const api = new OpenFlightHubApi()
 
 export default api

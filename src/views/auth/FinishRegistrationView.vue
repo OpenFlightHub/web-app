@@ -33,7 +33,7 @@ const newPassword2IsValid = computed(()=>{
 })
 
 async function setInitialPassword(){
-    await api.auth.passwordSetInitial.post({
+    await api.rest.auth.passwordSetInitial.post({
         new_password: newPassword2.value
     })
     store.userSelf.registration_incomplete = false

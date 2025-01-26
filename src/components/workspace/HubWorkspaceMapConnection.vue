@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ApiResponse_ConnectionGet, ApiResponse_DroneLastpositionGet, ApiResponse_RemotecontrollerLastpositionGet, ApiResponse_DroneLastbatteryGet } from '@/api/openflighthub-api';
+import { ApiResponse_ConnectionGet, ApiResponse_DroneLastpositionGet, ApiResponse_RemotecontrollerLastpositionGet, ApiResponse_DroneLastbatteryGet } from 'openflighthub-api-client-sdk';
 import MapMarker from '../cesium/MapMarker.vue';
 import { Color, Viewer } from 'cesium';
 import { computed, onMounted, reactive, ref } from 'vue';
@@ -28,8 +28,8 @@ const isValidLastDronePosition = computed(()=>{
 onMounted(async ()=>{
     await fetchLastDronePosition()
 
-    api.listenToLiveDrone(props.connection.drone_id, (_, data)=>{
-        updateObject(lastDronePosition, data)
+    api.live.addEventListener('drone', '' + props.connection.drone_id, (_, filter, data)=>{
+        updateObject(lastDronePosition, data.position)
     })
 })
 
@@ -38,7 +38,7 @@ async function fetchLastDronePosition(){
         return
     }
 
-    updateObject(lastDronePosition, await api.drone.lastPosition.get({
+    updateObject(lastDronePosition, await api.rest.drone.lastPosition.get({
         droneId: props.connection.drone_id
     }))
 }
@@ -59,7 +59,7 @@ async function fetchLastRemoteControllerPosition(){
     }
 
 
-    updateObject(lastRemoteControllerPosition, await api.remoteController.lastPosition.get({
+    updateObject(lastRemoteControllerPosition, await api.rest.remoteController.lastPosition.get({
         remoteControllerId: props.connection.remote_controller_id
     }))
 }
@@ -97,7 +97,7 @@ async function fetchLastDroneBattery(){
     }
 
 
-    updateObject(lastDroneBattery, await api.drone.lastBattery.get({
+    updateObject(lastDroneBattery, await api.rest.drone.lastBattery.get({
         droneId: props.connection.drone_id
     }))
 }

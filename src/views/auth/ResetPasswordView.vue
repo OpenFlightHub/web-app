@@ -11,7 +11,7 @@ const router = useRouter()
 const email = ref('')
 
 async function resetPassword(){
-    await api.auth.passwordReset.post({
+    await api.rest.auth.passwordReset.post({
         username: email.value
     })
 }

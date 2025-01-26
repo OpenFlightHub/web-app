@@ -13,7 +13,7 @@ const props = defineProps<{
 
 <template>
 
-    <LoadApi :api-method="api.drone.get" :params="{droneId: props.id}" v-slot="scope">
+    <LoadApi :api-method="api.rest.drone.get" :params="{droneId: props.id}" v-slot="scope">
         <SnippetWithImage :image-url="'/images/drone/type/' + scope.data.type + '.png'">
             <h3>{{ scope.data.name }}</h3>
             <h4><DroneType :type="scope.data.type"></DroneType></h4>

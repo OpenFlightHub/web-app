@@ -14,7 +14,7 @@ const props = defineProps<{
 
 <template>
 
-    <LoadApi :api-method="api.connection.get" :params="{connectionId: props.connectionId}" v-slot="scope">
+    <LoadApi :api-method="api.rest.connection.get" :params="{connectionId: props.connectionId}" v-slot="scope">
         <Snippet :to-url="'/connection/' + props.connectionId">
             <LinkVue>Connection #{{ scope.data.id }}</LinkVue>
 

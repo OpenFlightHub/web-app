@@ -11,7 +11,7 @@ import List from '@/components/layout/List.vue';
 
 <template>
 
-   <LoadApiWithIdParamInUrl :api-method="api.connection.get" :id-params="{connectionId: undefined}" v-slot="connection">
+   <LoadApiWithIdParamInUrl :api-method="api.rest.connection.get" :id-params="{connectionId: undefined}" v-slot="connection">
       <Padding>
          <h1>Connection {{ connection.data.id }}</h1>
 

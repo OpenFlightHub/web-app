@@ -36,7 +36,7 @@ const newPassword2IsValid = computed(()=>{
 })
 
 async function changePassword(){
-    await api.auth.passwordChange.post({
+    await api.rest.auth.passwordChange.post({
         current_password: currentPassword.value,
         new_password: newPassword2.value
     })

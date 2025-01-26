@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ApiResponse_ConnectionGet } from '@/api/openflighthub-api';
+import { ApiResponse_ConnectionGet } from 'openflighthub-api-client-sdk';
 import { ref, onMounted } from 'vue';
 
 import { Cartesian3, createOsmBuildingsAsync, Ion, Math, Terrain, Viewer, Cartographic, OpenStreetMapImageryProvider } from "cesium";

@@ -59,12 +59,12 @@ import api from './api'
 
 let apiIsReconnected = false
 
-api.status.addListener('connected', ()=>{//TODO when reconneting but not logged in this will flicker
+api.live.status.addListener('connected', ()=>{//TODO when reconneting but not logged in this will flicker
     store.apiDisconnected = false
     apiIsReconnected = true
 })
 
-api.status.addListener('disconnected', reason=>{
+api.live.status.addListener('disconnected', reason=>{
 
     if(reason === 'logout'){
         store.isForceLoggedOut = true
