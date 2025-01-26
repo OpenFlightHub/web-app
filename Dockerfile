@@ -13,6 +13,14 @@ RUN npm install
 COPY . .
 RUN npm run build
 
+# fix cesium static
+RUN mkdir dist/cesiumStatic
+
+RUN cp -r node_modules/@cesium/engine/Build/ThirdParty dist/cesiumStatic/ThirdParty
+RUN cp -r node_modules/@cesium/engine/Build/Workers dist/cesiumStatic/Workers
+RUN cp -r node_modules/@cesium/engine/Source/Assets dist/cesiumStatic/Assets
+RUN cp -r node_modules/@cesium/widgets/Source dist/cesiumStatic/Widgets
+
 
 FROM nginx:alpine
 RUN apk add --update openssl
