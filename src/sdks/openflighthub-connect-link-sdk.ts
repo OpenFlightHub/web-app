@@ -1,6 +1,6 @@
 import api from "@/api/index.js";
 import { deviceSupportsSDK, DjiOpenPlatformConnectSDK, EventManager } from "./dji-pilot-2/dji-open-platform-connect-sdk.js";
-import { ApiResponse_ConnectionlinkConfigGet } from "@/api/openflighthub-api.js";
+import { ApiResponse_ConnectionlinkConfigGet } from "openflighthub-api-client-sdk";
 
 export function deviceSupportsOpenFlightHubConnectLink(){
     // add more alternatives here once they exist
