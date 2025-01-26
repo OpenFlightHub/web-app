@@ -35,7 +35,7 @@ export default defineConfig({
         return html.replace(regex, replacer);
       },
     },
-    viteStaticCopy({
+    viteStaticCopy({//this doesnt work for vite build (thats why we manually copy folders in build.sh and build.cmd)
       targets: [
         { src: `${cesiumSource}/ThirdParty`, dest: cesiumBaseUrl },
         { src: `${cesiumSource}/Workers`, dest: cesiumBaseUrl },
