@@ -9,12 +9,13 @@ import { cleanupClickMyEntity, ClickMyEntityHandle, setupClickMyEntity } from '@
 const props = defineProps<{
     mapContainer: HTMLElement
     viewer: Viewer
-    position: [number, number]
+    position: [number, number] // longitude, latitude
     elevation?: number //if not present, marker will sit on the ground
     iconUrl: string
     iconWidth: number
     iconHeight: number
     label?: string
+    color: Color
     fontSize?: number
     showHeightIndicator?: boolean
 }>()
@@ -70,12 +71,12 @@ function addMarker(){
             image: props.iconUrl,
             width: props.iconWidth,
             height: props.iconHeight,
-            color: Color.CYAN,
+            color: props.color,
             heightReference: heightIsNotZero() ? HeightReference.NONE : HeightReference.CLAMP_TO_TERRAIN,
             disableDepthTestDistance: heightIsNotZero() ? 5000000 : Number.POSITIVE_INFINITY // show always above terrain https://community.cesium.com/t/points-labels-stuck-under-terrain/11141
         },
         label: {
-            text: props.label + ' ' + Math.floor(convertEllisoidalHeightToOrthometricHeight(props.position[0], props.position[1], props.elevation)) + 'm MSL',
+            text: (props.label ? props.label + ' ' : '') + Math.floor(convertEllisoidalHeightToOrthometricHeight(props.position[0], props.position[1], props.elevation)) + 'm MSL',
             font: (typeof props.fontSize === 'number' ? props.fontSize : 14) + 'pt monospace',
             style: LabelStyle.FILL_AND_OUTLINE,
             outlineWidth: 2,
