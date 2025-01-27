@@ -76,7 +76,7 @@ function addMarker(){
             disableDepthTestDistance: heightIsNotZero() ? 5000000 : Number.POSITIVE_INFINITY // show always above terrain https://community.cesium.com/t/points-labels-stuck-under-terrain/11141
         },
         label: {
-            text: (props.label ? props.label + ' ' : '') + Math.floor(convertEllisoidalHeightToOrthometricHeight(props.position[0], props.position[1], props.elevation)) + 'm MSL',
+            text: (props.label ? props.label + ' ' : '') + (typeof props.elevation === 'number' ? Math.floor(convertEllisoidalHeightToOrthometricHeight(props.position[0], props.position[1], props.elevation)) + 'm MSL' : ''),
             font: (typeof props.fontSize === 'number' ? props.fontSize : 14) + 'pt monospace',
             style: LabelStyle.FILL_AND_OUTLINE,
             outlineWidth: 2,
@@ -107,7 +107,7 @@ function removeMarker(){
 
 async function addHeightIndicator(){
 
-    if(!props.showHeightIndicator === false){
+    if(!props.showHeightIndicator === true){
         return
     }
 
@@ -117,19 +117,19 @@ async function addHeightIndicator(){
     // }
 
     heightIndicator = props.viewer.entities.add({
-        id: 'map-marker-height-indicator' + myId,
+        id: 'map-marker-height-indicator-' + myId,
         polyline: {
             positions: makeHeightIndicatorPositions(props.position, props.elevation),
             width: 2,
             material: new PolylineDashMaterialProperty({
-                color: Color.CYAN
+                color: props.color
             })
         }
     })
 }
 
-function makeHeightIndicatorPositions(latLon: [number, number], elevation: number){
-    return [Cartesian3.fromDegrees(latLon[0], latLon[1], elevation), Cartesian3.fromDegrees(latLon[0], latLon[1], 0)]
+function makeHeightIndicatorPositions(lonLat: [number, number], elevation: number){
+    return [Cartesian3.fromDegrees(lonLat[0], lonLat[1], elevation), Cartesian3.fromDegrees(lonLat[0], lonLat[1], 0)]
 }
 
 function removeHeightIndicator(){

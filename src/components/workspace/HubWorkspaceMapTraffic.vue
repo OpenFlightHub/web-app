@@ -53,9 +53,7 @@ onUnmounted(destroy)
 
 <template>
 
-    <template v-for="t of traffic">
-        <MapMarker :viewer="props.viewer" :map-container="props.mapContainer" :position="[t.position.longitude, t.position.latitude]" :elevation=t.position.height icon-url="/images/traffic/icon.png" :icon-width="51" :icon-height="51" :show-height-indicator="true" :color="Color.RED"></MapMarker>
-    </template>
+    <MapMarker v-for="t of traffic" :key="t.id" :viewer="props.viewer" :map-container="props.mapContainer" :position="[t.position.longitude, t.position.latitude]" :elevation="t.position.height" :label="t.id" icon-url="/images/traffic/icon.png" :icon-width="51" :icon-height="51" :show-height-indicator="true" :color="Color.RED"></MapMarker>
 
 </template>
 

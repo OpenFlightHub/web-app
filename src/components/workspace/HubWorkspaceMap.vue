@@ -73,7 +73,7 @@ onMounted(()=>{
             <HubWorkspaceMapConnection v-for="connection in props.connections" :key="connection.id" :map-container="mapContainer" :connection="connection" :viewer="viewer"></HubWorkspaceMapConnection>
 
             <!-- TODO implement center of map (but lazy load, so a small change in distance does not actually trigger a reset) -->
-            <HubWorkspaceMapTraffic :viewer="viewer" :map-container="mapContainer" :latitude="47.554" :longitude="10.22" :radius="10000"></HubWorkspaceMapTraffic>
+            <HubWorkspaceMapTraffic :viewer="viewer" :map-container="mapContainer" :latitude="47.554" :longitude="10.22" :radius="50000"></HubWorkspaceMapTraffic>
         </template>
     </div>
 
