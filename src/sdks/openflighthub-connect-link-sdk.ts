@@ -172,6 +172,18 @@ export class OpenFlightHubConnectLinkClient_DjiPilot2 extends OpenFlightHubConne
 
         this.sdk.setWorkspaceId(parseInt(this.platformConfig.workspace_id))
 
+
+        console.debug('  setup api ...')
+
+        // Api
+
+        if(this.sdk.api_moduleIsLoaded()){
+            await this.sdk.api_unloadModule()
+        }
+
+        this.sdk.api_loadModule(sdkConfig.api_url, 'api token')//TODO
+
+
         console.debug('  setup mqtt ...')
 
         // MQTT
@@ -220,6 +232,16 @@ export class OpenFlightHubConnectLinkClient_DjiPilot2 extends OpenFlightHubConne
         this.sdk.stream_stop()
         this.sdk.stream_setConfig_RTMP(sdkConfig.rtmp_url)
         this.sdk.stream_start()
+
+        console.debug('  setup media upload ...')
+
+        // Media Upload
+        if(this.sdk.media_moduleIsLoaded()){
+            await this.sdk.media_unloadModule()
+        }
+
+        await this.sdk.media_loadModule(true, 0, false)
+        this.sdk.media_setDownloadRemoteController('mine')//TODO check if this is required
 
         console.debug('init done')
     }

@@ -168,6 +168,26 @@ export type DjiBridge = {
     liveshareStopLive: () => DjiBridgeResponse<EmptyObject>
 
 
+    mediaSetAutoUploadPhoto: (auto: boolean) => DjiBridgeResponse<EmptyObject>
+    mediaGetAutoUploadPhoto: () => DjiBridgeResponse<boolean>
+
+    /**
+     *
+     * @param type 0 = original, 1 = thumbnail
+     */
+    mediaSetUploadPhotoType: (type: 0 | 1) => DjiBridgeResponse<EmptyObject>
+    mediaGetUploadPhotoType: () => DjiBridgeResponse<0 | 1>
+
+    mediaSetAutoUploadVideo: (auto: boolean) => DjiBridgeResponse<EmptyObject>
+    mediaGetAutoUploadVideo: () => DjiBridgeResponse<boolean>
+
+    /**
+     *
+     * @param rc 0 = the current remote controller, 1 = the other remote controller
+     */
+    mediaSetDownloadOwner: (rc: 0 | 1) => DjiBridgeResponse<EmptyObject>
+    mediaGetDownloadOwner: () => DjiBridgeResponse<0 | 1>
+
 
     /**
      * this function will be called when the user clicks the "sign out" button on the cloud platform (unlinking the the cloud platform from the remote controller and effectively resetting the cloud platform connection and settings)

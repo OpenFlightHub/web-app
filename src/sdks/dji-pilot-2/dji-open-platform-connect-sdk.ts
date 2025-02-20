@@ -3,6 +3,8 @@ import { ComponentName, DjiBridge, DjiBridgeEncapsulatedResponse, DjiBridgeRespo
 
 type ModuleName = ComponentName
 
+type Media_DownloadOwner = 'mine' | 'other'
+
 export function deviceSupportsSDK(){
     return !!window['djiBridge']
 }
@@ -451,6 +453,51 @@ export class DjiOpenPlatformConnectSDK extends EventManager<DjiOpenPlatformConne
         return this.unwrapResponse(this.djiBridge.liveshareStopLive())
     })
 
+
+    // Media Management
+
+    /**
+     *
+     * @param autoUploadPhoto
+     * @param autoUploadPhotoType 0 = original, 1 = thumbnail
+     * @param autoUploadVideo
+     * @returns
+     */
+    media_loadModule(autoUploadPhoto: boolean, autoUploadPhotoType: 0 | 1, autoUploadVideo: boolean){
+
+        this.guardModuleLoaded('api')
+
+        return this.loadModule('media', {
+            autoUploadPhoto,
+            autoUploadPhotoType,
+            autoUploadVideo
+        })
+    }
+
+    media_moduleIsLoaded(){
+        return this.moduleIsLoaded('media')
+    }
+
+    media_unloadModule(){
+        return this.unloadModule('media')
+    }
+
+    /**
+     *
+     * @param owner mine = current remote controller, other = the other remote controller
+     */
+    media_setDownloadRemoteController(rc: Media_DownloadOwner){
+        return this.unwrapResponse(this.djiBridge.mediaSetDownloadOwner(rc === 'mine' ? 0 : 1))
+    }
+
+
+    /**
+     *
+     * @returns mine = current remote controller, other = the other remote controller
+     */
+    media_getDownloadRemoteController(): Media_DownloadOwner {
+        return this.unwrapResponse(this.djiBridge.mediaGetDownloadOwner()) === 0 ? 'mine' : 'other'
+    }
 
 
 
