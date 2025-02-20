@@ -11,6 +11,7 @@ import Padding from '@/components/layout/Padding.vue';
 import { useRoute, useRouter } from 'vue-router';
 import { getIdQueryFromRouteOrUseDefault } from '@/util/url';
 import LiveStream from '@/components/video/LiveStream.vue';
+import HubWorkspaceFile from '@/components/workspace/HubWorkspaceFile.vue';
 
 const router = useRouter()
 
@@ -30,6 +31,7 @@ const router = useRouter()
                   <Tab :value="0">Map</Tab>
                   <Tab :value="1">Connections</Tab>
                   <Tab :value="2">Streams</Tab>
+                  <Tab :value="3">Files</Tab>
                </TabList>
                <TabPanels>
                   <TabPanel :value="0">
@@ -46,6 +48,15 @@ const router = useRouter()
                            <span>Connection {{ connection.id }}</span>
                            <LiveStream :id="connection.id"></LiveStream>
                         </div>
+                     </List>
+                  </TabPanel>
+                  <TabPanel :value="3">
+                     <List :horizontal="true">
+                        <LoadApiWithIdParamInUrl :api-method="api.rest.workspace.files.get" :id-params="{workspaceId: undefined}" v-slot="workspaceFiles">
+                           <div v-for="file in workspaceFiles.data" :key="file.id">
+                              <HubWorkspaceFile :id="file.id"></HubWorkspaceFile>
+                           </div>
+                        </LoadApiWithIdParamInUrl>
                      </List>
                   </TabPanel>
                </TabPanels>
