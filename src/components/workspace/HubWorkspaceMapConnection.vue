@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ApiResponse_ConnectionGet, ApiResponse_DroneLastpositionGet, ApiResponse_RemotecontrollerLastpositionGet, ApiResponse_DroneLastbatteryGet } from 'openflighthub-api-client-sdk';
+import { ApiResponse_ConnectionGet, ApiResponse_DroneLastpositionGet, ApiResponse_RemotecontrollerLastpositionGet, ApiResponse_DroneLastbatteryGet, Live } from 'openflighthub-api-client-sdk';
 import MapMarker from '../cesium/MapMarker.vue';
 import { Color, Viewer } from 'cesium';
-import { computed, onMounted, reactive, ref } from 'vue';
+import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { updateObject } from '@/util/vue';
 import api from '@/api';
 import MapLine from '../cesium/MapLine.vue';
@@ -24,45 +24,48 @@ const isValidLastDronePosition = computed(()=>{
     return typeof lastDronePosition.height === 'number'
 })
 
+onMounted(setup)
 
-onMounted(async ()=>{
-    await fetchLastDronePosition()
+watch(()=>{
+    return props.connection
+}, setup, {deep: true})
 
-    api.live.subscribeToDrone(props.connection.drone_id, (_, __, data)=>{
-        updateObject(lastDronePosition, data.position)
-    })
-})
+async function setup(){
 
-async function fetchLastDronePosition(){
-    if(typeof props.connection.drone_id !== 'number'){
-        return
+    if(typeof props.connection.drone_id === 'number'){
+        api.live.subscribeToDronePosition(props.connection.drone_id, (evt, filter, data)=>{
+            updateObject(lastDronePosition, data.position)
+        })
+
+        updateObject(lastDronePosition, await api.rest.drone.lastPosition.get({
+            droneId: props.connection.drone_id
+        }))
+
+        api.live.subscribeToDroneTelemetry(props.connection.drone_id, (evt, filter, data)=>{
+            updateObject(lastDroneBattery, data.telemetry)
+        })
+
+        updateObject(lastDroneBattery, await api.rest.drone.lastBattery.get({
+            droneId: props.connection.drone_id
+        }))
     }
 
-    updateObject(lastDronePosition, await api.rest.drone.lastPosition.get({
-        droneId: props.connection.drone_id
-    }))
-}
+    if(typeof props.connection.remote_controller_id === 'number'){
+        api.live.subscribeToRemoteControllerPosition(props.connection.remote_controller_id, (evt, filter, data)=>{
+            updateObject(lastRemoteControllerPosition, data)
+        })
 
+        updateObject(lastRemoteControllerPosition, await api.rest.remoteController.lastPosition.get({
+            remoteControllerId: props.connection.remote_controller_id
+        }))
+    }
+}
 
 const lastRemoteControllerPosition = reactive({} as ApiResponse_RemotecontrollerLastpositionGet)
 const isValidLastRemoteControllerPosition = computed(()=>{
     return typeof lastRemoteControllerPosition.height === 'number'
 })
 
-onMounted(()=>{
-    setInterval(fetchLastRemoteControllerPosition, 1000 * 1)
-})
-
-async function fetchLastRemoteControllerPosition(){
-    if(typeof props.connection.remote_controller_id !== 'number'){
-        return
-    }
-
-
-    updateObject(lastRemoteControllerPosition, await api.rest.remoteController.lastPosition.get({
-        remoteControllerId: props.connection.remote_controller_id
-    }))
-}
 
 const showInfo = ref(false)
 const infoHasBeenShownAtLeastOnce = ref(false)
@@ -87,20 +90,6 @@ const currentBatteryPercentString = computed(()=>{
     }
 })
 
-onMounted(()=>{
-    setInterval(fetchLastDroneBattery, 1000 * 1)
-})
-
-async function fetchLastDroneBattery(){
-    if(typeof props.connection.remote_controller_id !== 'number'){
-        return
-    }
-
-
-    updateObject(lastDroneBattery, await api.rest.drone.lastBattery.get({
-        droneId: props.connection.drone_id
-    }))
-}
 
 </script>
 
