@@ -77,6 +77,7 @@ export class OpenFlightHubConnectLinkManager {
      * this will reset the client sdk (if any weird errors happen, e.g. with dji sdk mqtt does not connect after playing around too much in dev mode with it). After this function finished executing, you must restart the dji remote controller!
      */
     async resetClients(){
+        console.log('resetting clients ...')
         const config = await api.rest.connectionLink.config.get()
 
 
@@ -91,6 +92,8 @@ export class OpenFlightHubConnectLinkManager {
         await sdk.unloadAllModules()
 
         sdk.setWorkspaceId(0)
+
+        console.log('reset done')
     }
 }
 
