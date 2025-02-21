@@ -13,6 +13,9 @@ const cesiumBaseUrl = "/cesiumStatic";
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  server: {
+    allowedHosts: ['dev.openflighthub.org']
+  },
   plugins: [vue(),
     {
       name: 'html-inject-data',
