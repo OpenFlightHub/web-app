@@ -1,10 +1,14 @@
 <script setup lang="ts">
 
+const props = defineProps<{
+    noNavBar?: boolean
+}>()
+
 </script>
 
 <template>
 
-    <div id="content">
+    <div id="content" :class="{no_navbar: props.noNavBar}">
 
         <div id="inner">
             <slot></slot>
@@ -20,6 +24,10 @@
     min-height: calc(100vh - var(--navbar-size));
     overflow-y: auto;
     position: relative;
+
+    &.no_navbar {
+        min-height: 100vh;
+    }
 
     &:after {
         content: '';

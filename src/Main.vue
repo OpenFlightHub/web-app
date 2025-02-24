@@ -1,7 +1,7 @@
 <script lang="ts">
 
-import { defineComponent } from 'vue';
-import { RouterView } from 'vue-router'
+import { computed, defineComponent } from 'vue';
+import { RouterView, useRoute } from 'vue-router'
 
 
 import App from '@/components/app/App.vue';
@@ -18,15 +18,24 @@ export default defineComponent({
 // fix cesium static url
 //@ts-ignore
 window.CESIUM_BASE_URL = '/cesiumStatic'
+</script>
+
+<script lang="ts" setup>
+
+const route = useRoute()
+
+const routeIsAuth = computed(()=>{
+    return route.path.startsWith('/auth')
+})
 
 </script>
 
 <template>
     <App>
-        <AppNavBar>
+        <AppNavBar v-if="!routeIsAuth">
         </AppNavBar>
 
-        <AppContent>
+        <AppContent :no-nav-bar="routeIsAuth">
             <RouterView/>
         </AppContent>
     </App>

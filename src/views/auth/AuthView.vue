@@ -26,9 +26,9 @@ import LogoVue from '@/components/branding/LogoVue.vue';
 #out {
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
     position: relative;
-    padding: 10vh 10vw;
+    padding: 5vh 5vw;
     min-height: calc(100vh - var(--navbar-size));
     width: 100vw;
 
