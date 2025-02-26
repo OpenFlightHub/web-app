@@ -125,7 +125,7 @@ export class DjiOpenPlatformConnectSDK extends EventManager<DjiOpenPlatformConne
     /**
      * @param id this is any positive integer
      *
-     * internally this number will be converted into an UUID 80b38820-xxxx-42ae-84e6-xxxxxxxxxxxx where x are digits of the id
+     * internally this number will be converted into an UUID 80b38820-0000-42ae-84e6-xxxxxxxxxxxx where x are digits of the id
      * e.g. id 366 will be converted into 80b38820-0000-42ae-84e6-000000000366
      */
     setWorkspaceId = this.wrapWithLog('setWorkspaceId', (id: number)=>{
