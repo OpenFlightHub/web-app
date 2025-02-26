@@ -59,6 +59,8 @@ async function linkToWorkspace(){
     initConnectLinkClient(await connectLinkManager.linkToOpenFlightHub(ret.connection_id, ret.secret) as OpenFlightHubConnectLinkClient_DjiPilot2)
 
     //TODO handle and show error
+
+    mustLinkFirst.value = false
 }
 
 function initConnectLinkClient(client: OpenFlightHubConnectLinkClient_DjiPilot2){
