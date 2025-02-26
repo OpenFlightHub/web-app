@@ -152,7 +152,7 @@ export class OpenFlightHubConnectLinkClient<ModuleName extends string> extends E
     }
 }
 
-export type OpenFlightHubConnectLinkClient_DjiPilot2_ModuleName = 'api' | 'mqtt' | 'stream'
+export type OpenFlightHubConnectLinkClient_DjiPilot2_ModuleName = 'api' | 'mqtt' | 'stream' | 'media'
 
 export class OpenFlightHubConnectLinkClient_DjiPilot2 extends OpenFlightHubConnectLinkClient<OpenFlightHubConnectLinkClient_DjiPilot2_ModuleName> {
 
@@ -184,8 +184,7 @@ export class OpenFlightHubConnectLinkClient_DjiPilot2 extends OpenFlightHubConne
             await this.sdk.api_unloadModule()
         }
 
-        this.sdk.api_loadModule(sdkConfig.api_url, 'api token')//TODO
-
+        this.sdk.api_loadModule(sdkConfig.api_url, this.platformConfig.secret)
 
         console.debug('  setup mqtt ...')
 
@@ -263,7 +262,16 @@ export class OpenFlightHubConnectLinkClient_DjiPilot2 extends OpenFlightHubConne
             connected: this.streamIsConnected
         })
 
-        //TODO api
+        modules.push({
+            name: 'api',
+            connected: this.sdk.api_moduleIsLoaded()
+        })
+
+
+        modules.push({
+            name: 'media',
+            connected: this.sdk.media_moduleIsLoaded()
+        })
 
         return {
             connected: modules.find(m => !m.connected) ? false : true,
