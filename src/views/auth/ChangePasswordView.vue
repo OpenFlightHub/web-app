@@ -7,6 +7,7 @@ import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import IconVue from '@/components/general/IconVue.vue';
 import { goToRedirect } from '@/util/router';
+import { Button, InputText } from 'primevue';
 
 const store = useMainStore()
 const router = useRouter()
@@ -49,48 +50,38 @@ async function changePassword(){
     <PerformOperation v-slot="scope">
         <div class="header">
             <div class="inner">
-                <ProfilePicture :user-id="store.userSelf.id" class="profile_picture"></ProfilePicture>
-
                 <span>{{ store.userSelf.name }}</span>
             </div>
         </div>
 
-
-
         <div class="centered">
             <span>{{ $t("auth.current_password") }}</span>
             <div class="password_container">
-                <v-text-field type="password" autocomplete="current-password" minlength="10" v-model="currentPassword"></v-text-field>
+                <InputText type="password" autocomplete="current-password" minlength="10" v-model="currentPassword"></InputText>
             </div>
-
-
-
 
             <span>{{ $t("auth.new_password") }}</span>
             <span class="restrictions">{{ $t("auth.password_restrictions") }}</span>
             <div class="password_container">
-                <v-text-field type="password" autocomplete="new-password" v-model="newPassword1"></v-text-field>
+                <InputText type="password" autocomplete="new-password" v-model="newPassword1"></InputText>
                 <IconVue class="valid_icon" name="check" v-if="newPassword1IsValid"></IconVue>
             </div>
 
-
-
-
             <span>{{ $t("auth.repeat_new_password") }}</span>
             <div class="password_container">
-                <v-text-field type="password" autocomplete="new-password" v-model="newPassword2"></v-text-field>
+                <InputText type="password" autocomplete="new-password" v-model="newPassword2"></InputText>
                 <IconVue class="valid_icon" name="check" v-if="newPassword2IsValid"></IconVue>
             </div>
 
             <div class="button_group">
-                <v-btn @click="scope.watch(
+                <Button @click="scope.watch(
                     changePassword().then(()=>{
                         //TODO show success
 
                         goToRedirect(router)
                     }))
-                " :disabled="currentPassword.length === 0 || !newPassword1IsValid || !newPassword2IsValid">{{ $t("actions.save_changes")}}</v-btn>
-                <v-btn @click="router.back()">{{ $t("actions.cancel") }}</v-btn>
+                " :disabled="currentPassword.length === 0 || !newPassword1IsValid || !newPassword2IsValid">{{ $t("actions.save_changes")}}</Button>
+                <Button @click="router.back()">{{ $t("actions.cancel") }}</Button>
             </div>
 
         </div>
@@ -112,11 +103,6 @@ async function changePassword(){
         flex-direction: column;
         align-items: center;
         gap: 1em;
-
-        .profile_picture {
-            width: 5em;
-            height: 5em;
-        }
     }
 }
 
