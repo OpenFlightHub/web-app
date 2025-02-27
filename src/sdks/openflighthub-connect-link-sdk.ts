@@ -237,7 +237,7 @@ export class OpenFlightHubConnectLinkClient_DjiPilot2 extends OpenFlightHubConne
 
         this.sdk.stream_stop()
         this.sdk.stream_setConfig_RTMP(sdkConfig.rtmp_url)
-        this.sdk.stream_start()
+        //this.sdk.stream_start()
 
         console.debug('  setup media upload ...')
 
