@@ -43,7 +43,8 @@
         "new_password": "New password",
         "repeat_new_password": "Repeat new Password",
         "email": "Email",
-        "finish_registration": "Please follow these steps to finish setting up your account."
+        "finish_registration": "Please follow these steps to finish setting up your account.",
+        "reset_password_now": "Reset your password now."
     },
 
     "actions": {

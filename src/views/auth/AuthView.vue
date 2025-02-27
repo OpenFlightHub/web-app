@@ -26,27 +26,10 @@ import LogoVue from '@/components/branding/LogoVue.vue';
 #out {
     display: flex;
     justify-content: center;
-    align-items: flex-start;
+    align-items: center;
     position: relative;
-    padding: 5vh 5vw;
-    min-height: calc(100vh - var(--navbar-size));
-    width: 100vw;
-
-    &:after {
-        content: '';
-        display: block;
-        position: absolute;
-        top: 0;
-        left: 0;
-        height: 100%;
-        width: 100%;
-        z-index: 1;
-        background-image: url('/images/logo_pattern.png');
-        background-size: 100px;
-        background-position: center;
-        background-repeat: repeat;
-        opacity: 7%;
-    }
+    height: 100%;
+    width: 100%;
 
     #in {
         display: flex;
@@ -56,9 +39,10 @@ import LogoVue from '@/components/branding/LogoVue.vue';
         padding: 2em;
         overflow-y: auto;
         z-index: 90;
-        background-color: var(--neutral-darkest);
-        box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        background: var(--neutral-darkest);
+        box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.25);
         color: var(--neutral-lighter);
+        border-radius: 1em;
 
         #logo {
             font-size: 50px;
@@ -70,6 +54,12 @@ import LogoVue from '@/components/branding/LogoVue.vue';
             flex-shrink: 1;
         }
 
+    }
+}
+
+@media screen and (max-height: 600px) {
+    #out {
+        align-items: flex-start;
     }
 }
 

@@ -3,9 +3,9 @@
 import api from '@/api';
 import PerformOperation from '@/components/general/PerformOperation.vue'
 import { ref } from 'vue';
-import LogoVue from '@/components/branding/LogoVue.vue';
 import { useRouter } from 'vue-router';
 import { goToRedirect } from '@/util/router';
+import { Button, IftaLabel, InputText } from 'primevue';
 const router = useRouter()
 
 const email = ref('')
@@ -21,25 +21,24 @@ async function resetPassword(){
 <template>
 
     <PerformOperation v-slot="scope">
-        <div class="header">
-            <div class="inner">
-                <LogoVue></LogoVue>
-            </div>
-        </div>
-
 
         <div class="centered">
-            <span>{{ $t("auth.email") }}</span>
-            <v-text-field type="email" placeholder="email@example.org" autocomplete="username" v-model="email"></v-text-field>
+            <span>{{ $t("auth.reset_password_now") }}</span>
+
+            <IftaLabel>
+                <InputText type="email" placeholder="email@example.org" autocomplete="username" v-model="email"></InputText>
+                <label for="username">{{ $t("auth.email")}}</label>
+            </IftaLabel>
 
             <div class="button_group">
-                <v-btn @click="scope.watch(
+                <Button @click="scope.watch(
                     resetPassword().then(()=>{
                         //TODO show success message first
                         goToRedirect(router)
                     }))
-                " :disabled="email.length === 0">{{ $t("actions.confirm") }}</v-btn>
-                <v-btn @click="router.back()">{{ $t("actions.cancel") }}</v-btn>
+                " :disabled="email.length === 0">{{ $t("actions.confirm") }}</Button>
+
+                <Button @click="router.back()">{{ $t("actions.cancel") }}</Button>
             </div>
 
         </div>
@@ -80,7 +79,8 @@ async function resetPassword(){
 
     .button_group {
         display: flex;
-        gap: 0.5em;
+        gap: 1em;
+        margin-top: 1em;
     }
 }
 
