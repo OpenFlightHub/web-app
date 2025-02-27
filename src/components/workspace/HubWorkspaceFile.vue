@@ -5,11 +5,28 @@ import Padding from '../layout/Padding.vue';
 import { Button } from 'primevue';
 import IconVue from '../general/IconVue.vue';
 import { downloadUrl } from '@/util/download';
+import { ref } from 'vue';
 
 
 const props = defineProps<{
     id: number
 }>()
+
+const showFullscreen = ref(false)
+const showInfoAndActions = ref(true)
+
+function handleClick(){
+    if(showFullscreen.value){
+        showInfoAndActions.value = !showInfoAndActions.value
+    } else {
+        showFullscreen.value = true
+    }
+}
+
+function closeFullScreen(){
+    showFullscreen.value = false
+    showInfoAndActions.value = true
+}
 
 </script>
 
@@ -17,14 +34,17 @@ const props = defineProps<{
 
     <LoadApi :api-method="api.rest.file.get" :params="{fileId: props.id}" v-slot="file">
 
-        <div id="file">
-            <div id="view" :style="'background-image: url(\'/api/file/data/' + props.id + '\')'"></div>
-            <div id="actions">
+        <div id="file" :class="{fullscreen: showFullscreen}">
+            <div id="view" :style="'background-image: url(\'/api/file/data/' + props.id + '\')'" @click="handleClick"></div>
+            <div id="actions" v-show="showInfoAndActions">
                 <Padding>
-                    <Button><IconVue name="download" @click="downloadUrl('/api/file/data/' + props.id, file.data.name)"></IconVue></Button>
+                    <div>
+                        <Button><IconVue name="download" @click="downloadUrl('/api/file/data/' + props.id, file.data.name)"></IconVue></Button>
+                        <Button v-show="showFullscreen"><IconVue name="x-lg" @click="closeFullScreen"></IconVue></Button>
+                    </div>
                 </Padding>
             </div>
-            <div id="info">
+            <div id="info" v-show="showInfoAndActions">
                 <Padding>
                     {{ file.data.name }}
                 </Padding>
@@ -38,14 +58,29 @@ const props = defineProps<{
 
     #file {
         position: relative;
-        width: 20em;
-        height: 20em;
+        width: 15em;
+        height: 15em;
+        cursor: pointer;
+
+        &.fullscreen {
+            position: fixed;
+            z-index: 10;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 100vw;
+            background: #000;
+
+            #view {
+                background-size: contain;
+            }
+        }
 
         #view {
             width: 100%;
             height: 100%;
             background: var(--neutral-darkest);
-            background-size: contain;
+            background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
         }
@@ -58,6 +93,11 @@ const props = defineProps<{
             background: #0006;
             flex-direction: row;
             justify-content: flex-end;
+
+            div {
+                display: flex;
+                gap: 1em
+            }
         }
 
         &:hover #actions {
@@ -69,6 +109,7 @@ const props = defineProps<{
             bottom: 0;
             width: 100%;
             background: #0006;
+            font-size: 0.8em;
         }
     }
 
