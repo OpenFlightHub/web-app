@@ -48,11 +48,6 @@ async function changePassword(){
 <template>
 
     <PerformOperation v-slot="scope">
-        <div class="header">
-            <div class="inner">
-                <span>{{ store.userSelf.name }}</span>
-            </div>
-        </div>
 
         <div class="centered">
             <span>{{ $t("auth.current_password") }}</span>
@@ -60,7 +55,7 @@ async function changePassword(){
                 <InputText type="password" autocomplete="current-password" minlength="10" v-model="currentPassword"></InputText>
             </div>
 
-            <span>{{ $t("auth.new_password") }}</span>
+            <h2>{{ $t("auth.new_password") }}</h2>
             <span class="restrictions">{{ $t("auth.password_restrictions") }}</span>
             <div class="password_container">
                 <InputText type="password" autocomplete="new-password" v-model="newPassword1"></InputText>
@@ -73,12 +68,13 @@ async function changePassword(){
                 <IconVue class="valid_icon" name="check" v-if="newPassword2IsValid"></IconVue>
             </div>
 
+
             <div class="button_group">
                 <Button @click="scope.watch(
                     changePassword().then(()=>{
                         //TODO show success
 
-                        goToRedirect(router)
+                        goToRedirect(router, '/')
                     }))
                 " :disabled="currentPassword.length === 0 || !newPassword1IsValid || !newPassword2IsValid">{{ $t("actions.save_changes")}}</Button>
                 <Button @click="router.back()">{{ $t("actions.cancel") }}</Button>
@@ -93,19 +89,6 @@ async function changePassword(){
 
 <style lang="scss" scoped>
 
-.header {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-
-    .inner {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 1em;
-    }
-}
-
 .centered {
     display: flex;
     flex-direction: column;
@@ -114,6 +97,7 @@ async function changePassword(){
     .password_container {
         position: relative;
         margin-top: 0.3em;
+        margin-bottom: 1em;
 
         .valid_icon {
             font-size: 30px;
@@ -131,6 +115,7 @@ async function changePassword(){
     .button_group {
         display: flex;
         gap: 0.5em;
+        margin-top: 1em;
     }
 }
 

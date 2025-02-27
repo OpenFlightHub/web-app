@@ -38,6 +38,7 @@
 
 
     "auth": {
+        "change_password": "Change Password",
         "password_restrictions": "Password must be at least 10 characters long.",
         "current_password": "Current password",
         "new_password": "Set your new password now",

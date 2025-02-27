@@ -8,6 +8,7 @@ import { useRouter } from 'vue-router';
 import IconVue from '@/components/general/IconVue.vue';
 import useMainStore from '@/stores/main';
 import { goToRedirect } from '@/util/router';
+import { Button, InputText } from 'primevue';
 
 const newPassword1 = ref('')
 const newPassword2 = ref('')
@@ -46,13 +47,6 @@ const router = useRouter()
 <template>
 
     <PerformOperation v-slot="scope" v-if="store.userSelf.registration_incomplete">
-        <div class="header">
-            <div class="inner">
-                <LogoVue></LogoVue>
-            </div>
-        </div>
-
-        <SpacerVue :size="50"></SpacerVue>
 
         <div class="centered">
             <span>{{ $t("auth.finish_registration") }}</span>
@@ -60,23 +54,23 @@ const router = useRouter()
             <span>{{ $t("auth.new_password") }}</span>
             <span class="restrictions">{{ $t("auth.password_restrictions") }}</span>
             <div class="password_container">
-                <v-text-field type="password" autocomplete="new-password" v-model="newPassword1"></v-text-field>
+                <InputText type="password" autocomplete="new-password" v-model="newPassword1"></InputText>
                 <IconVue class="valid_icon" name="check" v-if="newPassword1IsValid"></IconVue>
             </div>
 
             <span>{{ $t("auth.repeat_new_password") }}</span>
             <div class="password_container">
-                <v-text-field type="password" autocomplete="new-password" v-model="newPassword2"></v-text-field>
+                <InputText type="password" autocomplete="new-password" v-model="newPassword2"></InputText>
                 <IconVue class="valid_icon" name="check" v-if="newPassword2IsValid"></IconVue>
             </div>
 
             <div class="button_group">
-                <v-btn type="primary" @click="scope.watch(
+                <Button @click="scope.watch(
                     setInitialPassword().then(()=>{
                         //TODO show success message first
-                        goToRedirect(router)
+                        goToRedirect(router, '/')
                     }))
-                " :disabled="!newPassword1IsValid || !newPassword2IsValid">{{ $t("actions.confirm") }}</v-btn>
+                " :disabled="!newPassword1IsValid || !newPassword2IsValid">{{ $t("actions.confirm") }}</Button>
             </div>
 
         </div>
@@ -96,24 +90,6 @@ const router = useRouter()
 </template>
 
 <style lang="scss" scoped>
-
-.header {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-
-    .inner {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 1em;
-
-        .profile_picture {
-            width: 5em;
-            height: 5em;
-        }
-    }
-}
 
 .centered {
     display: flex;

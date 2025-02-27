@@ -22,10 +22,17 @@ const store = useMainStore()
         <div id="right">
             <slot></slot>
 
-            <LogoutButton v-if="store.isLoggedIn"></LogoutButton>
-            <RouterLink v-else to="/auth/login">
-                <Button :label="$t('login.sign_in')"></Button>
-            </RouterLink>
+            <template v-if="store.isLoggedIn">
+                <LogoutButton></LogoutButton>
+                <RouterLink to="/auth/password-change">
+                    {{ $t('auth.change_password') }}
+                </RouterLink>
+            </template>
+            <template v-else>
+                <RouterLink to="/auth/login">
+                    <Button :label="$t('login.sign_in')"></Button>
+                </RouterLink>
+            </template>
         </div>
     </div>
 

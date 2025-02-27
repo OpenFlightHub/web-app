@@ -34,7 +34,7 @@ async function resetPassword(){
                 <Button @click="scope.watch(
                     resetPassword().then(()=>{
                         //TODO show success message first
-                        goToRedirect(router)
+                        goToRedirect(router, '/')
                     }))
                 " :disabled="email.length === 0">{{ $t("actions.confirm") }}</Button>
 
