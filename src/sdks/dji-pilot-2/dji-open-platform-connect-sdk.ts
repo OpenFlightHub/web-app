@@ -122,18 +122,12 @@ export class DjiOpenPlatformConnectSDK extends EventManager<DjiOpenPlatformConne
         return ret
     })
 
-    /**
-     * @param id this is any positive integer
-     *
-     * internally this number will be converted into an UUID 80b38820-0000-42ae-84e6-xxxxxxxxxxxx where x are digits of the id
-     * e.g. id 366 will be converted into 80b38820-0000-42ae-84e6-000000000366
-     */
-    setWorkspaceId = this.wrapWithLog('setWorkspaceId', (id: number)=>{
+    setWorkspaceUUID = this.wrapWithLog('setWorkspaceId', (uuid: string)=>{
 
         this.guardLicenseIsVerified()
 
         return this.unwrapResponse(
-            this.djiBridge.platformSetWorkspaceId(this.convertPositiveIntegerIntoCustomUUID(id))
+            this.djiBridge.platformSetWorkspaceId(uuid)
         )
     })
 
@@ -677,36 +671,6 @@ export class DjiOpenPlatformConnectSDK extends EventManager<DjiOpenPlatformConne
     private log(...args){
         console.debug.apply(null, args)
         this.dispatch('log', args.map(a => '' + a).join(' '))
-    }
-
-    /**
-     * @param int must be a positive integer
-     *
-    * int will be converted into an UUID 80b38820-xxxx-42ae-84e6-xxxxxxxxxxxx where x are digits of the id
-    * e.g. id 366 will be converted into 80b38820-0000-42ae-84e6-000000000366
-    */
-    private convertPositiveIntegerIntoCustomUUID(int: number){
-        let digits = '' + Math.floor(int)
-
-        while(digits.length < 16){
-          digits = '0' + digits
-        }
-
-        return '80b38820-' + digits.substring(0, 4) + '-42ae-84e6-' + digits.substring(4)
-    }
-
-
-    /**
-     * @see convertPositiveIntegerIntoCustomUUID()
-     */
-    private convertCustomUUIDIntoPositiveInteger(uuid: string){
-        const split = uuid.split('-')
-
-        if(split.length !== 5){
-            throw new Error('invalid uuid: ' + uuid)
-        }
-
-        return parseInt(split[1]) * 1000000000000 + parseInt(split[4])
     }
 
 }

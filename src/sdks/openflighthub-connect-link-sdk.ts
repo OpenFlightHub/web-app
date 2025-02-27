@@ -74,12 +74,11 @@ export class OpenFlightHubConnectLinkManager {
     }
 
     /**
-     * this will reset the client sdk (if any weird errors happen, e.g. with dji sdk mqtt does not connect after playing around too much in dev mode with it). After this function finished executing, you must restart the dji remote controller!
+     * this will create a new workspace uuid and reset the client sdk (if any weird errors happen, e.g. with dji sdk mqtt does not connect after playing around too much in dev mode with it). Remote Controller must be restarted after this!
      */
     async resetClients(){
         console.log('resetting clients ...')
         const config = await api.rest.connectionLink.config.get()
-
 
         const sdkConfig = await api.rest.connectionLink.djiPilot2.sdkConfig.get()
 
@@ -87,11 +86,16 @@ export class OpenFlightHubConnectLinkManager {
 
         sdk.verifyLicense()
 
-        sdk.setWorkspaceId(parseInt(config.workspace_id))
+        sdk.setWorkspaceUUID(config.workspace_uuid)
 
         await sdk.unloadAllModules()
 
-        sdk.setWorkspaceId(0)
+        await api.rest.connectionLink.resetWorkspaceUuid.post()
+
+
+        sdk.setWorkspaceUUID(crypto.randomUUID())
+
+        sdk.setPlatformInformation(config.platform_name, 'RESET WORKSPACE', 'only temporary. Please visit the "manage connection" view to continue.')
 
         console.log('reset done')
     }
@@ -173,7 +177,7 @@ export class OpenFlightHubConnectLinkClient_DjiPilot2 extends OpenFlightHubConne
 
         this.sdk.setPlatformInformation(this.platformConfig.platform_name, this.platformConfig.workspace_name, 'on ' + this.platformConfig.platform_name)
 
-        this.sdk.setWorkspaceId(parseInt(this.platformConfig.workspace_id))
+        this.sdk.setWorkspaceUUID(this.platformConfig.workspace_uuid)
 
 
         console.debug('  setup api ...')

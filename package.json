@@ -17,7 +17,7 @@
     "@types/ovenplayer": "^0.10.12",
     "cesium": "^1.124.0",
     "dayjs": "^1.11.13",
-    "openflighthub-api-client-sdk": "^2.0.0",
+    "openflighthub-api-client-sdk": "^2.2.0",
     "ovenplayer": "^0.10.37",
     "pinia": "^2.1.7",
     "primevue": "^4.2.4",

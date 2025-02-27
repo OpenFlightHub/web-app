@@ -81,8 +81,12 @@ async function unlinkWorkspace(){//TODO does not work
     connectLinkClient.unlink()
 }
 
+const mustRestartRC = ref(false)
+
 async function resetLink(){
-    connectLinkManager.resetClients()
+    await connectLinkManager.resetClients()
+
+    mustRestartRC.value = true
 }
 
 
@@ -101,65 +105,72 @@ async function refreshConnectionState(){
 <template>
 
     <Padding>
-        <template v-if="mustLoginFirst">
-            {{ $t("link.must_login_before_can_link")}}
-
-            <LoginAndComeBackButton></LoginAndComeBackButton>
+        <template v-if="mustRestartRC">
+            {{ $t("link.must_restart_remote_controller")}}
         </template>
         <template v-else>
+            <template v-if="mustLoginFirst">
+                {{ $t("link.must_login_before_can_link")}}
 
-            <template v-if="mustLinkFirst">
-                <h2>{{ $t("link.select_workspace")}}</h2>
-
-                <List>
-                    <template v-if="selectedWorkspaceToLinkTo === -1">
-                        <Snippet v-for="workspace of availableWorkspaces" :key="workspace.id" class="workspace" @click="selectedWorkspaceToLinkTo = workspace.id">
-                            <h3>{{ workspace.name }}</h3>
-                        </Snippet>
-                    </template>
-                    <template v-else>
-                        <IftaLabel>
-                            <InputText id="connection-name" v-model="connectionName"/>
-                            <label for="connection-name">{{ $t("link.connection_name")}}</label>
-                        </IftaLabel>
-
-                        <Button :disabled="connectionName.length === 0" @click="linkToWorkspace">{{ $t("actions.confirm") }}</Button>
-                    </template>
-                </List>
+                <LoginAndComeBackButton></LoginAndComeBackButton>
             </template>
             <template v-else>
-                <template v-if="connectLinkClientIsLoaded">
-                    <h2>{{ $t("link.linked_to", {workspace: connectLinkClient.getWorkspaceName(), platform: connectLinkClient.getPlatformName()}) }}</h2>
 
-                    <table>
-                        <tbody>
-                            <tr>
-                                <td>Remote Controller SN</td>
-                                <td>{{ remoteControllerSerialNumber || '?' }}</td>
-                            </tr>
-                            <tr>
-                                <td>Aircraft SN</td>
-                                <td>{{ aircraftSerialNumber || '?' }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <template v-if="mustLinkFirst">
+                    <h2>{{ $t("link.select_workspace")}}</h2>
 
-                    <br>
+                    <List>
+                        <template v-if="selectedWorkspaceToLinkTo === -1">
+                            <Snippet v-for="workspace of availableWorkspaces" :key="workspace.id" class="workspace" @click="selectedWorkspaceToLinkTo = workspace.id">
+                                <h3>{{ workspace.name }}</h3>
+                            </Snippet>
+                        </template>
+                        <template v-else>
+                            <IftaLabel>
+                                <InputText id="connection-name" v-model="connectionName"/>
+                                <label for="connection-name">{{ $t("link.connection_name")}}</label>
+                            </IftaLabel>
 
-                    <h3>State: <span v-if="connectionState.connected">{{ $t("link.is_connected") }}</span><span v-else>{{ $t("link.is_not_connected") }}</span></h3>
-                    <div class="connection_state">
-                        <div v-for="module_state of connectionState.modules" :key="module_state.name" :class="['module_state', {connected: module_state.connected}]">{{ module_state.name }}</div>
-                    </div>
-
-                    <Button @click="unlinkWorkspace" severity="danger">{{ $t("link.unlink_workspace") }}</Button>
+                            <Button :disabled="connectionName.length === 0" @click="linkToWorkspace">{{ $t("actions.confirm") }}</Button><!--TODO show progress-->
+                        </template>
+                    </List>
                 </template>
                 <template v-else>
-                    Loading ...
+                    <template v-if="connectLinkClientIsLoaded">
+                        <h2>{{ $t("link.linked_to", {workspace: connectLinkClient.getWorkspaceName(), platform: connectLinkClient.getPlatformName()}) }}</h2>
 
-                    <Button @click="resetLink" severity="danger">{{ $t("link.reset") }}</Button>
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td>Remote Controller SN</td>
+                                    <td>{{ remoteControllerSerialNumber || '?' }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Aircraft SN</td>
+                                    <td>{{ aircraftSerialNumber || '?' }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <br>
+
+                        <h3>State: <span v-if="connectionState.connected">{{ $t("link.is_connected") }}</span><span v-else>{{ $t("link.is_not_connected") }}</span></h3>
+                        <div class="connection_state">
+                            <div v-for="module_state of connectionState.modules" :key="module_state.name" :class="['module_state', {connected: module_state.connected}]">{{ module_state.name }}</div>
+                        </div>
+
+                        <Button @click="unlinkWorkspace" severity="danger">{{ $t("link.unlink_workspace") }}</Button><!--TODO show progress-->
+
+                        <Button @click="resetLink" severity="danger">{{ $t("link.reset") }}</Button><!--TODO show progress-->
+                    </template>
+                    <template v-else>
+                        Loading ...
+
+                        <Button @click="resetLink" severity="danger">{{ $t("link.reset") }}</Button><!--TODO show progress-->
+                    </template>
                 </template>
-            </template>
 
+            </template>
         </template>
     </Padding>
 

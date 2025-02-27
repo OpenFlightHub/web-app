@@ -30,7 +30,10 @@
         "device_not_supported": "This devices does not support the OpenFlightHub connect link",
         "dji-pilot-2": {
 
-        }
+        },
+
+        "reset": "Reset the link",
+        "must_restart_remote_controller_and_visit_this_page": "Please restart your remote controller and visit this page again."
     },
 
 
