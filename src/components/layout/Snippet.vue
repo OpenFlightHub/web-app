@@ -40,7 +40,7 @@ const clazz = computed(()=>{
 #router_link, #snippet {
     display: inline-flex;
     flex-direction: column;
-    background: var(--neutral-dark);
+    background: var(--neutral-darker);
     border-radius: 0.3em;
     gap: 0.5em;
 
