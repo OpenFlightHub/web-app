@@ -7,6 +7,7 @@ import LogoVue from '@/components/branding/LogoVue.vue';
 import { useRouter } from 'vue-router';
 import IconVue from '@/components/general/IconVue.vue';
 import { goToRedirect } from '@/util/router';
+import { Button, InputText } from 'primevue'
 const router = useRouter()
 
 const newPassword1 = ref('')
@@ -57,37 +58,35 @@ onMounted(()=>{
 <template>
 
     <PerformOperation v-slot="scope" v-if="resetCode.length > 0">
-        <div class="header">
-            <div class="inner">
-                <LogoVue></LogoVue>
-            </div>
-        </div>
 
         <div class="centered">
             <v-form>
-                <span>{{ $t("auth.new_password") }}</span>
+                <h2>{{ $t("auth.new_password") }}</h2>
+                <br>
                 <span class="restrictions">{{ $t("auth.password_restrictions") }}</span>
                 <div class="password_container">
-                    <v-text-field type="password" autocomplete="new-password" v-model="newPassword1"></v-text-field>
+                    <InputText type="password" autocomplete="new-password" v-model="newPassword1"></InputText>
                     <IconVue class="valid_icon" name="check" v-if="newPassword1IsValid"></IconVue>
                 </div>
 
+                <br>
 
                 <span>{{ $t("auth.repeat_new_password") }}</span>
                 <div class="password_container">
-                    <v-text-field type="password" autocomplete="new-password" v-model="newPassword2" :rules="[v => v.length > 5]"></v-text-field>
+                    <InputText type="password" autocomplete="new-password" v-model="newPassword2" :rules="[v => v.length > 5]"></InputText>
                     <IconVue class="valid_icon" name="check" v-if="newPassword2IsValid"></IconVue>
                 </div>
 
+                <br>
 
                 <div class="button_group">
-                    <v-btn type="submit" @click="scope.watch(
+                    <Button type="submit" @click="scope.watch(
                         setNewPassword().then(()=>{
                             //TODO show success message first
-                            goToRedirect(router)
+                            goToRedirect(router, '/')
                         }))
-                    " :disabled="!newPassword1IsValid || !newPassword2IsValid">{{ $t("actions.confirm") }}</v-btn>
-                    <v-btn @click="router.back()">{{ $t("actions.cancel") }}</v-btn>
+                    " :disabled="!newPassword1IsValid || !newPassword2IsValid">{{ $t("actions.confirm") }}</Button>
+                    <Button @click="router.back()">{{ $t("actions.cancel") }}</Button>
                 </div>
             </v-form>
 
@@ -107,24 +106,6 @@ onMounted(()=>{
 </template>
 
 <style lang="scss" scoped>
-
-.header {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-
-    .inner {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 1em;
-
-        .profile_picture {
-            width: 5em;
-            height: 5em;
-        }
-    }
-}
 
 .centered {
     display: flex;

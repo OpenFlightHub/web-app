@@ -40,7 +40,7 @@
     "auth": {
         "password_restrictions": "Password must be at least 10 characters long.",
         "current_password": "Current password",
-        "new_password": "New password",
+        "new_password": "Set your new password now",
         "repeat_new_password": "Repeat new Password",
         "email": "Email",
         "finish_registration": "Please follow these steps to finish setting up your account.",
