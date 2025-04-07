@@ -15,18 +15,21 @@ const props = defineProps<{
 
 const mapContainer = ref(null as HTMLElement)
 
-let viewer = ref<Viewer>(null)
+const viewerIsLoaded = ref(false)
+let viewer: Viewer = null // if we make Viewer a reactive object, performance goes down the tube ...
 
 //TODO dont hardcode this token
 Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI5MTFkYzVkNy03ZmJkLTQyYTAtYTQ5Zi05ZDMxMGQ2YjU5N2QiLCJpZCI6MjYyNzgwLCJpYXQiOjE3MzQzNDM0NDF9.9NxftItZvbyOrcMENhulF4eKoLGI_-7lYjTkia2racg'
 
 onMounted(()=>{
 
-    viewer.value = new Viewer(mapContainer.value, {
+    viewer = new Viewer(mapContainer.value, {
         terrain: Terrain.fromWorldTerrain(),
         animation: false,
         timeline: false
     })
+
+    viewerIsLoaded.value = true
 
 
     //TODO currently switching to 2D crashes cesium
@@ -35,7 +38,7 @@ onMounted(()=>{
     // })
     //viewer.imageryLayers.addImageryProvider(openstreetmap) //TODO add attribution see https://operations.osmfoundation.org/policies/tiles/
 
-    viewer.value.camera.flyTo({
+    viewer.camera.flyTo({
         destination: Cartesian3.fromDegrees(10.31261, 47.48063, 3200),
         orientation: {
             heading: Math.toRadians(0),
@@ -52,8 +55,8 @@ onMounted(()=>{
     */
 
 
-    viewer.value.camera.moveEnd.addEventListener(evt=>{
-        const carto = Cartographic.fromCartesian(viewer.value.camera.position)
+    viewer.camera.moveEnd.addEventListener(evt=>{
+        const carto = Cartographic.fromCartesian(viewer.camera.position)
         console.log('camera.moveEnd', Math.toDegrees(carto.longitude), Math.toDegrees(carto.latitude), carto.height)
         //TODO append to url
     })
@@ -69,7 +72,7 @@ onMounted(()=>{
         <div id="map" ref="mapContainer">
         </div>
 
-        <template v-if="viewer && geoidIsLoaded">
+        <template v-if="viewerIsLoaded && geoidIsLoaded">
             <HubWorkspaceMapConnection v-for="connection in props.connections" :key="connection.id" :map-container="mapContainer" :connection="connection" :viewer="viewer"></HubWorkspaceMapConnection>
 
             <!-- TODO implement center of map (but lazy load, so a small change in distance does not actually trigger a reset) -->
