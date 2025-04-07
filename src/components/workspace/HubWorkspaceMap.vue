@@ -15,14 +15,14 @@ const props = defineProps<{
 
 const mapContainer = ref(null as HTMLElement)
 
-let viewer: Viewer
+let viewer = ref<Viewer>(null)
 
 //TODO dont hardcode this token
 Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI5MTFkYzVkNy03ZmJkLTQyYTAtYTQ5Zi05ZDMxMGQ2YjU5N2QiLCJpZCI6MjYyNzgwLCJpYXQiOjE3MzQzNDM0NDF9.9NxftItZvbyOrcMENhulF4eKoLGI_-7lYjTkia2racg'
 
 onMounted(()=>{
 
-    viewer = new Viewer(mapContainer.value, {
+    viewer.value = new Viewer(mapContainer.value, {
         terrain: Terrain.fromWorldTerrain(),
         animation: false,
         timeline: false
@@ -35,7 +35,7 @@ onMounted(()=>{
     // })
     //viewer.imageryLayers.addImageryProvider(openstreetmap) //TODO add attribution see https://operations.osmfoundation.org/policies/tiles/
 
-    viewer.camera.flyTo({
+    viewer.value.camera.flyTo({
         destination: Cartesian3.fromDegrees(10.31261, 47.48063, 3200),
         orientation: {
             heading: Math.toRadians(0),
@@ -52,8 +52,8 @@ onMounted(()=>{
     */
 
 
-    viewer.camera.moveEnd.addEventListener(evt=>{
-        const carto = Cartographic.fromCartesian(viewer.camera.position)
+    viewer.value.camera.moveEnd.addEventListener(evt=>{
+        const carto = Cartographic.fromCartesian(viewer.value.camera.position)
         console.log('camera.moveEnd', Math.toDegrees(carto.longitude), Math.toDegrees(carto.latitude), carto.height)
         //TODO append to url
     })
