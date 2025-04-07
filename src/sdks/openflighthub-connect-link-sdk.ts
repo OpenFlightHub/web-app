@@ -156,7 +156,7 @@ export class OpenFlightHubConnectLinkClient<ModuleName extends string> extends E
     }
 }
 
-export type OpenFlightHubConnectLinkClient_DjiPilot2_ModuleName = 'api' | 'mqtt' | 'stream' | 'media'
+export type OpenFlightHubConnectLinkClient_DjiPilot2_ModuleName = 'api' | 'mqtt' | 'stream' | 'ws' | 'media' | 'map'
 
 export class OpenFlightHubConnectLinkClient_DjiPilot2 extends OpenFlightHubConnectLinkClient<OpenFlightHubConnectLinkClient_DjiPilot2_ModuleName> {
 
@@ -164,6 +164,7 @@ export class OpenFlightHubConnectLinkClient_DjiPilot2 extends OpenFlightHubConne
 
     protected mqttIsConnected = false
     protected streamIsConnected = false
+    protected websocketIsConnected = false
 
     async init(){
 
@@ -249,6 +250,37 @@ export class OpenFlightHubConnectLinkClient_DjiPilot2 extends OpenFlightHubConne
         await this.sdk.media_loadModule(true, 0, false)
         this.sdk.media_setDownloadRemoteController('mine')//TODO check if this is required
 
+
+        console.debug('  setup ws ...')
+
+        // Ws
+
+        this.sdk.addListener('websocket_connection_state', state => {
+            this.websocketIsConnected = state
+            this.dispatch('connected-changed', undefined)
+        })
+
+
+        if(this.sdk.ws_moduleIsLoaded()){
+            await this.sdk.ws_unloadModule()
+        }
+        await this.sdk.ws_loadModule('wss://dev.openflighthub.org:443/api/connection-link/dji-pilot-2/ws/?x-auth-token=' + this.platformConfig.secret, this.platformConfig.secret)// TODO use sdkConfig.ws_url
+
+        this.sdk.ws_connect('wss://dev.openflighthub.org:443/api/connection-link/dji-pilot-2/ws/?x-auth-token=' + this.platformConfig.secret, this.platformConfig.secret)
+
+
+
+
+        console.debug('  setup map ...')
+
+        // Map
+        if(this.sdk.map_moduleIsLoaded()){
+            await this.sdk.map_unloadModule()
+        }
+
+        await this.sdk.map_loadModule(this.getRemoteControllerSerialNumber(), '')//TODO use connection name as prefix
+
+
         console.debug('init done')
     }
 
@@ -273,8 +305,20 @@ export class OpenFlightHubConnectLinkClient_DjiPilot2 extends OpenFlightHubConne
 
 
         modules.push({
+            name: 'ws',
+            connected: this.websocketIsConnected
+        })
+
+
+        modules.push({
             name: 'media',
             connected: this.sdk.media_moduleIsLoaded()
+        })
+
+
+        modules.push({
+            name: 'map',
+            connected: this.sdk.map_moduleIsLoaded()
         })
 
         return {

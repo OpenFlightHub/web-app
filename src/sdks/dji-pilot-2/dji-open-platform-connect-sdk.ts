@@ -64,6 +64,7 @@ export class EventManager<M extends { [key: string]: any }> {
 interface DjiOpenPlatformConnectSDKEvents {
     log: string
     unlinked: undefined //cloud platform connection is disabled and all config is reset
+    websocket_connection_state: boolean
     mqtt_connection_state: boolean
     stream_connection_state: boolean
 }
@@ -71,7 +72,7 @@ interface DjiOpenPlatformConnectSDKEvents {
 const JS_CALLBACK_PREFIX = 'dji_open_platform_connect_sdk_js_callback_'
 const JS_CALLBACK_MQTT_CONNECTION_STATE = JS_CALLBACK_PREFIX + 'mqtt_connection_state'
 const JS_CALLBACK_LIVESHARE_CONNECTION_STATE = JS_CALLBACK_PREFIX + 'liveshare_connection_state'
-
+const JS_CALLBACK_WEBSOCKET_CONNECTION_STATE = JS_CALLBACK_PREFIX + 'websocket_connection_state'
 
 export class DjiOpenPlatformConnectSDK extends EventManager<DjiOpenPlatformConnectSDKEvents> {
 
@@ -95,6 +96,12 @@ export class DjiOpenPlatformConnectSDK extends EventManager<DjiOpenPlatformConne
         this.djiBridge.onStopPlatform = ()=>{
             this.dispatch('unlinked', undefined)
         }
+
+        // WS
+
+        this.registerJsCallback(JS_CALLBACK_WEBSOCKET_CONNECTION_STATE, (connectState: boolean)=>{
+            this.dispatch('websocket_connection_state', connectState)
+        })
 
         // MQTT
 
@@ -332,6 +339,53 @@ export class DjiOpenPlatformConnectSDK extends EventManager<DjiOpenPlatformConne
     })
 
 
+    // -- WebSocket --
+
+    ws_loadModule(host: string, token: string){
+
+        if(!host.endsWith('/')){
+            host += '/'
+        }
+
+        return this.loadModule('ws', {
+            host,
+            token,
+            connectCallback: JS_CALLBACK_WEBSOCKET_CONNECTION_STATE
+        })
+    }
+
+    ws_moduleIsLoaded(){
+        return this.moduleIsLoaded('ws')
+    }
+
+    ws_unloadModule(){
+        return this.unloadModule('ws')
+    }
+
+    ws_connect = this.wrapWithLog('ws_connect', (host: string, token: string)=>{
+
+        return this.unwrapResponse(
+            this.djiBridge.wsConnect(host, token, JS_CALLBACK_WEBSOCKET_CONNECTION_STATE)
+        )
+    })
+
+    ws_disconnect = this.wrapWithLog('ws_disconnect', ()=>{
+
+        return this.unwrapResponse(
+            this.djiBridge.wsDisconnect()
+        )
+    })
+
+    ws_send = this.wrapWithLog('ws_send', (message: string)=>{
+
+        this.guardLicenseIsVerified()
+
+        return this.unwrapResponse(
+            this.djiBridge.wsSend(message)
+        )
+    })
+
+
 
     // Live stream
 
@@ -492,6 +546,38 @@ export class DjiOpenPlatformConnectSDK extends EventManager<DjiOpenPlatformConne
     media_getDownloadRemoteController(): Media_DownloadOwner {
         return this.unwrapResponse(this.djiBridge.mediaGetDownloadOwner()) === 0 ? 'mine' : 'other'
     }
+
+    // Map
+
+    map_loadModule(userName: string, elementNamePrefix: string){
+
+        this.guardModuleLoaded('thing')
+        this.guardModuleLoaded('ws')
+
+        return this.loadModule('map', {
+            userName,
+            elementPreName: elementNamePrefix
+        })
+    }
+
+    map_moduleIsLoaded(){
+        return this.moduleIsLoaded('map')
+    }
+
+    map_unloadModule(){
+        return this.unloadModule('map')
+    }
+
+    map_setUserName(userName: string){
+        return this.unwrapResponse(this.djiBridge.mapSetUserName(userName))
+    }
+
+    map_setElementNamePrefix(elementNamePrefix: string){
+        return this.unwrapResponse(this.djiBridge.mapSetElementPreName(elementNamePrefix))
+    }
+
+
+
 
 
 
