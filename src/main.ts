@@ -91,8 +91,8 @@ app.config.globalProperties.AbortSignal = AbortSignal
 
 // internationalisation
 
-import * as en from './i18n/en.json' assert { type:  'json' }
-import * as de from './i18n/de.json' assert { type:  'json' }
+import * as en from './i18n/en.json' with { type:  'json' }
+import * as de from './i18n/de.json' with { type:  'json' }
 import { definePreset } from '@primevue/themes'
 
 const FALLBACK_LOCALE = 'en'
