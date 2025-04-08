@@ -29,7 +29,7 @@ function getGeoidHeightAt(longitude: number, latitude: number){
     return geoid.getHeight(latitude, longitude)
 }
 
-export function convertEllisoidalHeightToOrthometricHeight(longitude: number, latitude: number, height: number){
+export function convertEllipsoidalHeightToOrthometricHeight(longitude: number, latitude: number, height: number){
     return height - getGeoidHeightAt(longitude, latitude)
 }
 

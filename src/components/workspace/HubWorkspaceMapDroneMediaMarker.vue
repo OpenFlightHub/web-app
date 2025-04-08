@@ -56,6 +56,7 @@ async function setup(){
 
 <template>
 
+<!-- make sure that elevation is at least at ground level -->
     <MapMarker v-if="parsedData" :map-container="props.mapContainer" :position="[parsedData.position.longitude, parsedData.position.latitude]" :elevation="parsedData.altitude" :viewer="props.viewer" :label="'Media #' + props.media.id" :icon-url="'/api/file/data/' + props.media.file_id " :icon-width="32" :icon-height="32" :bearing="parsedData.camera_heading"></MapMarker>
 
 </template>

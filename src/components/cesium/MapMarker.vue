@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
-import { Cartesian2, Cartesian3, Cartographic, Color, Ellipsoid, Entity, HeadingPitchRoll, HeightReference, JulianDate, LabelStyle, Math as MathCesium, Matrix3, PolylineDashMaterialProperty, Ray, SampledPositionProperty, sampleTerrainMostDetailed, Transforms, VerticalOrigin, Viewer } from 'cesium';
+import { Cartesian2, Cartesian3, Cartographic, Color, Ellipsoid, Entity, HeadingPitchRoll, HeightReference, JulianDate, LabelStyle, Math as MathCesium, Matrix3, PolylineArrowMaterialProperty, PolylineDashMaterialProperty, Ray, SampledPositionProperty, sampleTerrainMostDetailed, Transforms, VerticalOrigin, Viewer } from 'cesium';
 import { getElevationAtPosition } from '@/util/terrain';
-import { convertEllisoidalHeightToOrthometricHeight } from '@/util/geoid';
+import { convertEllipsoidalHeightToOrthometricHeight } from '@/util/geoid';
 import { cleanupClickMyEntity, ClickMyEntityHandle, getPointFromOriginWithBearingAndDistance, setupClickMyEntity } from '@/util/cesium';
 
 //TODO if marker elevation is below cesium terrain, clamp it to ground
@@ -86,7 +86,7 @@ function addMarker(){
             disableDepthTestDistance: heightIsNotZero() ? 5000000 : Number.POSITIVE_INFINITY // show always above terrain https://community.cesium.com/t/points-labels-stuck-under-terrain/11141
         },
         label: {
-            text: (props.label ? props.label + ' ' : '') + (typeof props.elevation === 'number' ? Math.floor(convertEllisoidalHeightToOrthometricHeight(props.position[0], props.position[1], props.elevation)) + 'm MSL' : ''),
+            text: (props.label ? props.label + ' ' : '') + (typeof props.elevation === 'number' ? Math.floor(convertEllipsoidalHeightToOrthometricHeight(props.position[0], props.position[1], props.elevation)) + 'm MSL' : ''),
             font: (typeof props.fontSize === 'number' ? props.fontSize : 14) + 'pt monospace',
             style: LabelStyle.FILL_AND_OUTLINE,
             outlineWidth: 2,
@@ -161,10 +161,8 @@ async function addBearingIndicator(){
         id: 'map-marker-bearing-indicator-' + myId,
         polyline: {
             positions: await makeBearingIndicatorPositions(props.position, props.bearing, props.elevation),
-            width: 2,
-            material: new PolylineDashMaterialProperty({
-                color: props.color || Color.WHITE
-            })
+            width: 10,
+            material: new PolylineArrowMaterialProperty(props.color || Color.WHITE)
         }
     })
 }
@@ -179,14 +177,9 @@ async function makeBearingIndicatorPositions(lonLat: [number, number], bearing: 
 
     const origin = Cartesian3.fromDegrees(lonLat[0], lonLat[1], elevation)
 
-    const destination = getPointFromOriginWithBearingAndDistance(bearing, 6371e3 - 100, MathCesium.toRadians(lonLat[1]), MathCesium.toRadians(lonLat[0]))
-
-    const result = [
-        origin, Cartesian3.fromDegrees(destination.longitude, destination.latitude, elevation)
+    return [
+        origin, getPointFromOriginWithBearingAndDistance(lonLat, elevation, bearing, 20)
     ]
-
-    console.log('makeBearingIndicatorPositions result', result)
-    return result
 }
 
 

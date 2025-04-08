@@ -1,4 +1,4 @@
-import { Cartesian2, Cartographic, defaultValue, defined, Entity, Viewer } from "cesium";
+import { Cartesian2, Cartesian3, Cartographic, defaultValue, defined, Entity, HeadingPitchRoll, Viewer, Math as MathCesium, Transforms, Matrix3, Ray } from "cesium";
 
 export type ClickMyEntityHandle = {
     readonly mapContainer: HTMLElement
@@ -86,14 +86,27 @@ function pickEntity(viewer: Viewer, windowPosition: Cartesian2) : Entity | undef
   }
 
 
-export function getPointFromOriginWithBearingAndDistance(bearingDeg: number, distance: number, originLatitudeInRadians: number, originLongitudeInRadians: number, radius = 6371e3){
-    const bearingRad = bearingDeg * Math.PI/180
-    const angDisRad = distance / radius
-    const sinLat2 = Math.sin(originLatitudeInRadians) * Math.cos(angDisRad) + Math.cos(originLatitudeInRadians) * Math.sin(angDisRad) * Math.cos(bearingRad)
-    const lat2Rad = Math.asin(sinLat2)
-    const y = Math.sin(bearingRad) * Math.sin(angDisRad) * Math.cos(originLatitudeInRadians)
-    const x = Math.cos(angDisRad) - Math.sin(originLatitudeInRadians) * sinLat2
-    const lon2Rad = originLongitudeInRadians + Math.atan2(y, x)
+/**
+ * @param originLonLat in degrees
+ * @param originElevation in meters
+ * @param bearing in degrees, 0 is north
+ * @param distance in meters
+ */
+export function getPointFromOriginWithBearingAndDistance(originLonLat: [number, number], originElevation: number, bearing: number, distance: number){
 
-    return Cartographic.fromRadians(lon2Rad,lat2Rad)
+    const origin = Cartesian3.fromDegrees(originLonLat[0], originLonLat[1], originElevation)
+
+    const hpr = HeadingPitchRoll.fromDegrees(bearing, 0, 0)
+    hpr.heading -= MathCesium.PI_OVER_TWO // fix cesium 0 = east
+
+    const orientation = Transforms.headingPitchRollQuaternion(origin, hpr)
+    const direction = Matrix3.multiplyByVector(Matrix3.fromQuaternion(orientation), Cartesian3.UNIT_X, new Cartesian3())
+    const ray = new Ray(origin, direction)
+
+    const destination = Ray.getPoint(ray, distance)
+
+    const carto = Cartographic.fromCartesian(destination)
+    const destinationWithCorrectedElevation = Cartesian3.fromRadians(carto.longitude, carto.latitude, originElevation)
+
+    return destinationWithCorrectedElevation
 }
