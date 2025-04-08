@@ -15,9 +15,10 @@ const props = defineProps<{
     iconWidth: number
     iconHeight: number
     label?: string
-    color: Color
+    color?: Color
     fontSize?: number
     showHeightIndicator?: boolean
+    bearing?: number//TODO implement
 }>()
 
 
@@ -122,7 +123,7 @@ async function addHeightIndicator(){
             positions: makeHeightIndicatorPositions(props.position, props.elevation),
             width: 2,
             material: new PolylineDashMaterialProperty({
-                color: props.color
+                color: props.color || Color.WHITE
             })
         }
     })
