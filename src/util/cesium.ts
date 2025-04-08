@@ -1,4 +1,4 @@
-import { Cartesian2, defaultValue, defined, Entity, Viewer } from "cesium";
+import { Cartesian2, Cartographic, defaultValue, defined, Entity, Viewer } from "cesium";
 
 export type ClickMyEntityHandle = {
     readonly mapContainer: HTMLElement
@@ -84,3 +84,16 @@ function pickEntity(viewer: Viewer, windowPosition: Cartesian2) : Entity | undef
     }
     return result;
   }
+
+
+export function getPointFromOriginWithBearingAndDistance(bearingDeg: number, distance: number, originLatitudeInRadians: number, originLongitudeInRadians: number, radius = 6371e3){
+    const bearingRad = bearingDeg * Math.PI/180
+    const angDisRad = distance / radius
+    const sinLat2 = Math.sin(originLatitudeInRadians) * Math.cos(angDisRad) + Math.cos(originLatitudeInRadians) * Math.sin(angDisRad) * Math.cos(bearingRad)
+    const lat2Rad = Math.asin(sinLat2)
+    const y = Math.sin(bearingRad) * Math.sin(angDisRad) * Math.cos(originLatitudeInRadians)
+    const x = Math.cos(angDisRad) - Math.sin(originLatitudeInRadians) * sinLat2
+    const lon2Rad = originLongitudeInRadians + Math.atan2(y, x)
+
+    return Cartographic.fromRadians(lon2Rad,lat2Rad)
+}

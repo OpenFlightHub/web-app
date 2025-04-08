@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
-import { Cartesian2, Cartesian3, Cartographic, Color, Ellipsoid, Entity, HeightReference, JulianDate, LabelStyle, PolylineDashMaterialProperty, SampledPositionProperty, sampleTerrainMostDetailed, VerticalOrigin, Viewer } from 'cesium';
+import { Cartesian2, Cartesian3, Cartographic, Color, Ellipsoid, Entity, HeadingPitchRoll, HeightReference, JulianDate, LabelStyle, Math as MathCesium, Matrix3, PolylineDashMaterialProperty, Ray, SampledPositionProperty, sampleTerrainMostDetailed, Transforms, VerticalOrigin, Viewer } from 'cesium';
 import { getElevationAtPosition } from '@/util/terrain';
 import { convertEllisoidalHeightToOrthometricHeight } from '@/util/geoid';
-import { cleanupClickMyEntity, ClickMyEntityHandle, setupClickMyEntity } from '@/util/cesium';
+import { cleanupClickMyEntity, ClickMyEntityHandle, getPointFromOriginWithBearingAndDistance, setupClickMyEntity } from '@/util/cesium';
 
 //TODO if marker elevation is below cesium terrain, clamp it to ground
 const props = defineProps<{
@@ -29,6 +29,7 @@ const emit = defineEmits<{
 let marker: Entity
 let markerClickMyEntityHandle: ClickMyEntityHandle
 let heightIndicator: Entity
+let bearingIndicator: Entity
 
 const myId = crypto.randomUUID()
 
@@ -40,6 +41,7 @@ onMounted(update)
 onBeforeUnmount(()=>{
     removeMarker()
     removeHeightIndicator()
+    removeBearingIndicator()
 })
 
 
@@ -57,6 +59,13 @@ async function update(){//TODO cesium fails to repaint polygons (height marker) 
     }
 
     await addHeightIndicator()
+
+
+    if(bearingIndicator){
+        removeBearingIndicator()
+    }
+
+    await addBearingIndicator()
 }
 
 
@@ -141,9 +150,58 @@ function removeHeightIndicator(){
     heightIndicator = undefined
 }
 
+
+async function addBearingIndicator(){
+
+    if(typeof props.bearing !== 'number'){
+        return
+    }
+
+    bearingIndicator = props.viewer.entities.add({
+        id: 'map-marker-bearing-indicator-' + myId,
+        polyline: {
+            positions: await makeBearingIndicatorPositions(props.position, props.bearing, props.elevation),
+            width: 2,
+            material: new PolylineDashMaterialProperty({
+                color: props.color || Color.WHITE
+            })
+        }
+    })
+}
+
+async function makeBearingIndicatorPositions(lonLat: [number, number], bearing: number, elevation: number){
+
+    const terrainElevation = (await getElevationAtPosition(props.viewer, lonLat[0], lonLat[1])).height
+
+    if(elevation < (terrainElevation + 1)){
+        elevation = terrainElevation + 1
+    }
+
+    const origin = Cartesian3.fromDegrees(lonLat[0], lonLat[1], elevation)
+
+    const destination = getPointFromOriginWithBearingAndDistance(bearing, 6371e3 - 100, MathCesium.toRadians(lonLat[1]), MathCesium.toRadians(lonLat[0]))
+
+    const result = [
+        origin, Cartesian3.fromDegrees(destination.longitude, destination.latitude, elevation)
+    ]
+
+    console.log('makeBearingIndicatorPositions result', result)
+    return result
+}
+
+
+function removeBearingIndicator(){
+    if(!bearingIndicator){
+        return
+    }
+    props.viewer.entities.remove(bearingIndicator)
+    bearingIndicator = undefined
+}
+
 onBeforeUnmount(()=>{
     removeMarker()
     removeHeightIndicator()
+    removeBearingIndicator
 })
 
 </script>
