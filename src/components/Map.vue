@@ -2,7 +2,7 @@
 import { ApiResponse_ConnectionGet } from 'openflighthub-api-client-sdk';
 import { ref, onMounted } from 'vue';
 
-import { Cartesian3, createOsmBuildingsAsync, Ion, Math, Terrain, Viewer, Cartographic, OpenStreetMapImageryProvider, ScreenSpaceCameraController } from "cesium";
+import { Cartesian3, createOsmBuildingsAsync, Ion, Math as MathCesium, Terrain, Viewer, Cartographic, OpenStreetMapImageryProvider, ScreenSpaceCameraController, PerspectiveFrustum } from "cesium";
 import "cesium/Build/Cesium/Widgets/widgets.css";
 
 const props = defineProps<{
@@ -11,8 +11,10 @@ const props = defineProps<{
     startHeight: number
     startCameraHeading?: number
     startCameraPitch?: number
-    disableUserControl?: boolean
+    disableUserControl?: boolean,
+    cameraFOV?: number
 }>()
+//TODO watch props and respond to changes
 
 const mapContainer = ref(null as HTMLElement)
 
@@ -57,10 +59,18 @@ onMounted(()=>{
     viewer.camera.setView({
         destination: Cartesian3.fromDegrees(props.startLongitude, props.startLatitude, props.startHeight),
         orientation: {
-            heading: Math.toRadians(typeof props.startCameraHeading === 'number' ? props.startCameraHeading : 0),
-            pitch: Math.toRadians(typeof props.startCameraPitch === 'number' ? props.startCameraPitch : -15)
+            heading: MathCesium.toRadians(typeof props.startCameraHeading === 'number' ? props.startCameraHeading : 0),
+            pitch: MathCesium.toRadians(typeof props.startCameraPitch === 'number' ? props.startCameraPitch : -15),
         }
     })
+
+    if(typeof props.cameraFOV === 'number'){
+
+        viewer.camera.frustum = new PerspectiveFrustum({
+            fov: MathCesium.toRadians(props.cameraFOV),
+            aspectRatio: viewer.canvas.clientWidth / viewer.canvas.clientHeight
+        })
+    }
 
     /*
     // Add Cesium OSM Buildings, a global 3D buildings layer.
@@ -72,7 +82,7 @@ onMounted(()=>{
 
     viewer.camera.moveEnd.addEventListener(evt=>{
         const carto = Cartographic.fromCartesian(viewer.camera.position)
-        console.log('camera.moveEnd', Math.toDegrees(carto.longitude), Math.toDegrees(carto.latitude), carto.height)
+        console.log('camera.moveEnd', MathCesium.toDegrees(carto.longitude), MathCesium.toDegrees(carto.latitude), carto.height)
         //TODO append to url
     })
 

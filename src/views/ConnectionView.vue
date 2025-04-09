@@ -7,8 +7,6 @@ import RemoteControllerSnippet from '@/components/remote_controller/RemoteContro
 import DroneSnippet from '@/components/drone/DroneSnippet.vue';
 import Padding from '@/components/layout/Padding.vue';
 import List from '@/components/layout/List.vue';
-import HubWorkspaceFile from '@/components/workspace/HubWorkspaceFile.vue';
-import Map from '@/components/Map.vue';
 import DroneMedia from '@/components/drone/DroneMedia.vue';
 
 </script>

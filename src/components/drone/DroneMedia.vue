@@ -25,6 +25,7 @@ const cameraLongitude = ref(0)
 const cameraLatitude = ref(0)
 const cameraHeight = ref(0)
 const cameraHeading = ref(0)
+const cameraFOV = ref(0)
 
 const hasValidLocationInformation = ref(false)
 
@@ -39,7 +40,8 @@ function parseData(){
             cameraLongitude.value = parsedMeta.metadata.shoot_position.lng
             cameraLatitude.value = parsedMeta.metadata.shoot_position.lat
             cameraHeight.value = parsedMeta.metadata.absolute_altitude
-            cameraHeading.value = parsedMeta.metadata.gimbal_yaw_degree
+            cameraHeading.value = parsedMeta.metadata.gimbal_yaw_degree - 14 //TODO fix heading, looks like gimbal yaw degree is not correct
+            cameraFOV.value = 48.5 //is Thermal Image of Mavic3 TODO make it work for visual images too
 
             hasValidLocationInformation.value = true
             return
@@ -61,7 +63,7 @@ function parseData(){
         <HubWorkspaceFile class="media_file" :id="props.media.file_id"></HubWorkspaceFile>
 
         <div class="media_map">
-            <Map v-if="hasValidLocationInformation" :start-longitude="cameraLongitude" :start-latitude="cameraLatitude" :start-height="cameraHeight" :start-camera-heading="cameraHeading" :start-camera-pitch="0" :disable-user-control="true"></Map>
+            <Map v-if="hasValidLocationInformation" :start-longitude="cameraLongitude" :start-latitude="cameraLatitude" :start-height="cameraHeight" :start-camera-heading="cameraHeading" :start-camera-pitch="0" :disable-user-control="true" :camera-f-o-v="cameraFOV"></Map>
             <div v-else>No valid location</div>
         </div>
     </div>
