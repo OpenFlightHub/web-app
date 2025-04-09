@@ -35,6 +35,8 @@ async function setup(){
     try {
         const parsed = JSON.parse(props.media.meta)
 
+
+        //TODO this should not be done in the frontend
         if(typeof parsed.metadata?.shoot_position?.lat === 'number' && typeof parsed.metadata?.shoot_position?.lng === 'number' && typeof parsed.metadata?.absolute_altitude === 'number' && typeof parsed.metadata?.gimbal_yaw_degree === 'number'){
 
             parsedData.value = {

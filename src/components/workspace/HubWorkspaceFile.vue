@@ -9,7 +9,7 @@ import { ref } from 'vue';
 
 
 const props = defineProps<{
-    id: number
+    id: number // TODO we should not use the name "id" for this prop as this override the html id attribute
 }>()
 
 const showFullscreen = ref(false)

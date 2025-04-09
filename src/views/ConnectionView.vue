@@ -8,6 +8,8 @@ import DroneSnippet from '@/components/drone/DroneSnippet.vue';
 import Padding from '@/components/layout/Padding.vue';
 import List from '@/components/layout/List.vue';
 import HubWorkspaceFile from '@/components/workspace/HubWorkspaceFile.vue';
+import Map from '@/components/Map.vue';
+import DroneMedia from '@/components/drone/DroneMedia.vue';
 
 </script>
 
@@ -35,7 +37,7 @@ import HubWorkspaceFile from '@/components/workspace/HubWorkspaceFile.vue';
          <h1>Drone Media</h1>
          <LoadApi :api-method="api.rest.drone.media.get" :params="{droneId: connection.data.drone_id}" v-slot="droneMedia">
             <List :horizontal="true">
-               <HubWorkspaceFile v-for="media in droneMedia.data" :id="media.file_id"></HubWorkspaceFile>
+               <DroneMedia v-for="media in droneMedia.data" :media="media"></DroneMedia>
             </List>
          </LoadApi>
 
