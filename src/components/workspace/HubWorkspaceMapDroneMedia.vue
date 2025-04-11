@@ -35,38 +35,6 @@ async function setup(){
     }
 }
 
-function mediaMetaContainsPositionInformation(meta?: string){
-    if(typeof meta !== 'string'){
-        return false
-    }
-
-    try {
-        const parsed = JSON.parse(meta)
-
-        if(typeof parsed.metadata?.shoot_position?.lat === 'number' && typeof parsed.metadata?.shoot_position?.lng === 'number' && typeof parsed.metadata?.absolute_altitude === 'number' && typeof parsed.metadata?.gimbal_yaw_degree === 'number'){
-            return true
-        }
-
-    } catch (err){
-        return false
-    }
-
-    return false
-}
-
-function mediaMetaGetPositionInformation(meta: string){
-    const parsed = JSON.parse(meta)
-
-    return {
-        position: {
-            longitude: parsed.metadata.shoot_position.lng,
-            latitude: parsed.metadata.shoot_position.lat
-        },
-        altitude: parsed.metadata.absolute_altitude,
-        camera_heading: parsed.metadata.gimbal_yaw_degree
-    }
-}
-
 </script>
 
 <template>
