@@ -2,7 +2,7 @@
 import { ApiResponse_DroneMediaGet } from 'openflighthub-api-client-sdk';
 import MapMarker from '../cesium/MapMarker.vue';
 import { Viewer } from 'cesium';
-import { onMounted, ref, watch } from 'vue';
+import { compile, computed, onMounted, ref, watch } from 'vue';
 
 const props = defineProps<{
     mapContainer: HTMLElement
@@ -54,12 +54,16 @@ async function setup(){
 
 }
 
+const validData = computed(()=>{
+    return parsedData.value && !(parsedData.value.position.latitude === 0 && parsedData.value.position.longitude === 0)
+})
+
 </script>
 
 <template>
 
 <!-- make sure that elevation is at least at ground level -->
-    <MapMarker v-if="parsedData" :map-container="props.mapContainer" :position="[parsedData.position.longitude, parsedData.position.latitude]" :elevation="parsedData.altitude" :viewer="props.viewer" :label="'Media #' + props.media.id" :icon-url="'/api/file/data/' + props.media.file_id " :icon-width="32" :icon-height="32" :bearing="parsedData.camera_heading"></MapMarker>
+    <MapMarker v-if="validData" :map-container="props.mapContainer" :position="[parsedData.position.longitude, parsedData.position.latitude]" :elevation="parsedData.altitude" :viewer="props.viewer" :label="'Media #' + props.media.id" :icon-url="'/api/file/data/' + props.media.file_id " :icon-width="32" :icon-height="32" :bearing="parsedData.camera_heading"></MapMarker>
 
 </template>
 
