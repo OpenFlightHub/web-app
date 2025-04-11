@@ -182,9 +182,11 @@ async function refreshConnectionState(){
                             <div v-for="module_state of connectionState.modules" :key="module_state.name" :class="['module_state', {connected: module_state.connected}]">{{ module_state.name }}</div>
                         </div>
 
-                        <Button @click="unlinkWorkspace" severity="danger">{{ $t("link.unlink_workspace") }}</Button><!--TODO show progress-->
+                        <div style="display: flex; gap: 1em;">
+                            <Button @click="unlinkWorkspace" severity="warn">{{ $t("link.unlink_workspace") }}</Button><!--TODO show progress-->
 
-                        <Button @click="resetLink" severity="danger">{{ $t("link.reset") }}</Button><!--TODO show progress-->
+                            <Button @click="resetLink" severity="danger">{{ $t("link.reset") }}</Button><!--TODO show progress-->
+                        </div>
                     </template>
                     <template v-else>
                         Loading ...
