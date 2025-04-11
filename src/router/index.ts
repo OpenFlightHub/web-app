@@ -18,7 +18,7 @@ import FinishRegistrationView from '@/views/auth/FinishRegistrationView.vue'
 import WorkspaceView from '@/views/WorkspaceView.vue'
 import ConnectionView from '@/views/ConnectionView.vue';
 import LinkView from '@/views/link/LinkView.vue'
-import ConnectDJIPilot2 from '@/views/link/dji-pilot-2/ConnectDJIPilot2.vue';
+import LinkDjiPilot2 from '@/views/link/dji-pilot-2/LinkDjiPilot2.vue';
 
 
 //Error
@@ -147,7 +147,7 @@ export function makeRouter(pinia: Pinia){
                 children: [
                     {
                         path: 'dji-pilot-2',
-                        component: ConnectDJIPilot2
+                        component: LinkDjiPilot2
                     }
                 ]
             },

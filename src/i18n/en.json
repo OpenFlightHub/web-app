@@ -20,6 +20,7 @@
         "linked_to": "Linked to Workspace \"{workspace}\" on {platform}",
         "select_workspace": "Select workspace to link to",
         "connection_name": "Connection Name",
+        "link": "Link",
         "unlink_workspace": "Unlink Workspace",
         "is_connected": "Connected",
         "is_not_connected": "Not connected",

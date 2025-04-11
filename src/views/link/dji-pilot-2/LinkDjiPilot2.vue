@@ -48,19 +48,31 @@ onMounted(async()=>{
 const selectedWorkspaceToLinkTo = ref(-1)
 const connectionName = ref('')
 
+const linkingIsInProgress = ref(false)
+const linkingError = ref('example link error (for debugging)')//TODO remove
+
 async function linkToWorkspace(){
+    linkingIsInProgress.value = true
+    linkingError.value = ''
 
-    const ret = await api.rest.workspace.connections.post({
-        workspaceId: selectedWorkspaceToLinkTo.value
-    }, {
-        name: connectionName.value
-    })
+    try {
 
-    initConnectLinkClient(await connectLinkManager.linkToOpenFlightHub(ret.connection_id, ret.secret) as OpenFlightHubConnectLinkClient_DjiPilot2)
+        const ret = await api.rest.workspace.connections.post({
+            workspaceId: selectedWorkspaceToLinkTo.value
+        }, {
+            name: connectionName.value
+        })
 
-    //TODO handle and show error
+        initConnectLinkClient(await connectLinkManager.linkToOpenFlightHub(ret.connection_id, ret.secret) as OpenFlightHubConnectLinkClient_DjiPilot2)
 
-    mustLinkFirst.value = false
+
+        mustLinkFirst.value = false
+
+    } catch (err){
+        linkingError.value = err
+    } finally {
+        linkingIsInProgress.value = false
+    }
 }
 
 function initConnectLinkClient(client: OpenFlightHubConnectLinkClient_DjiPilot2){
@@ -117,6 +129,7 @@ async function refreshConnectionState(){
             <template v-else>
 
                 <template v-if="mustLinkFirst">
+
                     <h2>{{ $t("link.select_workspace")}}</h2>
 
                     <List>
@@ -131,7 +144,17 @@ async function refreshConnectionState(){
                                 <label for="connection-name">{{ $t("link.connection_name")}}</label>
                             </IftaLabel>
 
-                            <Button :disabled="connectionName.length === 0" @click="linkToWorkspace">{{ $t("actions.confirm") }}</Button><!--TODO show progress-->
+                            <Button :disabled="connectionName.length === 0 || linkingIsInProgress || !mustLinkFirst" @click="linkToWorkspace">{{ $t("link.link") }}</Button>
+
+                            <div v-if="linkingIsInProgress" id="linking-status">
+                                Linking ...
+                            </div>
+
+                            <div v-if="linkingError.length > 0" id="linking-error">
+                                <h2>Linking Failed:</h2>
+                                <pre>{{ linkingError }}</pre>
+                            </div>
+
                         </template>
                     </List>
                 </template>
@@ -200,6 +223,18 @@ async function refreshConnectionState(){
         &.connected:before {
             background: var(--success);
         }
+    }
+}
+
+#linking-status {
+    margin-top: 1em;
+}
+
+#linking-error {
+    margin-top: 1em;
+
+    h2 {
+        color: red;
     }
 }
 
