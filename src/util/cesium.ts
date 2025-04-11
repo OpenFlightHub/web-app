@@ -8,14 +8,12 @@ export type ClickMyEntityHandle = {
 
 export function setupClickMyEntity(mapContainer: HTMLElement, viewer: Viewer, entity: Entity, callback: ()=>void){
 
-    const actualMapContainer = toRaw(mapContainer)
-
     const handle: ClickMyEntityHandle = {
-      mapContainer: actualMapContainer,
+      mapContainer,
         f: evt => {
             const clickX = evt.pageX
             const clickY = evt.pageY
-            const bounds = actualMapContainer.getBoundingClientRect()
+            const bounds = mapContainer.getBoundingClientRect()
 
             const containerX = bounds.left + window.scrollX
             const containerY = bounds.top + window.scrollY
@@ -31,7 +29,7 @@ export function setupClickMyEntity(mapContainer: HTMLElement, viewer: Viewer, en
         }
     }
 
-    actualMapContainer.addEventListener('click', handle.f)
+    mapContainer.addEventListener('click', handle.f)
 
     return handle
 }
