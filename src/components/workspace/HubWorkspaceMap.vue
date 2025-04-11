@@ -30,8 +30,8 @@ const showMedia = ref(false)
 <template>
 
     <div id="outer-container">
-        <div id="map-container">
-            <Map id="map" ref="mapContainer" :start-longitude="10.31261" :start-latitude="47.48063" :start-height="3200" @viewer-loaded="(v)=>{viewer = v; viewerIsLoaded = true}"></Map>
+        <div id="map-container" ref="mapContainer">
+            <Map id="map" :start-longitude="10.31261" :start-latitude="47.48063" :start-height="3200" @viewer-loaded="(v)=>{viewer = v; viewerIsLoaded = true}"></Map>
 
             <template v-if="viewerIsLoaded && geoidIsLoaded && mapContainer">
                 <HubWorkspaceMapConnection v-for="connection in props.connections" :key="connection.id" :map-container="mapContainer" :connection="connection" :viewer="viewer"></HubWorkspaceMapConnection>
