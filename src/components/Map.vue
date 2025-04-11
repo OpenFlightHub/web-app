@@ -79,12 +79,13 @@ onMounted(()=>{
     })
     */
 
-
-    viewer.camera.moveEnd.addEventListener(evt=>{
-        const carto = Cartographic.fromCartesian(viewer.camera.position)
-        console.log('camera.moveEnd', MathCesium.toDegrees(carto.longitude), MathCesium.toDegrees(carto.latitude), carto.height)
-        //TODO append to url
-    })
+    if(viewer?.camera?.moveEnd){
+        viewer.camera.moveEnd.addEventListener(evt=>{
+            const carto = Cartographic.fromCartesian(viewer.camera.position)
+            console.log('camera.moveEnd', MathCesium.toDegrees(carto.longitude), MathCesium.toDegrees(carto.latitude), carto.height)
+            //TODO append to url
+        })
+    }
 
     viewer.scene.screenSpaceCameraController.enableInputs = !props.disableUserControl
 
