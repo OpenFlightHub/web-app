@@ -1,4 +1,5 @@
 import { Cartesian2, Cartesian3, Cartographic, defaultValue, defined, Entity, HeadingPitchRoll, Viewer, Math as MathCesium, Transforms, Matrix3, Ray } from "cesium";
+import { toRaw } from "vue";
 
 export type ClickMyEntityHandle = {
     readonly mapContainer: HTMLElement
@@ -7,12 +8,14 @@ export type ClickMyEntityHandle = {
 
 export function setupClickMyEntity(mapContainer: HTMLElement, viewer: Viewer, entity: Entity, callback: ()=>void){
 
+    const actualMapContainer = toRaw(mapContainer)
+
     const handle: ClickMyEntityHandle = {
-        mapContainer,
+      mapContainer: actualMapContainer,
         f: evt => {
             const clickX = evt.pageX
             const clickY = evt.pageY
-            const bounds = mapContainer.getBoundingClientRect()
+            const bounds = actualMapContainer.getBoundingClientRect()
 
             const containerX = bounds.left + window.scrollX
             const containerY = bounds.top + window.scrollY
@@ -28,7 +31,7 @@ export function setupClickMyEntity(mapContainer: HTMLElement, viewer: Viewer, en
         }
     }
 
-    mapContainer.addEventListener('click', handle.f)
+    actualMapContainer.addEventListener('click', handle.f)
 
     return handle
 }
