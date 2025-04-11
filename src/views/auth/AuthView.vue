@@ -1,6 +1,16 @@
 <script setup lang="ts">
 
 import LogoVue from '@/components/branding/LogoVue.vue';
+import { computed } from 'vue';
+
+const showLogo = computed(()=>{
+
+    if(screen.availHeight < 400){
+        return false
+    }
+
+    return true
+})
 
 </script>
 
@@ -9,7 +19,7 @@ import LogoVue from '@/components/branding/LogoVue.vue';
 
         <div id="in">
 
-            <LogoVue id="logo" size1em></LogoVue>
+            <LogoVue id="logo" size1em v-if="showLogo"></LogoVue>
 
             <div id="router">
                 <RouterView/>
