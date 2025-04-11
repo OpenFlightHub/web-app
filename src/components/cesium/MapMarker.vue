@@ -35,6 +35,7 @@ const myId = crypto.randomUUID()
 
 watch(()=>props.position, update, {deep: true})
 watch(()=>props.elevation, update)
+watch(()=>props.mapContainer, update)
 
 onMounted(update)
 
@@ -46,6 +47,10 @@ onBeforeUnmount(()=>{
 
 
 async function update(){//TODO cesium fails to repaint polygons (height marker) if we update it too quickly (e.g. every 10ms)
+
+    if(!props.mapContainer){
+        return
+    }
 
     if(marker){
         removeMarker()
