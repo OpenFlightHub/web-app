@@ -33,14 +33,14 @@ const showMedia = ref(false)
         <div id="map-container">
             <Map id="map" ref="mapContainer" :start-longitude="10.31261" :start-latitude="47.48063" :start-height="3200" @viewer-loaded="(v)=>{viewer = v; viewerIsLoaded = true}"></Map>
 
-            <template v-if="viewerIsLoaded && geoidIsLoaded">
+            <template v-if="viewerIsLoaded && geoidIsLoaded && mapContainer">
                 <HubWorkspaceMapConnection v-for="connection in props.connections" :key="connection.id" :map-container="mapContainer" :connection="connection" :viewer="viewer"></HubWorkspaceMapConnection>
 
                 <!-- TODO implement center of map (but lazy load, so a small change in distance does not actually trigger a reset) -->
                 <HubWorkspaceMapTraffic :viewer="viewer" :map-container="mapContainer" :latitude="47.554" :longitude="10.22" :radius="50000"></HubWorkspaceMapTraffic>
             </template>
 
-            <template v-if="viewerIsLoaded && showMedia">
+            <template v-if="viewerIsLoaded && showMedia && mapContainer">
                 <HubWorkspaceMapDroneMedia v-for="connection in props.connections" :key="connection.id" :viewer="viewer" :map-container="mapContainer" :connection="connection"></HubWorkspaceMapDroneMedia>
             </template>
         </div>
