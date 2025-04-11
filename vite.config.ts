@@ -55,5 +55,8 @@ export default defineConfig({
   },
   define: {
     __INTLIFY_JIT_COMPILATION__: true
+  },
+  build: {
+    sourcemap: true
   }
 })
