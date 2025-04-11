@@ -1,10 +1,4 @@
 <script setup lang="ts">
-import LoadApi from '../functional/LoadApi.vue';
-import api from '@/api';
-import Padding from '../layout/Padding.vue';
-import { Button } from 'primevue';
-import IconVue from '../general/IconVue.vue';
-import { downloadUrl } from '@/util/download';
 import { onMounted, ref, watch } from 'vue';
 import { ApiResponse_DroneMediaGet } from 'openflighthub-api-client-sdk';
 import HubWorkspaceFile from '../workspace/HubWorkspaceFile.vue';
@@ -43,7 +37,10 @@ function parseData(){
             cameraHeading.value = parsedMeta.metadata.gimbal_yaw_degree - 14 //TODO fix heading, looks like gimbal yaw degree is not correct
             cameraFOV.value = 48.5 //is Thermal Image of Mavic3 TODO make it work for visual images too
 
-            hasValidLocationInformation.value = true
+            if(!(cameraLongitude.value === 0 && cameraLatitude.value === 0)){
+                hasValidLocationInformation.value = true
+            }
+
             return
         }
     } catch (err){
