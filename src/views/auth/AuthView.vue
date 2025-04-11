@@ -5,7 +5,7 @@ import { computed } from 'vue';
 
 const showLogo = computed(()=>{
 
-    if(screen.availHeight < 400){
+    if(screen.availHeight < 600){
         return false
     }
 
