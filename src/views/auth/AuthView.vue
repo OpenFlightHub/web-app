@@ -1,16 +1,21 @@
 <script setup lang="ts">
 
 import LogoVue from '@/components/branding/LogoVue.vue';
-import { computed } from 'vue';
+import { ref, onMounted } from 'vue';
 
-const showLogo = computed(()=>{
+const showLogo = ref(true)
+
+onMounted(checkLogoVisibility)
+window.addEventListener('resize', checkLogoVisibility)
+
+function checkLogoVisibility(){
 
     if(screen.availHeight < 600){
-        return false
+        showLogo.value = false
+    } else {
+        showLogo.value = true
     }
-
-    return true
-})
+}
 
 </script>
 
@@ -19,7 +24,7 @@ const showLogo = computed(()=>{
 
         <div id="in">
 
-            <LogoVue id="logo" size1em v-if="showLogo"></LogoVue>
+            <LogoVue v-if="showLogo" id="logo" size1em></LogoVue>
 
             <div id="router">
                 <RouterView/>
