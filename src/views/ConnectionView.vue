@@ -15,7 +15,7 @@ import DroneMedia from '@/components/drone/DroneMedia.vue';
 
    <LoadApiWithIdParamInUrl :api-method="api.rest.connection.get" :id-params="{connectionId: undefined}" v-slot="connection">
       <Padding>
-         <h1>Connection {{ connection.data.id }}</h1>
+         <h1>Connection {{ connection.data.name }}</h1>
 
          <List>
             <div>

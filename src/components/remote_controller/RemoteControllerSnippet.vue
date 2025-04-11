@@ -15,7 +15,7 @@ const props = defineProps<{
 
     <LoadApi :api-method="api.rest.remoteController.get" :params="{remoteControllerId: props.id}" v-slot="scope">
         <SnippetWithImage :image-url="'/images/remote_controller/type/' + scope.data.type + '.png'">
-            <h3><RemoteControllerType :type="scope.data.type"></RemoteControllerType></h3>
+            <h3>Type: <RemoteControllerType :type="scope.data.type"></RemoteControllerType></h3>
             <h4>SN: {{ scope.data.serial_number }}</h4>
         </SnippetWithImage>
     </LoadApi>
