@@ -105,7 +105,11 @@ async function downloadMediaIfNotExists(mediaId: number, workspaceId: number, wo
 
     const media = await api.rest.media.get({mediaId})
 
-    const cleanFileName = media.file_name.replace(/\//g, '_')
+    let cleanFileName = media.file_name.replace(/[\/<>:\\\|\?\*]/g, '_')
+
+    if(cleanFileName === '.' || cleanFileName === '.' || ['CON', 'PRN', 'AUX', 'NUL', 'COM1', 'COM2', 'COM3', 'COM4', 'COM5', 'COM6', 'COM7', 'COM8', 'COM9', 'LPT1', 'LPT2', 'LPT3', 'LPT4', 'LPT5', 'LPT6', 'LPT7', 'LPT8', 'LPT9'].includes(cleanFileName)){
+        cleanFileName = '_' + cleanFileName
+    }
 
     if(await droneMediaDownloader.droneFileExistsOrIsEmpty(workspaceId, droneId, cleanFileName) === false){
 
