@@ -2,6 +2,7 @@
 
 import { ApiResponse_WorkspaceMyworkspacesGet } from "openflighthub-api-client-sdk";
 import { createFileStreamInDirectory, DirectoryPicker_StartIn, filesApiIsSupported, selectFolderToSaveFilesTo } from "./util.js";
+import type {FileSystemDirectoryHandle } from './types.js'
 
 /**
  * use FilesDownloader.askUserToSelectFolder() as an entry point

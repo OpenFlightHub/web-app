@@ -1,3 +1,4 @@
+import type {FileSystemDirectoryHandle, FileSystemFileHandle } from './types.js'
 
 export function filesApiIsSupported(){
     return ('showDirectoryPicker' in self)
