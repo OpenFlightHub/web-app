@@ -96,7 +96,7 @@ export default class FilesDownloader {
         }
     }
 
-    async fileExists(workspaceId: number, fileName: string){
+    async fileExistsOrIsEmpty(workspaceId: number, fileName: string){
         const folder = await this.getWorkspaceFolder(workspaceId)
 
         if(folder === false){
@@ -104,7 +104,14 @@ export default class FilesDownloader {
         }
 
         try {
-            const file = await folder.getFileHandle(fileName)
+            const fileHandle = await folder.getFileHandle(fileName)
+
+            const file = await fileHandle.getFile()
+
+            if(file.size === 0){
+                return false
+            }
+
             return true
         } catch (err){
             return false

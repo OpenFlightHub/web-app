@@ -104,7 +104,7 @@ async function downloadMediaIfNotExists(mediaId: number, workspaceId: number){
 
     const cleanFileName = file.name.replace(/\//g, '_')
 
-    if(await filesDownloader.fileExists(workspaceId, cleanFileName) === false){
+    if(await filesDownloader.fileExistsOrIsEmpty(workspaceId, cleanFileName) === false){
 
         try {
             filesThatAreBeingDownloaded.value ++
