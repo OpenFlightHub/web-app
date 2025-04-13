@@ -102,9 +102,7 @@ async function downloadMediaIfNotExists(mediaId: number, workspaceId: number){
 
     const media = await api.rest.media.get({mediaId})
 
-    const file = await api.rest.file.get({fileId: media.file_id})
-
-    const cleanFileName = file.name.replace(/\//g, '_')
+    const cleanFileName = media.file_name.replace(/\//g, '_')
 
     if(await filesDownloader.fileExistsOrIsEmpty(workspaceId, cleanFileName) === false){
 
