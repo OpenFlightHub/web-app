@@ -7,81 +7,64 @@ import type {FileSystemDirectoryHandle } from './types.js'
 /**
  * use FilesDownloader.askUserToSelectFolder() as an entry point
  */
-export default class FilesDownloader {
+export class FilesDownloader {
 
-    private readonly globalFolderHandle: FileSystemDirectoryHandle
+    protected readonly globalFolderHandle: FileSystemDirectoryHandle
 
     constructor(folderHandle: FileSystemDirectoryHandle){
         this.globalFolderHandle = folderHandle
     }
 
-    async setWorkspaces(workspaces: ApiResponse_WorkspaceMyworkspacesGet){
-        for(const workspace of workspaces){
 
-            let workspaceFolderHandle = await this.getWorkspaceFolderAndRenameIfRequired(workspace.id, workspace.name)
-
-            if(workspaceFolderHandle === false){
-                workspaceFolderHandle = await this.createWorkspaceFolder(workspace.id, workspace.name)
-            }
-        }
-    }
-
-    private makeWorkspaceDirectoryName(id: number, name: string){
+    protected makeFolderNameWithId(id: number, name: string){
         return '' + id + '_' + name
     }
 
-    private async getWorkspaceFolder(workspaceId: number){
-        for await (const entry of this.globalFolderHandle.entries()){
+    protected async getFolderById(context: FileSystemDirectoryHandle, folderId: number){
+        for await (const entry of context.entries()){
             const name = entry[0]
-            const handle = entry[1]
 
             const nameSplit = name.split('_')
-            if(nameSplit[0] === ('' + workspaceId)){
+            if(nameSplit[0] === ('' + folderId)){
                 // exists
-                return await this.globalFolderHandle.getDirectoryHandle(name)
+                return await context.getDirectoryHandle(name)
             }
         }
 
         return false
     }
 
-
-    private async getWorkspaceFolderAndRenameIfRequired(workspaceId: number, workspaceName: string){
-
-        const folder = await this.getWorkspaceFolder(workspaceId)
+    protected async getFolderOrCreateById(context: FileSystemDirectoryHandle, folderId: number, folderName: string, renameIfRequired?: boolean){
+        let folder = await this.getFolderById(context, folderId)
 
         if(folder === false){
-            return false
+            folder = await this.createFolder(context, folderId, folderName)
         }
 
         const folderNameSplit = folder.name.split('_')
 
         folderNameSplit.splice(0, 1)
-        const existingWorkspaceName = folderNameSplit.join('_')
+        const existingFolderName = folderNameSplit.join('_')
 
-        if(existingWorkspaceName !== workspaceName){
+        if(existingFolderName !== folderName){
             //TODO implement (chrome does not currently support this!)
         }
 
         return folder
     }
 
-    private async createWorkspaceFolder(workspaceId: number, workspaceName: string){
-        return await this.globalFolderHandle.getDirectoryHandle(this.makeWorkspaceDirectoryName(workspaceId, workspaceName), {
+    protected async createFolder(context: FileSystemDirectoryHandle, folderId: number, folderName: string){
+        return await context.getDirectoryHandle(this.makeFolderNameWithId(folderId, folderName), {
             create: true
         })
     }
+
 
     /**
      *
      * @param fileOrUrl File, Blob or url to file
      */
-    async saveFileToWorkspace(workspaceId: number, fileOrUrl: File | Blob | string, fileName: string){
-        let folder = await this.getWorkspaceFolder(workspaceId)
-
-        if(folder === false){
-            folder = await this.createWorkspaceFolder(workspaceId, 'unknown')
-        }
+    protected async saveFileToFolder(folder: FileSystemDirectoryHandle, fileOrUrl: File | Blob | string, fileName: string){
 
         const fs = await createFileStreamInDirectory(fileName, folder)
 
@@ -96,12 +79,7 @@ export default class FilesDownloader {
         }
     }
 
-    async fileExistsOrIsEmpty(workspaceId: number, fileName: string){
-        const folder = await this.getWorkspaceFolder(workspaceId)
-
-        if(folder === false){
-            return false
-        }
+    protected async fileExistsOrIsEmpty(folder: FileSystemDirectoryHandle, fileName: string){
 
         try {
             const fileHandle = await folder.getFileHandle(fileName)
@@ -126,5 +104,78 @@ export default class FilesDownloader {
 
     static isSupported(){
         return filesApiIsSupported()
+    }
+}
+
+export class WorkspaceFilesDownloader extends FilesDownloader {
+
+
+
+    async setWorkspaces(workspaces: ApiResponse_WorkspaceMyworkspacesGet){
+        for(const workspace of workspaces){
+            await this.getWorkspaceFolderOrCreate(workspace.id, workspace.name, true)
+        }
+    }
+
+    protected async getWorkspaceFolder(workspaceId: number){
+        return this.getFolderById(this.globalFolderHandle, workspaceId)
+    }
+
+    protected async createWorkspaceFolder(workspaceId: number, workspaceName: string){
+        return this.createFolder(this.globalFolderHandle, workspaceId, workspaceName)
+    }
+
+    protected async getWorkspaceFolderOrCreate(workspaceId: number, workspaceName: string, renameIfRequired?: boolean){
+        return this.getFolderOrCreateById(this.globalFolderHandle, workspaceId, workspaceName, renameIfRequired)
+    }
+
+    static async askUserToSelectFolder(id?: string, startIn?: DirectoryPicker_StartIn){
+        const handle = await selectFolderToSaveFilesTo(id, startIn)
+
+        return new DroneMediaDownloader(handle)
+    }
+}
+
+export class DroneMediaDownloader extends WorkspaceFilesDownloader {
+
+    protected async getDroneFolder(workspaceId: number, droneId: number){
+        const workspaceFolder = await this.getWorkspaceFolder(workspaceId)
+
+        if(workspaceFolder === false){
+            return false
+        }
+
+        return this.getFolderById(workspaceFolder, droneId)
+    }
+
+    protected async createDroneFolder(workspaceId: number, workspaceName: string, droneId: number, droneName: string){
+        const workspaceFolder = await this.getWorkspaceFolderOrCreate(workspaceId, workspaceName)
+        return this.createFolder(workspaceFolder, droneId, droneName)
+    }
+
+    protected async getDroneFolderOrCreate(workspaceId: number, workspaceName: string, droneId: number, droneName: string, renameIfRequired?: boolean){
+        const workspaceFolder = await this.getWorkspaceFolderOrCreate(workspaceId, workspaceName, renameIfRequired)
+        return await this.getFolderOrCreateById(workspaceFolder, droneId, droneName, renameIfRequired)
+    }
+
+    async saveDroneFile(workspaceId: number, workspaceName: string, droneId: number, droneName: string, fileOrUrl: File | Blob | string, fileName: string){
+        const droneFolder = await this.getDroneFolderOrCreate(workspaceId, workspaceName, droneId, droneName)
+        return await this.saveFileToFolder(droneFolder, fileOrUrl, fileName)
+    }
+
+    async droneFileExistsOrIsEmpty(workspaceId: number, droneId: number, fileName: string){
+        const droneFolder = await this.getDroneFolder(workspaceId, droneId)
+
+        if(droneFolder === false){
+            return false
+        }
+
+        return await this.fileExistsOrIsEmpty(droneFolder, fileName)
+    }
+
+    static async askUserToSelectFolder(id?: string, startIn?: DirectoryPicker_StartIn){
+        const handle = await selectFolderToSaveFilesTo(id, startIn)
+
+        return new DroneMediaDownloader(handle)
     }
 }

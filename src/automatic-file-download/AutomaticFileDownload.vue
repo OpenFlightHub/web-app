@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import IconVue from '../components/general/IconVue.vue';
-import FilesDownloader from '../util/files-downloader'
+import { DroneMediaDownloader } from '../util/files-downloader'
 
 import useMainStore from "@/stores/main"
 import api from '@/api';
@@ -13,7 +13,7 @@ const store = useMainStore()
 const isSupported = ref(false)
 
 onMounted(()=>{
-    isSupported.value = FilesDownloader.isSupported()
+    isSupported.value = DroneMediaDownloader.isSupported()
 })
 
 const isSetup = ref(false)
@@ -21,7 +21,7 @@ const isSetup = ref(false)
 
 const mediaIdsThatAreBeingDownloaded = ref<number[]>([])
 
-let filesDownloader: FilesDownloader
+let droneMediaDownloader: DroneMediaDownloader
 
 let fullSyncCheckInterval
 
@@ -36,7 +36,7 @@ async function setup(){
 
     fullSyncCheckInterval = setInterval(makeFullSyncCheck, 1000 * 60)
 
-    filesDownloader = await FilesDownloader.askUserToSelectFolder('ofh-download', 'desktop')
+    droneMediaDownloader = await DroneMediaDownloader.askUserToSelectFolder('ofh-download', 'desktop')
 
     makeFullSyncCheck()
 
@@ -49,7 +49,7 @@ const knownWorkspaceIds: number[] = []
 async function makeFullSyncCheck(){
     const myWorkspaces = await api.rest.workspace.myWorkspaces.get()
 
-    await filesDownloader.setWorkspaces(myWorkspaces)
+    await droneMediaDownloader.setWorkspaces(myWorkspaces)
 
     for(const workspace of myWorkspaces){
 
@@ -62,7 +62,10 @@ async function makeFullSyncCheck(){
 
                 try {
 
-                    await downloadMediaIfNotExists(data.id, workspace.id)
+                    const drone = await api.rest.drone.get({droneId: data.drone_id})
+                    const connection = await api.rest.connection.get({connectionId: drone.last_connection_id})
+
+                    await downloadMediaIfNotExists(data.id, workspace.id, workspace.name, data.drone_id, connection.name)
 
                 } catch (err){
                     console.error('failed to download media', data, err)
@@ -82,7 +85,7 @@ async function makeFullSyncCheck(){
 
                     for(const media of allMedia){
                         if(mediaIdsThatAreBeingDownloaded.value.includes(media.id) === false){
-                            downloadMediaIfNotExists(media.id, workspace.id).catch(err => {
+                            downloadMediaIfNotExists(media.id, workspace.id, workspace.name, media.drone_id, connection.name).catch(err => {// this should not be the connection.name but drone name (not implemented yet in backend
                                 console.error('failed to download media (full sync)', media,  err)
                             })
                         }
@@ -98,18 +101,18 @@ async function makeFullSyncCheck(){
 
 
 
-async function downloadMediaIfNotExists(mediaId: number, workspaceId: number){
+async function downloadMediaIfNotExists(mediaId: number, workspaceId: number, workspaceName: string, droneId: number, droneName: string){
 
     const media = await api.rest.media.get({mediaId})
 
     const cleanFileName = media.file_name.replace(/\//g, '_')
 
-    if(await filesDownloader.fileExistsOrIsEmpty(workspaceId, cleanFileName) === false){
+    if(await droneMediaDownloader.droneFileExistsOrIsEmpty(workspaceId, droneId, cleanFileName) === false){
 
         try {
             mediaIdsThatAreBeingDownloaded.value.push(media.id)
 
-            await filesDownloader.saveFileToWorkspace(workspaceId, '/api/file/data/' + media.file_id, cleanFileName)
+            await droneMediaDownloader.saveDroneFile(workspaceId, workspaceName, droneId, droneName, '/api/file/data/' + media.file_id, cleanFileName)
 
         } finally {
             mediaIdsThatAreBeingDownloaded.value.splice(mediaIdsThatAreBeingDownloaded.value.indexOf(media.id), 1)
