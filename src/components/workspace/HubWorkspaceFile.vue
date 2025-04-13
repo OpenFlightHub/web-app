@@ -13,19 +13,13 @@ const props = defineProps<{
 }>()
 
 const showFullscreen = ref(false)
-const showInfoAndActions = ref(true)
 
 function handleClick(){
-    if(showFullscreen.value){
-        showInfoAndActions.value = !showInfoAndActions.value
-    } else {
-        showFullscreen.value = true
-    }
+    showFullscreen.value = !showFullscreen.value
 }
 
 function closeFullScreen(){
     showFullscreen.value = false
-    showInfoAndActions.value = true
 }
 
 </script>
@@ -35,16 +29,16 @@ function closeFullScreen(){
     <LoadApi :api-method="api.rest.file.get" :params="{fileId: props.id}" v-slot="file">
 
         <div id="file" :class="{fullscreen: showFullscreen}">
-            <div id="view" :style="'background-image: url(\'/api/file/data/' + props.id + '\')'" @click="handleClick"></div>
-            <div id="actions" v-show="showInfoAndActions">
+            <div id="view" :style="'background-image: url(\'/api/file/data/' + props.id + '\')'" @click.self.stop="handleClick"></div>
+            <div id="actions">
                 <Padding>
                     <div>
                         <Button><IconVue name="download" @click="downloadUrl('/api/file/data/' + props.id, file.data.name)"></IconVue></Button>
-                        <Button v-show="showFullscreen"><IconVue name="x-lg" @click="closeFullScreen"></IconVue></Button>
+                        <Button v-show="showFullscreen"><IconVue name="x-lg" @click.self.stop="closeFullScreen"></IconVue></Button>
                     </div>
                 </Padding>
             </div>
-            <div id="info" v-show="showInfoAndActions">
+            <div id="info">
                 <Padding>
                     {{ file.data.name }}
                 </Padding>
