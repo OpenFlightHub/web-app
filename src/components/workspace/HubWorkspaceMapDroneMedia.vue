@@ -1,14 +1,9 @@
 <script setup lang="ts">
-import { ApiResponse_ConnectionGet, ApiResponse_DroneLastpositionGet, ApiResponse_RemotecontrollerLastpositionGet, ApiResponse_DroneLastbatteryGet, Live, ApiResponse_DroneMediaGet } from 'openflighthub-api-client-sdk';
-import MapMarker from '../cesium/MapMarker.vue';
-import { Color, Viewer } from 'cesium';
-import { computed, onMounted, reactive, ref, watch } from 'vue';
-import { updateArray, updateObject } from '@/util/vue';
+import { ApiResponse_ConnectionGet, ApiResponse_DroneMediaGet } from 'openflighthub-api-client-sdk';
+import { Viewer } from 'cesium';
+import { onMounted, reactive, watch } from 'vue';
+import { updateArray } from '@/util/vue';
 import api from '@/api';
-import MapLine from '../cesium/MapLine.vue';
-import Padding from '../layout/Padding.vue';
-import LiveStream from '../video/LiveStream.vue';
-import IconVue from '../general/IconVue.vue';
 import HubWorkspaceMapDroneMediaMarker from './HubWorkspaceMapDroneMediaMarker.vue';
 
 const props = defineProps<{

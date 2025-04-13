@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ApiResponse_DroneMediaGet } from 'openflighthub-api-client-sdk';
-import MapMarker from '../cesium/MapMarker.vue';
+import MapMarker from '../map/MapMarker.vue';
 import { Viewer } from 'cesium';
 import { compile, computed, onMounted, ref, watch } from 'vue';
 

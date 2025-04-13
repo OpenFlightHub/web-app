@@ -1,14 +1,12 @@
 <script setup lang="ts">
-import { ApiResponse_ConnectionGet, ApiResponse_DroneLastpositionGet, ApiResponse_RemotecontrollerLastpositionGet, ApiResponse_DroneLastbatteryGet, Live } from 'openflighthub-api-client-sdk';
-import MapMarker from '../cesium/MapMarker.vue';
+import { ApiResponse_ConnectionGet, ApiResponse_DroneLastpositionGet, ApiResponse_RemotecontrollerLastpositionGet, ApiResponse_DroneLastbatteryGet } from 'openflighthub-api-client-sdk';
+import MapMarker from '../map/MapMarker.vue';
 import { Color, Viewer } from 'cesium';
 import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { updateObject } from '@/util/vue';
 import api from '@/api';
-import MapLine from '../cesium/MapLine.vue';
-import Padding from '../layout/Padding.vue';
+import MapLine from '../map/MapLine.vue';
 import LiveStream from '../video/LiveStream.vue';
-import IconVue from '../general/IconVue.vue';
 
 const props = defineProps<{
     mapContainer: HTMLElement
@@ -95,7 +93,7 @@ const currentBatteryPercentString = computed(()=>{
 
 <template>
 
-    <MapMarker v-if="isValidLastDronePosition" :map-container="props.mapContainer" :position="[lastDronePosition.longitude, lastDronePosition.latitude]" :elevation="lastDronePosition.height" :viewer="props.viewer" :label="'Drone #' + props.connection.drone_id" icon-url="/images/drone/icon_simple.png" :icon-width="32" :icon-height="32" @click="clickMarker" :color="Color.CYAN" :show-height-indicator="true"></MapMarker>
+    <MapMarker v-if="isValidLastDronePosition" :map-container="props.mapContainer" :position="[lastDronePosition.longitude, lastDronePosition.latitude]" :elevation="lastDronePosition.height" :viewer="props.viewer" :label="props.connection.name" icon-url="/images/drone/icon_simple.png" :icon-width="32" :icon-height="32" @click="clickMarker" :color="Color.CYAN" :show-height-indicator="true"></MapMarker>
 
     <MapMarker v-if="isValidLastRemoteControllerPosition" :map-container="props.mapContainer" :position="[lastRemoteControllerPosition.longitude, lastRemoteControllerPosition.latitude]" :elevation="lastRemoteControllerPosition.height" :viewer="props.viewer" :label="'RC #' + props.connection.remote_controller_id" icon-url="/images/remote_controller/icon_simple.png" :icon-width="32" :icon-height="32" @click="clickMarker" :color="Color.CYAN"></MapMarker>
 

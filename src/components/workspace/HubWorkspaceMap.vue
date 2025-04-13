@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ApiResponse_ConnectionGet } from 'openflighthub-api-client-sdk';
-import { ref, onMounted } from 'vue';
+import { ref } from 'vue';
 
-import { Cartesian3, createOsmBuildingsAsync, Ion, Math, Terrain, Viewer, Cartographic, OpenStreetMapImageryProvider } from "cesium";
+import { Viewer } from "cesium";
 import "cesium/Build/Cesium/Widgets/widgets.css";
 
 import HubWorkspaceMapConnection from './HubWorkspaceMapConnection.vue';
@@ -11,8 +11,7 @@ import HubWorkspaceMapTraffic from './HubWorkspaceMapTraffic.vue';
 import Checkbox from 'primevue/checkbox'
 import { Button } from 'primevue';
 import HubWorkspaceMapDroneMedia from './HubWorkspaceMapDroneMedia.vue';
-import Map from '../Map.vue';
-import IconVue from '../general/IconVue.vue';
+import Map from '../map/Map.vue';
 
 const props = defineProps<{
     connections: ApiResponse_ConnectionGet[]

@@ -2,7 +2,7 @@
 import { onMounted, ref, watch } from 'vue';
 import { ApiResponse_DroneMediaGet } from 'openflighthub-api-client-sdk';
 import HubWorkspaceFile from '../workspace/HubWorkspaceFile.vue';
-import Map from '../Map.vue';
+import Map from '../map/Map.vue';
 
 
 const props = defineProps<{
