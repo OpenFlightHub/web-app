@@ -84,9 +84,12 @@ async function makeFullSyncCheck(){
                 }).then(async(allMedia) => {
 
                     for(const media of allMedia){
+                        filesThatAreBeingDownloaded.value ++
 
                         downloadMedia(media.id, workspace.id).catch(err => {
                             console.error('failed to download media (full sync)', media,  err)
+                        }).finally(()=>{
+                            filesThatAreBeingDownloaded.value --
                         })
                     }
 
