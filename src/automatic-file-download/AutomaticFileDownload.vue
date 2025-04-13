@@ -107,9 +107,10 @@ async function downloadMedia(mediaId: number, workspaceId: number){
 
     const file = await api.rest.file.get({fileId: media.file_id})
 
+    const cleanFileName = file.name.replace(/\//g, '_')
 
-    if(await filesDownloader.fileExists(workspaceId, file.name) === false){
-        await filesDownloader.saveFileToWorkspace(workspaceId, '/api/file/data/' + media.file_id, file.name.replace(/\//g, '_'))
+    if(await filesDownloader.fileExists(workspaceId, cleanFileName) === false){
+        await filesDownloader.saveFileToWorkspace(workspaceId, '/api/file/data/' + media.file_id, cleanFileName)
     }
 }
 
