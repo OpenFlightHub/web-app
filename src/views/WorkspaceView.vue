@@ -51,13 +51,13 @@ const router = useRouter()
                      </List>
                   </TabPanel>
                   <TabPanel :value="3">
-                     <List :horizontal="true">
-                        <LoadApiWithIdParamInUrl :api-method="api.rest.workspace.files.get" :id-params="{workspaceId: undefined}" v-slot="workspaceFiles">
+                     <LoadApiWithIdParamInUrl :api-method="api.rest.workspace.files.get" :id-params="{workspaceId: undefined}" v-slot="workspaceFiles">
+                        <List :horizontal="true">
                            <div v-for="file in workspaceFiles.data" :key="file.id">
                               <HubWorkspaceFile :id="file.id"></HubWorkspaceFile>
                            </div>
-                        </LoadApiWithIdParamInUrl>
-                     </List>
+                        </List>
+                     </LoadApiWithIdParamInUrl>
                   </TabPanel>
                </TabPanels>
             </Tabs>

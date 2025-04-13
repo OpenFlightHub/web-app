@@ -93,7 +93,7 @@ const currentBatteryPercentString = computed(()=>{
 
 <template>
 
-    <MapMarker v-if="isValidLastDronePosition" :map-container="props.mapContainer" :position="[lastDronePosition.longitude, lastDronePosition.latitude]" :elevation="lastDronePosition.height" :viewer="props.viewer" :label="props.connection.name" icon-url="/images/drone/icon_simple.png" :icon-width="32" :icon-height="32" @click="clickMarker" :color="Color.CYAN" :show-height-indicator="true"></MapMarker>
+    <MapMarker v-if="isValidLastDronePosition" :map-container="props.mapContainer" :position="[lastDronePosition.longitude, lastDronePosition.latitude]" :elevation="lastDronePosition.height" :viewer="props.viewer" :label="props.connection.name" icon-url="/images/drone/icon_simple.png" :icon-width="32" :icon-height="32" @click="clickMarker" :color="Color.CYAN" :show-height-indicator="true" :show-height-mean-sea-level-in-label="true"></MapMarker>
 
     <MapMarker v-if="isValidLastRemoteControllerPosition" :map-container="props.mapContainer" :position="[lastRemoteControllerPosition.longitude, lastRemoteControllerPosition.latitude]" :elevation="lastRemoteControllerPosition.height" :viewer="props.viewer" :label="'RC #' + props.connection.remote_controller_id" icon-url="/images/remote_controller/icon_simple.png" :icon-width="32" :icon-height="32" @click="clickMarker" :color="Color.CYAN"></MapMarker>
 

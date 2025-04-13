@@ -18,6 +18,7 @@ const props = defineProps<{
     color?: Color
     fontSize?: number
     showHeightIndicator?: boolean
+    showHeightMeanSeaLevelInLabel?: boolean
     bearing?: number//TODO implement
 }>()
 
@@ -91,7 +92,7 @@ function addMarker(){
             disableDepthTestDistance: heightIsNotZero() ? 5000000 : Number.POSITIVE_INFINITY // show always above terrain https://community.cesium.com/t/points-labels-stuck-under-terrain/11141
         },
         label: {
-            text: (props.label ? props.label + ' ' : ''),//  + (typeof props.elevation === 'number' ? Math.floor(convertEllipsoidalHeightToOrthometricHeight(props.position[0], props.position[1], props.elevation)) + 'm MSL' : '')
+            text: (props.label ? props.label + ' ' : '') + (props.showHeightMeanSeaLevelInLabel ? (typeof props.elevation === 'number' ? Math.floor(convertEllipsoidalHeightToOrthometricHeight(props.position[0], props.position[1], props.elevation)) + 'm' : '') : ''),
             font: (typeof props.fontSize === 'number' ? props.fontSize : 14) + 'pt monospace',
             style: LabelStyle.FILL_AND_OUTLINE,
             outlineWidth: 2,
