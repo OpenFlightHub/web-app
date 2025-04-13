@@ -147,7 +147,7 @@ const statusIconName = computed(()=>{
     <div v-if="store.isLoggedIn && isSupported" @click="setup">
 
         <div id="status" :state="state">
-            <span v-if="state === 'is_downloading'" id="download-count">{{ mediaIdsThatAreBeingDownloaded }}</span><IconVue :name="statusIconName"></IconVue>
+            <span v-if="state === 'is_downloading'" id="download-count">{{ mediaIdsThatAreBeingDownloaded.length }}</span><IconVue :name="statusIconName"></IconVue>
         </div>
 
     </div>
