@@ -63,11 +63,8 @@ async function makeFullSyncCheck(){
 
                 try {
 
-                    const media = await api.rest.media.get({mediaId: data.id})
+                    await downloadMedia(data.id, workspace.id)
 
-                    const file = await api.rest.file.get({fileId: media.file_id})
-
-                    await filesDownloader.saveFileToWorkspace(data.workspace_id, '/api/file/data/' + media.file_id, file.name)
                 } catch (err){
                     console.error('failed to download media', data, err)
                 } finally {
@@ -88,19 +85,8 @@ async function makeFullSyncCheck(){
 
                     for(const media of allMedia){
 
-                        const file = api.rest.file.get({fileId: media.file_id}).then(async(file) => {
-
-                            if(await filesDownloader.fileExists(workspace.id, file.name) === false){
-                                filesThatAreBeingDownloaded.value++
-                                try {
-                                    filesDownloader.saveFileToWorkspace(workspace.id, '/api/file/data/' + file.id, file.name)
-                                } catch (err){
-                                    console.warn('failed to download media', workspace.id, file.id, err)
-                                } finally {
-                                    filesThatAreBeingDownloaded.value--
-                                }
-                            }
-
+                        downloadMedia(media.id, workspace.id).catch(err => {
+                            console.error('failed to download media (full sync)', media,  err)
                         })
                     }
 
@@ -109,6 +95,18 @@ async function makeFullSyncCheck(){
                 })
             }
         }
+    }
+}
+
+async function downloadMedia(mediaId: number, workspaceId: number){
+
+    const media = await api.rest.media.get({mediaId})
+
+    const file = await api.rest.file.get({fileId: media.file_id})
+
+
+    if(await filesDownloader.fileExists(workspaceId, file.name) === false){
+        await filesDownloader.saveFileToWorkspace(workspaceId, '/api/file/data/' + media.file_id, file.name.replace(/\//g, '_'))
     }
 }
 
