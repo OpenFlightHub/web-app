@@ -12,6 +12,7 @@ import Checkbox from 'primevue/checkbox'
 import { Button } from 'primevue';
 import HubWorkspaceMapDroneMedia from './HubWorkspaceMapDroneMedia.vue';
 import Map from '../Map.vue';
+import IconVue from '../general/IconVue.vue';
 
 const props = defineProps<{
     connections: ApiResponse_ConnectionGet[]
@@ -46,13 +47,15 @@ const showMedia = ref(false)
         </div>
 
         <div id="sidebar">
-            <Button @click="sidebarIsOpen = !sidebarIsOpen">
-                <template v-if="sidebarIsOpen">Close</template>
-                <template v-else>Open</template>
+            <Button @click="sidebarIsOpen = !sidebarIsOpen" id="sidebar-close">
+                <template v-if="sidebarIsOpen">&gt;&gt;</template>
+                <template v-else>&lt;&lt;</template>
             </Button>
             <div v-show="sidebarIsOpen" id="sidebar-inner">
-                <Checkbox v-model="showMedia" binary input-id="show-media"></Checkbox>
-                <label for="show-media">Show Media</label>
+                <label for="show-media">
+                    <Checkbox v-model="showMedia" binary input-id="show-media"></Checkbox>
+                    Show Media
+                </label>
             </div>
         </div>
     </div>
@@ -78,8 +81,28 @@ const showMedia = ref(false)
     }
 
     #sidebar {
+        display: flex;
+        flex-direction: row;
         flex-shrink: 0;
         flex-grow: 0;
+        background: var(--neutral-darker);
+
+        #sidebar-close {
+            height: 100%;
+        }
+
+        #sidebar-inner {
+            padding: 0.5em;
+
+            label {
+                cursor: pointer;
+
+                .p-checkbox {
+                    margin-right: 0.5em;
+                }
+            }
+
+        }
     }
 }
 </style>
