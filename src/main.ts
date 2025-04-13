@@ -133,39 +133,3 @@ app.mount('#ofh')
         evt.preventDefault()
     })
 })
-
-import FilesDownloader from './util/files-downloader'
-if(FilesDownloader.isSupported()){
-    window.addEventListener('click', async ()=>{
-
-        const filesDownloader = await FilesDownloader.askUserToSelectFolder('ofh-download', 'desktop')
-
-        let isSetup = false
-
-        setInterval(async ()=>{
-            if(!isSetup){
-
-                if(store.isLoggedIn && !store.apiDisconnected){
-                    const myWorkspaces = await api.rest.workspace.myWorkspaces.get()
-
-                    await filesDownloader.setWorkspaces(myWorkspaces)
-
-                    isSetup = true
-
-                    await filesDownloader.saveFileToWorkspace(1, '/api/file/data/1', '1.png')
-                }
-            }
-        }, 500)
-
-        // selectFolderToSaveFilesTo().then(folder => {
-        //     createFileStreamInDirectory('test_files_api.txt', folder).then(s=>{
-        //         const writer = s.getWriter()
-
-        //         writer.write('hello').then(()=>{
-        //             writer.close()
-        //         })
-        //     })
-        // })
-
-    })
-}

@@ -7,6 +7,7 @@ import { RouterView, useRoute } from 'vue-router'
 import App from '@/components/app/App.vue';
 import AppNavBar from '@/components/app/AppNavBar.vue';
 import AppContent from '@/components/app/AppContent.vue';
+import AutomaticFileDownload from './automatic-file-download/AutomaticFileDownload.vue';
 
 export default defineComponent({
 
@@ -38,6 +39,8 @@ const routeIsAuth = computed(()=>{
         <AppContent :no-nav-bar="routeIsAuth">
             <RouterView/>
         </AppContent>
+
+        <AutomaticFileDownload></AutomaticFileDownload>
     </App>
 
 </template>
