@@ -111,7 +111,7 @@ async function downloadMediaIfNotExists(mediaId: number, workspaceId: number, wo
         cleanFileName = '_' + cleanFileName
     }
 
-    if(await droneMediaDownloader.droneFileExistsOrIsEmpty(workspaceId, droneId, cleanFileName) === false){
+    if(await droneMediaDownloader.droneFileExistsAndIsNotEmpty(workspaceId, droneId, cleanFileName) === false){
 
         try {
             mediaIdsThatAreBeingDownloaded.value.push(media.id)

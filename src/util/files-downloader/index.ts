@@ -79,7 +79,7 @@ export class FilesDownloader {
         }
     }
 
-    protected async fileExistsOrIsEmpty(folder: FileSystemDirectoryHandle, fileName: string){
+    protected async fileExistsAndIsNotEmpty(folder: FileSystemDirectoryHandle, fileName: string){
 
         try {
             const fileHandle = await folder.getFileHandle(fileName)
@@ -163,14 +163,14 @@ export class DroneMediaDownloader extends WorkspaceFilesDownloader {
         return await this.saveFileToFolder(droneFolder, fileOrUrl, fileName)
     }
 
-    async droneFileExistsOrIsEmpty(workspaceId: number, droneId: number, fileName: string){
+    async droneFileExistsAndIsNotEmpty(workspaceId: number, droneId: number, fileName: string){
         const droneFolder = await this.getDroneFolder(workspaceId, droneId)
 
         if(droneFolder === false){
             return false
         }
 
-        return await this.fileExistsOrIsEmpty(droneFolder, fileName)
+        return await this.fileExistsAndIsNotEmpty(droneFolder, fileName)
     }
 
     static async askUserToSelectFolder(id?: string, startIn?: DirectoryPicker_StartIn){
