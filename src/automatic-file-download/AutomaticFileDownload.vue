@@ -57,18 +57,15 @@ async function makeFullSyncCheck(){
             knownWorkspaceIds.push(workspace.id)
 
             api.live.subscribeToWorkspaceDronesMedia(workspace.id, async (evt, filter, data)=>{
-                filesThatAreBeingDownloaded.value ++
 
                 console.log('new drone media', data)
 
                 try {
 
-                    await downloadMedia(data.id, workspace.id)
+                    await downloadMediaIfNotExists(data.id, workspace.id)
 
                 } catch (err){
                     console.error('failed to download media', data, err)
-                } finally {
-                    filesThatAreBeingDownloaded.value --
                 }
             })
         }
@@ -84,12 +81,8 @@ async function makeFullSyncCheck(){
                 }).then(async(allMedia) => {
 
                     for(const media of allMedia){
-                        filesThatAreBeingDownloaded.value ++
-
-                        downloadMedia(media.id, workspace.id).catch(err => {
+                        downloadMediaIfNotExists(media.id, workspace.id).catch(err => {
                             console.error('failed to download media (full sync)', media,  err)
-                        }).finally(()=>{
-                            filesThatAreBeingDownloaded.value --
                         })
                     }
 
@@ -101,7 +94,9 @@ async function makeFullSyncCheck(){
     }
 }
 
-async function downloadMedia(mediaId: number, workspaceId: number){
+
+
+async function downloadMediaIfNotExists(mediaId: number, workspaceId: number){
 
     const media = await api.rest.media.get({mediaId})
 
@@ -110,7 +105,15 @@ async function downloadMedia(mediaId: number, workspaceId: number){
     const cleanFileName = file.name.replace(/\//g, '_')
 
     if(await filesDownloader.fileExists(workspaceId, cleanFileName) === false){
-        await filesDownloader.saveFileToWorkspace(workspaceId, '/api/file/data/' + media.file_id, cleanFileName)
+
+        try {
+            filesThatAreBeingDownloaded.value ++
+
+            await filesDownloader.saveFileToWorkspace(workspaceId, '/api/file/data/' + media.file_id, cleanFileName)
+
+        } finally {
+            filesThatAreBeingDownloaded.value --
+        }
     }
 }
 
