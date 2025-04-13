@@ -95,6 +95,21 @@ export default class FilesDownloader {
         }
     }
 
+    async fileExists(workspaceId: number, fileName: string){
+        const folder = await this.getWorkspaceFolder(workspaceId)
+
+        if(folder === false){
+            return false
+        }
+
+        try {
+            const file = await folder.getFileHandle(fileName)
+            return true
+        } catch (err){
+            return false
+        }
+    }
+
     static async askUserToSelectFolder(id?: string, startIn?: DirectoryPicker_StartIn){
         const handle = await selectFolderToSaveFilesTo(id, startIn)
 

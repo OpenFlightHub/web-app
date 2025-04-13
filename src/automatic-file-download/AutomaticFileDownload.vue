@@ -5,6 +5,8 @@ import FilesDownloader from '../util/files-downloader'
 
 import useMainStore from "@/stores/main"
 import api from '@/api';
+import { ApiResponse_WorkspaceGet } from 'openflighthub-api-client-sdk';
+import { RefSymbol } from '@vue/reactivity';
 const store = useMainStore()
 
 
@@ -19,43 +21,96 @@ const isSetup = ref(false)
 
 const filesThatAreBeingDownloaded = ref(0)
 
+let filesDownloader: FilesDownloader
+
+let fullSyncCheckInterval
+
 async function setup(){
     if(isSetup.value){
         return
     }
 
-    const filesDownloader = await FilesDownloader.askUserToSelectFolder('ofh-download', 'desktop')
-
-    const myWorkspaces = await api.rest.workspace.myWorkspaces.get()
-
-    await filesDownloader.setWorkspaces(myWorkspaces)
-
-    // TODO implement reactivity when new workspaces are added
-    for(const workspace of myWorkspaces){
-        api.live.subscribeToWorkspaceDronesMedia(workspace.id, async (evt, filter, data)=>{
-            filesThatAreBeingDownloaded.value ++
-
-            console.log('new drone media', data)
-
-            try {
-
-                const media = await api.rest.media.get({mediaId: data.id})
-
-                const file = await api.rest.file.get({fileId: media.file_id})
-
-                await filesDownloader.saveFileToWorkspace(data.workspace_id, '/api/file/data/' + media.file_id, file.name)
-            } catch (err){
-                console.error('failed to download media', data, err)
-            } finally {
-                filesThatAreBeingDownloaded.value --
-            }
-        })
+    if(typeof fullSyncCheckInterval === 'number'){
+        clearInterval(fullSyncCheckInterval)
     }
+
+    fullSyncCheckInterval = setInterval(makeFullSyncCheck, 1000 * 60)
+
+    filesDownloader = await FilesDownloader.askUserToSelectFolder('ofh-download', 'desktop')
+
+    makeFullSyncCheck()
 
 
     isSetup.value = true
 }
 
+const knownWorkspaceIds: number[] = []
+
+async function makeFullSyncCheck(){
+    const myWorkspaces = await api.rest.workspace.myWorkspaces.get()
+
+    await filesDownloader.setWorkspaces(myWorkspaces)
+
+    for(const workspace of myWorkspaces){
+
+        if(knownWorkspaceIds.includes(workspace.id) === false){
+            knownWorkspaceIds.push(workspace.id)
+
+            api.live.subscribeToWorkspaceDronesMedia(workspace.id, async (evt, filter, data)=>{
+                filesThatAreBeingDownloaded.value ++
+
+                console.log('new drone media', data)
+
+                try {
+
+                    const media = await api.rest.media.get({mediaId: data.id})
+
+                    const file = await api.rest.file.get({fileId: media.file_id})
+
+                    await filesDownloader.saveFileToWorkspace(data.workspace_id, '/api/file/data/' + media.file_id, file.name)
+                } catch (err){
+                    console.error('failed to download media', data, err)
+                } finally {
+                    filesThatAreBeingDownloaded.value --
+                }
+            })
+        }
+
+        const connections = await api.rest.workspace.connections.get({
+            workspaceId: workspace.id
+        })
+
+        for(const connection of connections){
+            if(typeof connection.drone_id === 'number'){
+                api.rest.drone.media.get({
+                    droneId: connection.drone_id
+                }).then(async(allMedia) => {
+
+                    for(const media of allMedia){
+
+                        const file = api.rest.file.get({fileId: media.file_id}).then(async(file) => {
+
+                            if(await filesDownloader.fileExists(workspace.id, file.name) === false){
+                                filesThatAreBeingDownloaded.value++
+                                try {
+                                    filesDownloader.saveFileToWorkspace(workspace.id, '/api/file/data/' + file.id, file.name)
+                                } catch (err){
+                                    console.warn('failed to download media', workspace.id, file.id, err)
+                                } finally {
+                                    filesThatAreBeingDownloaded.value--
+                                }
+                            }
+
+                        })
+                    }
+
+                }).catch(err => {
+                    console.error('failed to get media for drone', err)
+                })
+            }
+        }
+    }
+}
 
 const state = computed(()=>{
     if(isSetup.value){
