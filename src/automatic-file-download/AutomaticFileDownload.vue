@@ -19,7 +19,7 @@ onMounted(()=>{
 const isSetup = ref(false)
 
 
-const filesThatAreBeingDownloaded = ref(0)
+const mediaIdsThatAreBeingDownloaded = ref<number[]>([])
 
 let filesDownloader: FilesDownloader
 
@@ -81,9 +81,11 @@ async function makeFullSyncCheck(){
                 }).then(async(allMedia) => {
 
                     for(const media of allMedia){
-                        downloadMediaIfNotExists(media.id, workspace.id).catch(err => {
-                            console.error('failed to download media (full sync)', media,  err)
-                        })
+                        if(mediaIdsThatAreBeingDownloaded.value.includes(media.id) === false){
+                            downloadMediaIfNotExists(media.id, workspace.id).catch(err => {
+                                console.error('failed to download media (full sync)', media,  err)
+                            })
+                        }
                     }
 
                 }).catch(err => {
@@ -107,19 +109,19 @@ async function downloadMediaIfNotExists(mediaId: number, workspaceId: number){
     if(await filesDownloader.fileExistsOrIsEmpty(workspaceId, cleanFileName) === false){
 
         try {
-            filesThatAreBeingDownloaded.value ++
+            mediaIdsThatAreBeingDownloaded.value.push(media.id)
 
             await filesDownloader.saveFileToWorkspace(workspaceId, '/api/file/data/' + media.file_id, cleanFileName)
 
         } finally {
-            filesThatAreBeingDownloaded.value --
+            mediaIdsThatAreBeingDownloaded.value.splice(mediaIdsThatAreBeingDownloaded.value.indexOf(media.id), 1)
         }
     }
 }
 
 const state = computed(()=>{
     if(isSetup.value){
-        if(filesThatAreBeingDownloaded.value > 0){
+        if(mediaIdsThatAreBeingDownloaded.value.length > 0){
             return 'is_downloading'
         } else {
             return 'synced'
@@ -145,7 +147,7 @@ const statusIconName = computed(()=>{
     <div v-if="store.isLoggedIn && isSupported" @click="setup">
 
         <div id="status" :state="state">
-            <span v-if="state === 'is_downloading'" id="download-count">{{ filesThatAreBeingDownloaded }}</span><IconVue :name="statusIconName"></IconVue>
+            <span v-if="state === 'is_downloading'" id="download-count">{{ mediaIdsThatAreBeingDownloaded }}</span><IconVue :name="statusIconName"></IconVue>
         </div>
 
     </div>
