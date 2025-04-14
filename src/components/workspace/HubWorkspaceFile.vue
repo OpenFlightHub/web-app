@@ -33,7 +33,7 @@ function closeFullScreen(){
             <div id="actions">
                 <Padding>
                     <div>
-                        <Button><IconVue name="download" @click="downloadUrl('/api/file/data/' + props.id, file.data.name)"></IconVue></Button>
+                        <Button><IconVue name="download" @click="downloadUrl(api.getFileDataUrl(props.id), file.data.name)"></IconVue></Button>
                         <Button v-show="showFullscreen"><IconVue name="x-lg" @click.self.stop="closeFullScreen"></IconVue></Button>
                     </div>
                 </Padding>
