@@ -7,7 +7,7 @@ import RemoteControllerSnippet from '@/components/remote_controller/RemoteContro
 import DroneSnippet from '@/components/drone/DroneSnippet.vue';
 import Padding from '@/components/layout/Padding.vue';
 import List from '@/components/layout/List.vue';
-import DroneMedia from '@/components/drone/DroneMedia.vue';
+import HubWorkspaceFilePreview from '@/components/workspace/HubWorkspaceFilePreview.vue';
 
 </script>
 
@@ -35,7 +35,11 @@ import DroneMedia from '@/components/drone/DroneMedia.vue';
          <h1>Drone Media</h1>
          <LoadApi :api-method="api.rest.drone.media.get" :params="{droneId: connection.data.drone_id}" v-slot="droneMedia">
             <List :horizontal="true">
-               <DroneMedia v-for="media in droneMedia.data" :media="media"></DroneMedia>
+               <template v-for="media in droneMedia.data">
+                  <RouterLink :to="'/drone-media/' + media.id">
+                     <HubWorkspaceFilePreview  class="media_file" :id="media.file_id"></HubWorkspaceFilePreview>
+                  </RouterLink>
+               </template>
             </List>
          </LoadApi>
 
@@ -50,6 +54,11 @@ import DroneMedia from '@/components/drone/DroneMedia.vue';
    display: flex;
    flex-direction: column;
    gap: 1em;
+}
+
+.media_file {
+   height: 15em;
+   width: 15em;
 }
 
 </style>

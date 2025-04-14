@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue';
 import { ApiResponse_DroneMediaGet } from 'openflighthub-api-client-sdk';
-import HubWorkspaceFile from '../workspace/HubWorkspaceFile.vue';
 import Map from '../map/Map.vue';
-
+import api from '@/api';
 
 const props = defineProps<{
     media: ApiResponse_DroneMediaGet[0]
@@ -57,7 +56,9 @@ function parseData(){
 <template>
 
     <div id="drone-media-container">
-        <HubWorkspaceFile class="media_file" :id="props.media.file_id"></HubWorkspaceFile>
+        <div class="media_file">
+            <img :src="api.getFileDataUrl(props.media.file_id)" loading="lazy" fetchpriority="low">
+        </div>
 
         <div class="media_map">
             <Map v-if="hasValidLocationInformation" :start-longitude="cameraLongitude" :start-latitude="cameraLatitude" :start-height="cameraHeight" :start-camera-heading="cameraHeading" :start-camera-pitch="0" :disable-user-control="true" :camera-f-o-v="cameraFOV"></Map>
@@ -68,17 +69,27 @@ function parseData(){
 </template>
 
 <style scoped lang="scss">
+
 #drone-media-container {
     display: flex;
     flex-direction: row;
-    height: 15em;
+    height: 100%;
 
-    .media_file {
+    .media_file, .media_map {
+        flex-grow: 1;
         width: 50%;
     }
 
-    .media_map {
-        width: 50%;
+    .media_file {
+
+        img {
+            object-fit: contain;
+            object-position: center;
+            margin: auto;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+        }
     }
 }
 

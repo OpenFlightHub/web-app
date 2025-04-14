@@ -54,7 +54,7 @@ const router = useRouter()
                      <LoadApiWithIdParamInUrl :api-method="api.rest.workspace.files.get" :id-params="{workspaceId: undefined}" v-slot="workspaceFiles">
                         <List :horizontal="true">
                            <div v-for="file in workspaceFiles.data" :key="file.id">
-                              <HubWorkspaceFile :id="file.id"></HubWorkspaceFile>
+                              <HubWorkspaceFile :id="file.id" class="workspace_file"></HubWorkspaceFile>
                            </div>
                         </List>
                      </LoadApiWithIdParamInUrl>
@@ -71,5 +71,9 @@ const router = useRouter()
 
 <style scoped lang="scss">
 
+.workspace_file {
+   width: 15em;
+   height: 15em;
+}
 </style>
 
