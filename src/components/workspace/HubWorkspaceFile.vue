@@ -56,6 +56,10 @@ function closeFullScreen(){
     #file {
         position: relative;
         cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        width: 100%;
 
         &.fullscreen {
             position: fixed;
@@ -66,14 +70,17 @@ function closeFullScreen(){
             width: 100vw;
             background: #000;
 
-            #view {
-                background-size: contain;
+            #info {
+                position: absolute;
+                bottom: 0;
+                left: 0;
             }
         }
 
         #view {
             width: 100%;
             height: 100%;
+            flex-grow: 1;
             background: var(--neutral-darkest);
 
             img {
@@ -106,11 +113,10 @@ function closeFullScreen(){
         }
 
         #info {
-            position: absolute;
-            bottom: 0;
             width: 100%;
             background: #0006;
             font-size: 0.8em;
+            flex-grow: 0;
         }
     }
 

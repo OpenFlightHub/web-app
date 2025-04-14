@@ -37,7 +37,7 @@ import HubWorkspaceFilePreview from '@/components/workspace/HubWorkspaceFilePrev
             <List :horizontal="true">
                <template v-for="media in droneMedia.data">
                   <RouterLink :to="'/drone-media/' + media.id">
-                     <HubWorkspaceFilePreview  class="media_file" :id="media.file_id"></HubWorkspaceFilePreview>
+                     <HubWorkspaceFilePreview  class="media_file_preview" :id="media.file_id"></HubWorkspaceFilePreview>
                   </RouterLink>
                </template>
             </List>
@@ -56,7 +56,7 @@ import HubWorkspaceFilePreview from '@/components/workspace/HubWorkspaceFilePrev
    gap: 1em;
 }
 
-.media_file {
+.media_file_preview {
    height: 15em;
    width: 15em;
 }

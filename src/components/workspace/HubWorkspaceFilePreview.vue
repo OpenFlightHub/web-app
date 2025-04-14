@@ -2,10 +2,6 @@
 import LoadApi from '../functional/LoadApi.vue';
 import api from '@/api';
 import Padding from '../layout/Padding.vue';
-import { Button } from 'primevue';
-import IconVue from '../general/IconVue.vue';
-import { downloadUrl } from '@/util/download';
-import { ref } from 'vue';
 
 
 const props = defineProps<{
@@ -36,22 +32,29 @@ const props = defineProps<{
 
     #file {
         position: relative;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: 100%;
 
         #view {
-            width: 100%;
-            height: 100%;
-            background: var(--neutral-darkest);
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
+            flex-grow: 1;
+
+            img {
+                object-fit: contain;
+                object-position: center;
+                margin: auto;
+                width: 100%;
+                height: 100%;
+                background-color: #000;
+            }
         }
 
         #info {
-            position: absolute;
-            bottom: 0;
             width: 100%;
             background: #0006;
             font-size: 0.8em;
+            flex-grow: 0;
         }
     }
 
