@@ -29,7 +29,7 @@ function closeFullScreen(){
     <LoadApi :api-method="api.rest.file.get" :params="{fileId: props.id}" v-slot="file">
 
         <div id="file" :class="{fullscreen: showFullscreen}">
-            <div id="view" :style="'background-image: url(\'/api/file/data/' + props.id + '\')'" @click.self.stop="handleClick"></div>
+            <div id="view" :style="'background-image: url(\'' + ( (showFullscreen || !file.data.has_thumbnail) ? api.getFileDataUrl(props.id) : api.getFileThumbnailUrl(props.id)) + '\')'" @click.self.stop="handleClick"></div>
             <div id="actions">
                 <Padding>
                     <div>
