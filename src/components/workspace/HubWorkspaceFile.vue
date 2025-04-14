@@ -29,6 +29,7 @@ function closeFullScreen(){
     <LoadApi :api-method="api.rest.file.get" :params="{fileId: props.id}" v-slot="file">
 
         <div id="file" :class="{fullscreen: showFullscreen}">
+            <!-- TODO implement lazy loading with img tag and fetchpriority low-->
             <div id="view" :style="'background-image: url(\'' + ( (showFullscreen || !file.data.has_thumbnail) ? api.getFileDataUrl(props.id) : api.getFileThumbnailUrl(props.id)) + '\')'" @click.self.stop="handleClick"></div>
             <div id="actions">
                 <Padding>
