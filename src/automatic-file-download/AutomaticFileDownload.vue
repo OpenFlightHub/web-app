@@ -116,7 +116,7 @@ async function downloadMediaIfNotExists(mediaId: number, workspaceId: number, wo
         try {
             mediaIdsThatAreBeingDownloaded.value.push(media.id)
 
-            await droneMediaDownloader.saveDroneFile(workspaceId, workspaceName, droneId, droneName, '/api/file/data/' + media.file_id, cleanFileName)
+            await droneMediaDownloader.saveDroneFile(workspaceId, workspaceName, droneId, droneName, api.getFileDataUrl(media.file_id), cleanFileName)
 
         } finally {
             mediaIdsThatAreBeingDownloaded.value.splice(mediaIdsThatAreBeingDownloaded.value.indexOf(media.id), 1)
