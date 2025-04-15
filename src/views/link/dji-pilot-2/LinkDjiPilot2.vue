@@ -210,8 +210,8 @@ async function toggleMediaModule(){
                             <div v-for="module_state of connectionState.modules" :key="module_state.name" :class="['module_state', {connected: module_state.connected}]">{{ module_state.name }}</div>
                         </div>
 
-                        <div>
-                            <label @click.self.stop="toggleMediaModule"><Checkbox v-model="mediaModuleEnabled" :disabled="!canChangeMediaModule"></Checkbox>&nbsp;Automatic Image Upload</label>
+                        <div style="margin-bottom: 1em">
+                            <label @click.self.stop="toggleMediaModule"><Checkbox v-model="mediaModuleEnabled"></Checkbox>&nbsp;Automatic Image Upload</label>
                         </div>
 
                         <div style="display: flex; gap: 1em;">
@@ -251,7 +251,7 @@ async function toggleMediaModule(){
             width: 1em;
             border-radius: 10000px;
             margin-right: 0.5em;
-            background: var(--error);
+            background: var(--warning);
         }
 
         &.connected:before {
