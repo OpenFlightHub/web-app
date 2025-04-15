@@ -49,7 +49,7 @@ const selectedWorkspaceToLinkTo = ref(-1)
 const connectionName = ref('')
 
 const linkingIsInProgress = ref(false)
-const linkingError = ref('example link error (for debugging)')//TODO remove
+const linkingError = ref('')
 
 async function linkToWorkspace(){
     linkingIsInProgress.value = true
