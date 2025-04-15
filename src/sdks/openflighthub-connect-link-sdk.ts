@@ -290,4 +290,13 @@ export class OpenFlightHubConnectLinkClient_DjiPilot2 extends OpenFlightHubConne
     getAircraftSerialNumber(){
         return this.sdk.getAircraftSN()
     }
+
+    async toggleMediaModuleEnabled(){
+        if(this.sdk.media_moduleIsLoaded()){
+            await this.sdk.media_unloadModule()
+        } else {
+            await this.sdk.media_loadModule(true, 0, false)
+            this.sdk.media_setDownloadRemoteController('mine')//TODO check if this is required
+        }
+    }
 }

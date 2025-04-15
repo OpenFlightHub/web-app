@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue';
+import { computed, onMounted, reactive, ref } from 'vue';
 import api from '@/api';
 import { OpenFlightHubConnectLinkClient_DjiPilot2, OpenFlightHubConnectLinkManager, ConnectionState } from '@/sdks/openflighthub-connect-link-sdk';
 import LoginAndComeBackButton from '@/components/general/LoginAndComeBackButton.vue';
 import List from '@/components/layout/List.vue';
 import { ApiResponse_WorkspaceGet } from 'openflighthub-api-client-sdk';
 import { updateArray, updateObject } from '@/util/vue';
-import { Button, IftaLabel, InputText } from 'primevue';
+import { Button, IftaLabel, InputText, Checkbox } from 'primevue';
 import Snippet from '@/components/layout/Snippet.vue';
 import Padding from '@/components/layout/Padding.vue';
 
@@ -112,6 +112,34 @@ async function refreshConnectionState(){
     updateObject(connectionState, await connectLinkClient.isConnected())
 }
 
+const mediaModuleEnabled = computed(()=>{
+    const mediaModule =  connectionState.modules.find(m => m.name === 'media')
+
+    if(mediaModule?.connected){
+        return true
+    } else {
+        return false
+    }
+})
+
+const canChangeMediaModule = ref(true)
+
+async function toggleMediaModule(){
+    if(!canChangeMediaModule.value){
+        return
+    }
+
+    try {
+        canChangeMediaModule.value = false
+
+        await connectLinkClient.toggleMediaModuleEnabled()
+
+        await refreshConnectionState()
+    } finally {
+        canChangeMediaModule.value = true
+    }
+}
+
 </script>
 
 <template>
@@ -180,6 +208,10 @@ async function refreshConnectionState(){
                         <h3>State: <span v-if="connectionState.connected">{{ $t("link.is_connected") }}</span><span v-else>{{ $t("link.is_not_connected") }}</span></h3>
                         <div class="connection_state">
                             <div v-for="module_state of connectionState.modules" :key="module_state.name" :class="['module_state', {connected: module_state.connected}]">{{ module_state.name }}</div>
+                        </div>
+
+                        <div>
+                            <label @click.self.stop="toggleMediaModule"><Checkbox v-model="mediaModuleEnabled" :disabled="!canChangeMediaModule"></Checkbox>&nbsp;Automatic Image Upload</label>
                         </div>
 
                         <div style="display: flex; gap: 1em;">
