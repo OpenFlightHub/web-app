@@ -1,8 +1,12 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, reactive, ref, watch } from 'vue';
 import { ApiResponse_DroneMediaGet } from 'openflighthub-api-client-sdk';
 import Map from '../map/Map.vue';
 import api from '@/api';
+import { updateArray, updateObject } from '@/util/vue';
+import { Color, Viewer } from 'cesium';
+import MapPolygon from '../map/MapPolygon.vue';
+import MapMarker from '../map/MapMarker.vue';
 
 const props = defineProps<{
     media: ApiResponse_DroneMediaGet[0]
@@ -49,7 +53,43 @@ function parseData(){
     hasValidLocationInformation.value = false
 }
 
+type Location = {
+    position: {
+        longitude: number
+        latitude: number
+    }
+    elevation: number
+}
 
+let coverage = reactive<{
+    all: Location[],
+    outer: Location[]
+}>({all: [], outer: []})
+
+onMounted(async()=>{
+    try {
+        const response = await fetch('/api/media/ground-coverage/' + props.media.id, {
+            method: 'get',
+            credentials: 'include'
+        })
+
+        if(('' + response.status).startsWith('2') === false){
+            throw new Error(response.statusText + ': ' + await response.text())
+        }
+
+        const res = JSON.parse(await response.text())
+        updateArray(coverage.all, res.coverage.all)
+        updateArray(coverage.outer, res.coverage.outer)
+    } catch (err){
+        console.error('failed to load coverage', err)
+    }
+})
+
+
+const viewerIsLoaded = ref(false)
+let viewer: Viewer = null // if we make Viewer a reactive object, performance goes down the tube ...
+
+const mapContainer = ref<HTMLElement>(null)
 
 </script>
 
@@ -60,8 +100,13 @@ function parseData(){
             <img :src="api.getFileDataUrl(props.media.file_id)" loading="lazy" fetchpriority="low">
         </div>
 
-        <div class="media_map">
-            <Map v-if="hasValidLocationInformation" :start-longitude="cameraLongitude" :start-latitude="cameraLatitude" :start-height="cameraHeight" :start-camera-heading="cameraHeading" :start-camera-pitch="0" :disable-user-control="true" :camera-f-o-v="cameraFOV"></Map>
+        <div class="media_map" ref="mapContainer">
+            <Map v-if="hasValidLocationInformation" :start-longitude="cameraLongitude" :start-latitude="cameraLatitude" :start-height="cameraHeight" :start-camera-heading="cameraHeading" :start-camera-pitch="0" :disable-user-control="false" :camera-f-o-v="cameraFOV" @viewer-loaded="(v)=>{viewer = v; viewerIsLoaded = true}"></Map>
+
+            <template v-if="viewerIsLoaded && mapContainer && coverage.all.length > 0">
+                <MapMarker v-for="p in coverage.all" :viewer="viewer" :position="[p.position.longitude, p.position.latitude]" :map-container="mapContainer" icon-url="/images/traffic/warning.png" :icon-width="20" :icon-height="20"></MapMarker>
+            </template>
+
             <div v-else>No valid location</div>
         </div>
     </div>
