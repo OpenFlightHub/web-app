@@ -215,7 +215,7 @@ async function toggleMediaModule(){
                                 <span>Automatic Image Upload:</span>
                                 <span v-if="mediaModuleEnabled" style="color: var(--success)">Enabled</span>
                                 <span v-else style="color: var(--warning)">Disabled</span>
-                                <Button @click="toggleMediaModule" :disabled="!canChangeMediaModule">{{ mediaModuleEnabled ? 'Disable' : 'Enable' }}</Button>
+                                <Button size="small" @click="toggleMediaModule" :disabled="!canChangeMediaModule">{{ mediaModuleEnabled ? 'Disable' : 'Enable' }}</Button>
                             </div>
                         </div>
 
