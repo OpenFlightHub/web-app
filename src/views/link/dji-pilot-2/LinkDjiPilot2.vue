@@ -211,7 +211,12 @@ async function toggleMediaModule(){
                         </div>
 
                         <div style="margin-bottom: 1em">
-                            <label @click.self.stop="toggleMediaModule"><Checkbox v-model="mediaModuleEnabled"></Checkbox>&nbsp;Automatic Image Upload</label>
+                            <div style="display: flex; gap: 1em;">
+                                <span>Automatic Image Upload:</span>
+                                <span v-if="mediaModuleEnabled" style="color: var(--success)">Enabled</span>
+                                <span v-else style="color: var(--warning)">Disabled</span>
+                                <Button @click="toggleMediaModule" :disabled="!canChangeMediaModule">{{ mediaModuleEnabled ? 'Disable' : 'Enable' }}</Button>
+                            </div>
                         </div>
 
                         <div style="display: flex; gap: 1em;">
