@@ -28,6 +28,8 @@ const emit = defineEmits<{
 //TODO dont hardcode this token
 Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI5MTFkYzVkNy03ZmJkLTQyYTAtYTQ5Zi05ZDMxMGQ2YjU5N2QiLCJpZCI6MjYyNzgwLCJpYXQiOjE3MzQzNDM0NDF9.9NxftItZvbyOrcMENhulF4eKoLGI_-7lYjTkia2racg'
 
+let viewerLoadCheckInterval
+
 onMounted(()=>{
 
     viewer = new Viewer(mapContainer.value, {
@@ -44,11 +46,6 @@ onMounted(()=>{
         sceneModePicker: props.disableUserControl !== true,
         geocoder: props.disableUserControl !== true
     })
-
-    viewerIsLoaded.value = true
-
-    emit('viewer-loaded', viewer)
-
 
     //TODO currently switching to 2D crashes cesium
     // const openstreetmap = new OpenStreetMapImageryProvider({
@@ -93,6 +90,17 @@ onMounted(()=>{
     // viewer.scene.screenSpaceCameraController.enableTilt = false;
     // viewer.scene.screenSpaceCameraController.enableLook = false;
 
+    viewerLoadCheckInterval = setInterval(()=>{
+
+        if(viewer.terrainProvider){
+
+            clearInterval(viewerLoadCheckInterval)
+
+            viewerIsLoaded.value = true
+
+            emit('viewer-loaded', viewer)
+        }
+    }, 10)
 
 })
 

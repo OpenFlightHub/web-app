@@ -34,9 +34,7 @@ let bearingIndicator: Entity
 
 const myId = crypto.randomUUID()
 
-watch(()=>props.position, update, {deep: true})
-watch(()=>props.elevation, update)
-watch(()=>props.mapContainer, update)
+watch(()=>props, update, {deep: true})
 
 onMounted(update)
 
