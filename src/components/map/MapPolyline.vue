@@ -22,7 +22,7 @@ let polyline: Entity
 
 const myId = crypto.randomUUID()
 
-watch(()=>props.points, update, {deep: true})
+watch(()=>props, update, {deep: true})
 
 onMounted(update)
 onBeforeUnmount(()=>{

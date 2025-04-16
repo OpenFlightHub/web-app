@@ -24,8 +24,7 @@ let line: Entity
 
 const myId = crypto.randomUUID()
 
-watch(()=>props.from, update, {deep: true})
-watch(()=>props.to, update, {deep: true})
+watch(()=>props, update, {deep: true})
 
 onMounted(update)
 onBeforeUnmount(()=>{

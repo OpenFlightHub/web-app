@@ -106,36 +106,21 @@ const mapContainer = ref<HTMLElement>(null)
         </div>
 
         <div class="media_map" ref="mapContainer">
-            <Map v-if="hasValidLocationInformation" :start-longitude="cameraLongitude" :start-latitude="cameraLatitude" :start-height="cameraHeight" :start-camera-heading="cameraHeading" :start-camera-pitch="0" :disable-user-control="false" :camera-f-o-v="cameraFOV" @viewer-loaded="(v)=>{viewer = v; viewerIsLoaded = true}"></Map>
+            <template v-if="hasValidLocationInformation">
+                <Map :start-longitude="cameraLongitude" :start-latitude="cameraLatitude" :start-height="cameraHeight" :start-camera-heading="cameraHeading" :start-camera-pitch="0" :disable-user-control="false" :camera-f-o-v="cameraFOV" @viewer-loaded="(v)=>{viewer = v; viewerIsLoaded = true}"></Map>
 
-            <template v-if="viewerIsLoaded && coverage.all.length > 0 && false">
-                <MapLine v-for="p in coverage.all" :viewer="viewer" :from="{position: [cameraLongitude, cameraLatitude], elevation: cameraHeight}" :to="{position: [p.position.longitude, p.position.latitude], elevation: p.elevation}" :color="(p.debug === 'failed' ? Color.RED : p.debug === 'hole-start' ? Color.YELLOW : p.debug == 'hole-end' ? Color.ORANGE : Color.WHITE).withAlpha(0.4)"></MapLine>
+                <template v-if="viewerIsLoaded && coverage.all.length > 0 && false">
+                    <MapLine v-for="p in coverage.all" :viewer="viewer" :from="{position: [cameraLongitude, cameraLatitude], elevation: cameraHeight}" :to="{position: [p.position.longitude, p.position.latitude], elevation: p.elevation}" :color="(p.debug === 'failed' ? Color.RED : p.debug === 'hole-start' ? Color.YELLOW : p.debug == 'hole-end' ? Color.ORANGE : Color.WHITE).withAlpha(0.4)"></MapLine>
+                </template>
+
+                <template v-if="viewerIsLoaded && coverage.holes.length > 0">
+                    <MapPolygon v-for="hole in coverage.holes" :viewer="viewer" :points="hole" :clamp-to-ground="true" :color="Color.RED.withAlpha(0.3)" :filled="true"></MapPolygon>
+
+                </template>
+
+                <MapPolyline key="outer" v-if="viewerIsLoaded" :viewer="viewer" :points="coverage.outer.concat(coverage.outer[0])" :clamp-to-ground="true" :color="Color.GREENYELLOW.withAlpha(0.5)"></MapPolyline>
+
             </template>
-
-            <template v-if="viewerIsLoaded && coverage.holes.length > 0">
-                <MapPolygon v-for="hole in coverage.holes" :viewer="viewer" :points="hole" :clamp-to-ground="true" :color="Color.fromRandom().withAlpha(0.3)" :filled="true"></MapPolygon>
-
-            </template>
-
-            <MapPolyline v-if="viewerIsLoaded" :viewer="viewer" :points="coverage.outer.concat(coverage.outer[0])" :clamp-to-ground="true" :color="Color.GREENYELLOW.withAlpha(0.5)"></MapPolyline>
-
-            <MapPolygon v-if="viewerIsLoaded" :viewer="viewer" :points="[{
-                    position: {
-                        longitude: 10.18527063888889,
-                        latitude: 47.53088863888889
-                    }
-                }, {
-                    position: {
-                        longitude: 10.19527063888889,
-                        latitude: 47.53088863888889
-                    }
-                }, {
-                    position: {
-                        longitude: 10.19527063888889,
-                        latitude: 47.54088863888889
-                    }
-                }]" :clamp-to-ground="true" :color="Color.HOTPINK"></MapPolygon>
-
             <div v-else>No valid location</div>
         </div>
     </div>
