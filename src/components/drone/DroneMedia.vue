@@ -70,7 +70,16 @@ let coverage = reactive<{
     holes: Location[][]
 }>({all: [], outer: [], holes: []})
 
-onMounted(async()=>{
+onMounted(()=>{
+    setTimeout(()=>{
+        loadCoverage().catch(()=>{
+            setTimeout(loadCoverage, 1000 * 1)
+        })
+    }, 100)
+})
+
+async function loadCoverage(){
+
     try {
         const response = await fetch('/api/media/ground-coverage/' + props.media.id, {
             method: 'get',
@@ -87,8 +96,9 @@ onMounted(async()=>{
         updateArray(coverage.holes, res.coverage.holes)
     } catch (err){
         console.error('failed to load coverage', err)
+        throw err
     }
-})
+}
 
 
 const viewerIsLoaded = ref(false)
