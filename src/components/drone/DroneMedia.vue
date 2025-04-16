@@ -93,7 +93,11 @@ async function loadCoverage(){
         const res = JSON.parse(await response.text())
         updateArray(coverage.all, res.coverage.all)
         updateArray(coverage.outer, res.coverage.outer)
-        updateArray(coverage.holes, res.coverage.holes)
+        if(coverage.holes.length > 100){
+            alert('too many holes')
+        } else {
+            updateArray(coverage.holes, res.coverage.holes)
+        }
     } catch (err){
         console.error('failed to load coverage', err)
         throw err
