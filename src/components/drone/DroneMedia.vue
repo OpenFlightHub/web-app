@@ -7,6 +7,8 @@ import { updateArray, updateObject } from '@/util/vue';
 import { Color, Viewer } from 'cesium';
 import MapPolygon from '../map/MapPolygon.vue';
 import MapMarker from '../map/MapMarker.vue';
+import MapLine from '../map/MapLine.vue';
+import MapPolyline from '../map/MapPolyline.vue';
 
 const props = defineProps<{
     media: ApiResponse_DroneMediaGet[0]
@@ -59,12 +61,14 @@ type Location = {
         latitude: number
     }
     elevation: number
+    debug?: 'failed' | 'hole-start' | 'hole-end'
 }
 
 let coverage = reactive<{
-    all: Location[],
+    all: Location[]
     outer: Location[]
-}>({all: [], outer: []})
+    holes: Location[][]
+}>({all: [], outer: [], holes: []})
 
 onMounted(async()=>{
     try {
@@ -80,6 +84,7 @@ onMounted(async()=>{
         const res = JSON.parse(await response.text())
         updateArray(coverage.all, res.coverage.all)
         updateArray(coverage.outer, res.coverage.outer)
+        updateArray(coverage.holes, res.coverage.holes)
     } catch (err){
         console.error('failed to load coverage', err)
     }
@@ -103,9 +108,33 @@ const mapContainer = ref<HTMLElement>(null)
         <div class="media_map" ref="mapContainer">
             <Map v-if="hasValidLocationInformation" :start-longitude="cameraLongitude" :start-latitude="cameraLatitude" :start-height="cameraHeight" :start-camera-heading="cameraHeading" :start-camera-pitch="0" :disable-user-control="false" :camera-f-o-v="cameraFOV" @viewer-loaded="(v)=>{viewer = v; viewerIsLoaded = true}"></Map>
 
-            <template v-if="viewerIsLoaded && mapContainer && coverage.all.length > 0">
-                <MapMarker v-for="p in coverage.all" :viewer="viewer" :position="[p.position.longitude, p.position.latitude]" :map-container="mapContainer" icon-url="/images/traffic/warning.png" :icon-width="20" :icon-height="20"></MapMarker>
+            <template v-if="viewerIsLoaded && coverage.all.length > 0 && false">
+                <MapLine v-for="p in coverage.all" :viewer="viewer" :from="{position: [cameraLongitude, cameraLatitude], elevation: cameraHeight}" :to="{position: [p.position.longitude, p.position.latitude], elevation: p.elevation}" :color="(p.debug === 'failed' ? Color.RED : p.debug === 'hole-start' ? Color.YELLOW : p.debug == 'hole-end' ? Color.ORANGE : Color.WHITE).withAlpha(0.4)"></MapLine>
             </template>
+
+            <template v-if="viewerIsLoaded && coverage.holes.length > 0">
+                <MapPolygon v-for="hole in coverage.holes" :viewer="viewer" :points="hole" :clamp-to-ground="true" :color="Color.fromRandom().withAlpha(0.3)" :filled="true"></MapPolygon>
+
+            </template>
+
+            <MapPolyline v-if="viewerIsLoaded" :viewer="viewer" :points="coverage.outer.concat(coverage.outer[0])" :clamp-to-ground="true" :color="Color.GREENYELLOW.withAlpha(0.5)"></MapPolyline>
+
+            <MapPolygon v-if="viewerIsLoaded" :viewer="viewer" :points="[{
+                    position: {
+                        longitude: 10.18527063888889,
+                        latitude: 47.53088863888889
+                    }
+                }, {
+                    position: {
+                        longitude: 10.19527063888889,
+                        latitude: 47.53088863888889
+                    }
+                }, {
+                    position: {
+                        longitude: 10.19527063888889,
+                        latitude: 47.54088863888889
+                    }
+                }]" :clamp-to-ground="true" :color="Color.HOTPINK"></MapPolygon>
 
             <div v-else>No valid location</div>
         </div>

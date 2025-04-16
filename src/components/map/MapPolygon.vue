@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, watch } from 'vue';
-import { Cartesian3, Cartographic, Color, Entity, PolylineDashMaterialProperty, Viewer } from 'cesium';
+import { Cartesian3, Cartographic, Color, Entity, PolygonGeometry, PolylineDashMaterialProperty, Property, Viewer } from 'cesium';
 import { getElevationAtPosition } from '@/util/terrain';
 
 
@@ -16,6 +16,7 @@ const props = defineProps<{
     }[],
     clampToGround?: boolean
     color: Color
+    filled?: boolean
 }>()
 
 let polygon: Entity
@@ -50,24 +51,24 @@ async function addPolygon(){
             cartographicPosition = Cartographic.fromDegrees(p.position.longitude, p.position.latitude)
         } else if(typeof p.elevation !== 'number' || p.elevation === 0){
             cartographicPosition = await getElevationAtPosition(props.viewer, p.position.longitude, p.position.latitude)
+            cartographicPosition.height += 10
         } else {
             cartographicPosition = Cartographic.fromDegrees(p.position.longitude, p.position.latitude, p.elevation)
         }
 
         positions.push(Cartographic.toCartesian(cartographicPosition))
     }
-console.log(positions)
+
     polygon = props.viewer.entities.add({
         id: 'map-polygon-' + myId,
-
-        polyline: {
-            positions,
-            clampToGround: props.clampToGround === true,
-
-            width: 10,
-            material: new PolylineDashMaterialProperty({
-                color: props.color
-            })
+        polygon: {
+            //@ts-ignore
+            hierarchy: {
+                positions
+            },
+            filled: true,
+            material: props.color,
+            perPositionHeight: false, //props.clampToGround !== false
         }
     })
 }
