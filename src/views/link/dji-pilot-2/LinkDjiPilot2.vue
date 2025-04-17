@@ -146,7 +146,7 @@ async function toggleMediaModule(){
 
     <Padding>
         <template v-if="mustRestartRC">
-            {{ $t("link.must_restart_remote_controller")}}
+            {{ $t("link.must_restart_remote_controller_and_visit_this_page")}}
         </template>
         <template v-else>
             <template v-if="mustLoginFirst">
@@ -158,33 +158,39 @@ async function toggleMediaModule(){
 
                 <template v-if="mustLinkFirst">
 
-                    <h2>{{ $t("link.select_workspace")}}</h2>
 
-                    <List>
-                        <template v-if="selectedWorkspaceToLinkTo === -1">
+                    <template v-if="selectedWorkspaceToLinkTo === -1">
+
+                        <h2>{{ $t("link.select_workspace")}}</h2>
+
+                        <List>
                             <Snippet v-for="workspace of availableWorkspaces" :key="workspace.id" class="workspace" @click="selectedWorkspaceToLinkTo = workspace.id">
                                 <h3>{{ workspace.name }}</h3>
                             </Snippet>
-                        </template>
-                        <template v-else>
-                            <IftaLabel>
-                                <InputText id="connection-name" v-model="connectionName"/>
-                                <label for="connection-name">{{ $t("link.connection_name")}}</label>
-                            </IftaLabel>
+                        </List>
+                    </template>
+                    <template v-else>
 
-                            <Button :disabled="connectionName.length === 0 || linkingIsInProgress || !mustLinkFirst" @click="linkToWorkspace">{{ $t("link.link") }}</Button>
+                        <h2>{{ $t("link.set_name_for_link")}}</h2>
 
-                            <div v-if="linkingIsInProgress" id="linking-status">
-                                Linking ...
-                            </div>
+                        <IftaLabel>
+                            <InputText id="connection-name" v-model="connectionName"/>
+                            <label for="connection-name">{{ $t("link.connection_name")}}</label>
+                        </IftaLabel>
 
-                            <div v-if="linkingError.length > 0" id="linking-error">
-                                <h2>Linking Failed:</h2>
-                                <pre>{{ linkingError }}</pre>
-                            </div>
+                        <Button :disabled="connectionName.length === 0 || linkingIsInProgress || !mustLinkFirst" @click="linkToWorkspace">{{ $t("link.link") }}</Button>
 
-                        </template>
-                    </List>
+                        <div v-if="linkingIsInProgress" id="linking-status">
+                            Linking ...
+                        </div>
+
+                        <div v-if="linkingError.length > 0" id="linking-error">
+                            <h2>Linking Failed:</h2>
+                            <pre>{{ linkingError }}</pre>
+                        </div>
+
+                    </template>
+
                 </template>
                 <template v-else>
                     <template v-if="connectLinkClientIsLoaded">

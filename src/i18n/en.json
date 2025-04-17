@@ -19,6 +19,7 @@
     "link": {
         "linked_to": "Linked to Workspace \"{workspace}\" on {platform}",
         "select_workspace": "Select workspace to link to",
+        "set_name_for_link": "Set a name for this connection",
         "connection_name": "Connection Name",
         "link": "Link",
         "unlink_workspace": "Unlink Workspace",

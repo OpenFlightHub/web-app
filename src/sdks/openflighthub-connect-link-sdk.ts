@@ -278,7 +278,7 @@ export class OpenFlightHubConnectLinkClient_DjiPilot2 extends OpenFlightHubConne
         })
 
         return {
-            connected: modules.find(m => !m.connected) ? false : true,
+            connected: modules.filter(m=>m.name !== 'stream').find(m => !m.connected) ? false : true,// stream reports connected only when stream is live
             modules
         }
     }
