@@ -116,6 +116,11 @@ async function refreshConnectionState(){
 }
 
 const mediaModuleEnabled = computed(()=>{
+
+    if(!connectionState.modules){
+        return false
+    }
+
     const mediaModule =  connectionState.modules.find(m => m.name === 'media')
 
     if(mediaModule?.connected){
@@ -215,7 +220,7 @@ async function toggleMediaModule(){
                         <br>
 
                         <h3>State: <span v-if="connectionState.connected">{{ $t("link.is_connected") }}</span><span v-else>{{ $t("link.is_not_connected") }}</span></h3>
-                        <div class="connection_state">
+                        <div class="connection_state" v-if="connectionState.modules">
                             <div v-for="module_state of connectionState.modules" :key="module_state.name" :class="['module_state', {connected: module_state.connected}]">{{ module_state.name }}</div>
                         </div>
 
