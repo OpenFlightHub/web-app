@@ -121,7 +121,7 @@ const mapContainer = ref<HTMLElement>(null)
 
         <div class="media_map" ref="mapContainer">
             <template v-if="hasValidLocationInformation">
-                <Map :start-longitude="cameraLongitude" :start-latitude="cameraLatitude" :start-height="cameraHeight" :start-camera-heading="cameraHeading" :start-camera-pitch="0" :disable-user-control="false" :camera-f-o-v="cameraFOV" @viewer-loaded="(v)=>{viewer = v; viewerIsLoaded = true}"></Map>
+                <Map :start-point="{longitude: cameraLongitude, latitude: cameraLatitude}" :start-height="cameraHeight" :start-camera-heading="cameraHeading" :start-camera-pitch="0" :disable-user-control="false" :camera-f-o-v="cameraFOV" @viewer-loaded="(v)=>{viewer = v; viewerIsLoaded = true}"></Map>
 
                 <template v-if="viewerIsLoaded && coverage.all.length > 0 && false">
                     <MapLine v-for="p in coverage.all" :viewer="viewer" :from="{position: [cameraLongitude, cameraLatitude], elevation: cameraHeight}" :to="{position: [p.position.longitude, p.position.latitude], elevation: p.elevation}" :color="(p.debug === 'failed' ? Color.RED : p.debug === 'hole-start' ? Color.YELLOW : p.debug == 'hole-end' ? Color.ORANGE : Color.WHITE).withAlpha(0.4)"></MapLine>

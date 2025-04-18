@@ -6,11 +6,13 @@ import { Cartesian3, createOsmBuildingsAsync, Ion, Math as MathCesium, Terrain, 
 import "cesium/Build/Cesium/Widgets/widgets.css";
 
 const props = defineProps<{
-    startLongitude: number,
-    startLatitude: number,
+    startPoint: {
+        longitude: number,
+        latitude: number
+    },
     startHeight: number
-    startCameraHeading?: number
-    startCameraPitch?: number
+    startCameraHeading?: number // degree
+    startCameraPitch?: number // degree
     disableUserControl?: boolean,
     cameraFOV?: number
 }>()
@@ -54,7 +56,7 @@ onMounted(()=>{
     //viewer.imageryLayers.addImageryProvider(openstreetmap) //TODO add attribution see https://operations.osmfoundation.org/policies/tiles/
 
     viewer.camera.setView({
-        destination: Cartesian3.fromDegrees(props.startLongitude, props.startLatitude, props.startHeight),
+        destination: Cartesian3.fromDegrees(props.startPoint.longitude, props.startPoint.latitude, props.startHeight),
         orientation: {
             heading: MathCesium.toRadians(typeof props.startCameraHeading === 'number' ? props.startCameraHeading : 0),
             pitch: MathCesium.toRadians(typeof props.startCameraPitch === 'number' ? props.startCameraPitch : -15),

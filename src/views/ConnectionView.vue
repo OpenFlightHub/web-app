@@ -1,13 +1,11 @@
 <script setup lang="ts">
 import api from '@/api';
 
-import LoadApi from '@/components/functional/LoadApi.vue';
 import LoadApiWithIdParamInUrl from '@/components/functional/LoadApiWithIdParamInUrl.vue';
 import RemoteControllerSnippet from '@/components/remote_controller/RemoteControllerSnippet.vue';
 import DroneSnippet from '@/components/drone/DroneSnippet.vue';
 import Padding from '@/components/layout/Padding.vue';
 import List from '@/components/layout/List.vue';
-import HubWorkspaceFilePreview from '@/components/workspace/HubWorkspaceFilePreview.vue';
 
 </script>
 
@@ -30,18 +28,6 @@ import HubWorkspaceFilePreview from '@/components/workspace/HubWorkspaceFilePrev
                <span v-else>-</span>
             </div>
          </List>
-
-
-         <h1>Drone Media</h1>
-         <LoadApi :api-method="api.rest.drone.media.get" :params="{droneId: connection.data.drone_id}" v-slot="droneMedia">
-            <List :horizontal="true">
-               <template v-for="media in droneMedia.data">
-                  <RouterLink :to="'/drone-media/' + media.id">
-                     <HubWorkspaceFilePreview  class="media_file_preview" :id="media.file_id"></HubWorkspaceFilePreview>
-                  </RouterLink>
-               </template>
-            </List>
-         </LoadApi>
 
       </Padding>
    </LoadApiWithIdParamInUrl>
