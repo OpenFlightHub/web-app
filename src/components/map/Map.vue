@@ -2,7 +2,7 @@
 import { ApiResponse_ConnectionGet } from 'openflighthub-api-client-sdk';
 import { ref, onMounted } from 'vue';
 
-import { Cartesian3, createOsmBuildingsAsync, Ion, Math as MathCesium, Terrain, Viewer, Cartographic, OpenStreetMapImageryProvider, ScreenSpaceCameraController, PerspectiveFrustum } from "cesium";
+import { Cartesian3, createOsmBuildingsAsync, Ion, Math as MathCesium, Terrain, Viewer, Cartographic, OpenStreetMapImageryProvider, ScreenSpaceCameraController, PerspectiveFrustum, IonImageryProvider } from "cesium";
 import "cesium/Build/Cesium/Widgets/widgets.css";
 
 const props = defineProps<{
@@ -32,7 +32,7 @@ Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI5MTFkY
 
 let viewerLoadCheckInterval
 
-onMounted(()=>{
+onMounted(async()=>{
 
     viewer = new Viewer(mapContainer.value, {
         terrain: Terrain.fromWorldTerrain(),
@@ -44,10 +44,17 @@ onMounted(()=>{
         navigationInstructionsInitiallyVisible: props.disableUserControl !== true,
         //projectionPicker: props.disableUserControl !== true,
         selectionIndicator: props.disableUserControl !== true,
-        baseLayerPicker: props.disableUserControl !== true,
+        baseLayerPicker: false,
         sceneModePicker: props.disableUserControl !== true,
         geocoder: props.disableUserControl !== true
     })
+
+    const layers = viewer.scene.imageryLayers
+    layers.removeAll(true)
+    layers.addImageryProvider(
+        await IonImageryProvider.fromAssetId(3954)
+    )
+
 
     //TODO currently switching to 2D crashes cesium
     // const openstreetmap = new OpenStreetMapImageryProvider({
