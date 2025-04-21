@@ -45,7 +45,9 @@ async function setup(){
     api.live.subscribeToDronePosition(props.droneId, (evt, filter, data)=>{
         updateObject(lastDronePosition, data.position)
 
-        currentFlight.track.push(data.position)
+        if(currentFlight.track){//TODO check this can lead to a missing point on the track
+            currentFlight.track.push(data.position)
+        }
 
         emit('drone-position', data.position)
     })
