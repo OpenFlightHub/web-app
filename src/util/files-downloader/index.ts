@@ -179,3 +179,48 @@ export class DroneMediaDownloader extends WorkspaceFilesDownloader {
         return new DroneMediaDownloader(handle)
     }
 }
+
+
+export class FlightMediaDownloader extends DroneMediaDownloader {
+
+    protected async getFlightFolder(workspaceId: number, droneId: number, flightId: number){
+        const droneFolder = await this.getDroneFolder(workspaceId, droneId)
+
+        if(droneFolder === false){
+            return false
+        }
+
+        return this.getFolderById(droneFolder, flightId)
+    }
+
+    protected async createFlightFolder(workspaceId: number, workspaceName: string, droneId: number, droneName: string, flightId: number, flightName: string){
+        const droneFolder = await this.getDroneFolderOrCreate(workspaceId, workspaceName, droneId, droneName)
+        return this.createFolder(droneFolder, flightId, flightName)
+    }
+
+    protected async getFlightFolderOrCreate(workspaceId: number, workspaceName: string, droneId: number, droneName: string, flightId: number, flightName: string, renameIfRequired?: boolean){
+        const droneFolder = await this.getDroneFolderOrCreate(workspaceId, workspaceName, droneId, droneName, renameIfRequired)
+        return await this.getFolderOrCreateById(droneFolder, flightId, flightName, renameIfRequired)
+    }
+
+    async saveFlightFile(workspaceId: number, workspaceName: string, droneId: number, droneName: string, flightId: number, flightName: string, fileOrUrl: File | Blob | string, fileName: string){
+        const flightFolder = await this.getFlightFolderOrCreate(workspaceId, workspaceName, droneId, droneName, flightId, flightName)
+        return await this.saveFileToFolder(flightFolder, fileOrUrl, fileName)
+    }
+
+    async flightFileExistsAndIsNotEmpty(workspaceId: number, droneId: number, flightId: number, fileName: string){
+        const flightFolder = await this.getFlightFolder(workspaceId, droneId, flightId)
+
+        if(flightFolder === false){
+            return false
+        }
+
+        return await this.fileExistsAndIsNotEmpty(flightFolder, fileName)
+    }
+
+    static async askUserToSelectFolder(id?: string, startIn?: DirectoryPicker_StartIn){
+        const handle = await selectFolderToSaveFilesTo(id, startIn)
+
+        return new FlightMediaDownloader(handle)
+    }
+}

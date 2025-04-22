@@ -1,19 +1,17 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import IconVue from '../components/general/IconVue.vue';
-import { DroneMediaDownloader } from '../util/files-downloader'
+import { FlightMediaDownloader } from '../util/files-downloader'
 
 import useMainStore from "@/stores/main"
 import api from '@/api';
-import { ApiResponse_WorkspaceGet } from 'openflighthub-api-client-sdk';
-import { RefSymbol } from '@vue/reactivity';
 const store = useMainStore()
 
 
 const isSupported = ref(false)
 
 onMounted(()=>{
-    isSupported.value = DroneMediaDownloader.isSupported()
+    isSupported.value = FlightMediaDownloader.isSupported()
 })
 
 const isSetup = ref(false)
@@ -21,7 +19,7 @@ const isSetup = ref(false)
 
 const mediaIdsThatAreBeingDownloaded = ref<number[]>([])
 
-let droneMediaDownloader: DroneMediaDownloader
+let flightMediaDownloader: FlightMediaDownloader
 
 let fullSyncCheckInterval
 
@@ -36,7 +34,7 @@ async function setup(){
 
     fullSyncCheckInterval = setInterval(makeFullSyncCheck, 1000 * 60)
 
-    droneMediaDownloader = await DroneMediaDownloader.askUserToSelectFolder('ofh-download', 'desktop')
+    flightMediaDownloader = await FlightMediaDownloader.askUserToSelectFolder('ofh-download', 'desktop')
 
     makeFullSyncCheck()
 
@@ -49,7 +47,7 @@ const knownWorkspaceIds: number[] = []
 async function makeFullSyncCheck(){
     const myWorkspaces = await api.rest.workspace.myWorkspaces.get()
 
-    await droneMediaDownloader.setWorkspaces(myWorkspaces)
+    await flightMediaDownloader.setWorkspaces(myWorkspaces)
 
     for(const workspace of myWorkspaces){
 
@@ -65,7 +63,7 @@ async function makeFullSyncCheck(){
                     const drone = await api.rest.drone.get({droneId: data.drone_id})
                     const connection = await api.rest.connection.get({connectionId: drone.last_connection_id})
 
-                    await downloadMediaIfNotExists(data.id, workspace.id, workspace.name, data.drone_id, connection.name)
+                    await downloadMediaIfNotExists(data.id, workspace.id, workspace.name, data.drone_id, connection.name, data.flight_id, 'Flight ' + data.flight_id /* TODO implement flight name*/)
 
                 } catch (err){
                     console.error('failed to download media', data, err)
@@ -85,7 +83,10 @@ async function makeFullSyncCheck(){
 
                     for(const media of allMedia){
                         if(mediaIdsThatAreBeingDownloaded.value.includes(media.id) === false){
-                            downloadMediaIfNotExists(media.id, workspace.id, workspace.name, media.drone_id, connection.name).catch(err => {// this should not be the connection.name but drone name (not implemented yet in backend
+
+                            const flight = await api.rest.flight.get({flightId: media.flight_id})
+
+                            downloadMediaIfNotExists(media.id, workspace.id, workspace.name, media.drone_id, connection.name, media.flight_id, 'Flight ' + flight.id /* TODO add name */).catch(err => {// this should not be the connection.name but drone name (not implemented yet in backend
                                 console.error('failed to download media (full sync)', media,  err)
                             })
                         }
@@ -101,7 +102,7 @@ async function makeFullSyncCheck(){
 
 
 
-async function downloadMediaIfNotExists(mediaId: number, workspaceId: number, workspaceName: string, droneId: number, droneName: string){
+async function downloadMediaIfNotExists(mediaId: number, workspaceId: number, workspaceName: string, droneId: number, droneName: string, flightId: number, flightName: string){
 
     const media = await api.rest.media.get({mediaId})
 
@@ -111,12 +112,12 @@ async function downloadMediaIfNotExists(mediaId: number, workspaceId: number, wo
         cleanFileName = '_' + cleanFileName
     }
 
-    if(await droneMediaDownloader.droneFileExistsAndIsNotEmpty(workspaceId, droneId, cleanFileName) === false){
+    if(await flightMediaDownloader.flightFileExistsAndIsNotEmpty(workspaceId, droneId, flightId, cleanFileName) === false){
 
         try {
             mediaIdsThatAreBeingDownloaded.value.push(media.id)
 
-            await droneMediaDownloader.saveDroneFile(workspaceId, workspaceName, droneId, droneName, api.getFileDataUrl(media.file_id), cleanFileName)
+            await flightMediaDownloader.saveFlightFile(workspaceId, workspaceName, droneId, droneName, flightId, flightName, api.getFileDataUrl(media.file_id), cleanFileName)
 
         } finally {
             mediaIdsThatAreBeingDownloaded.value.splice(mediaIdsThatAreBeingDownloaded.value.indexOf(media.id), 1)
