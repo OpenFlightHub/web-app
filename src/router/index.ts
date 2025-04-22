@@ -26,6 +26,7 @@ import LinkDjiPilot2 from '@/views/link/dji-pilot-2/LinkDjiPilot2.vue';
 import Error404View from '@/views/error/Error404View.vue'
 import DroneMediaView from '@/views/DroneMediaView.vue';
 import DroneView from '@/views/DroneView.vue';
+import FlightView from '@/views/FlightView.vue';
 
 
 
@@ -164,6 +165,10 @@ export function makeRouter(pinia: Pinia){
             {
                 path: '/drone/:droneId',
                 component: DroneView
+            },
+            {
+                path: '/flight/:flightId',
+                component: FlightView
             },
             {
                 path: '/drone-media/:mediaId',

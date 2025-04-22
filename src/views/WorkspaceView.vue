@@ -11,7 +11,7 @@ import Padding from '@/components/layout/Padding.vue';
 import { useRoute, useRouter } from 'vue-router';
 import { getIdQueryFromRouteOrUseDefault } from '@/util/url';
 import LiveStream from '@/components/video/LiveStream.vue';
-import HubWorkspaceFile from '@/components/workspace/HubWorkspaceFile.vue';
+import HubWorkspaceFiles from '@/components/workspace/HubWorkspaceFiles.vue';
 import DroneSnippet from '@/components/drone/DroneSnippet.vue';
 
 const router = useRouter()
@@ -55,13 +55,9 @@ const router = useRouter()
                      </List>
                   </TabPanel>
                   <TabPanel :value="3">
-                     <LoadApiWithIdParamInUrl :api-method="api.rest.workspace.files.get" :id-params="{workspaceId: undefined}" v-slot="workspaceFiles">
-                        <List :horizontal="true">
-                           <div v-for="file in workspaceFiles.data" :key="file.id">
-                              <HubWorkspaceFile :id="file.id" class="workspace_file"></HubWorkspaceFile>
-                           </div>
-                        </List>
-                     </LoadApiWithIdParamInUrl>
+                     <LoadApiArrayWithIdParamInUrl :api-method="api.rest.workspace.files.get" :id-params="{workspaceId: undefined}" v-slot="workspaceFiles">
+                        <HubWorkspaceFiles :files="workspaceFiles.data"></HubWorkspaceFiles>
+                     </LoadApiArrayWithIdParamInUrl>
                   </TabPanel>
                   <TabPanel :value="4">
                      <List>
@@ -80,9 +76,5 @@ const router = useRouter()
 
 <style scoped lang="scss">
 
-.workspace_file {
-   width: 15em;
-   height: 15em;
-}
 </style>
 

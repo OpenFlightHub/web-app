@@ -6,46 +6,9 @@ import LoadApiWithIdParamInUrl from '@/components/functional/LoadApiWithIdParamI
 import Padding from '@/components/layout/Padding.vue';
 import List from '@/components/layout/List.vue';
 import HubWorkspaceFilePreview from '@/components/workspace/HubWorkspaceFilePreview.vue';
-import Map from '@/components/map/Map.vue';
-import { ref } from 'vue';
-import { Viewer } from 'cesium';
-import { ApiResponse_DroneCurrentflightGet } from 'openflighthub-api-client-sdk';
-import * as turf from '@turf/turf'
-import HubWorkspaceMapDrone from '@/components/workspace/HubWorkspaceMapDrone.vue';
-
-const mapContainer = ref(null as HTMLElement)
-
-const viewerIsLoaded = ref(false)
-let viewer: Viewer = null // if we make Viewer a reactive object, performance goes down the tube ...
-
-
-function getCenterPointForFlight(flight: ApiResponse_DroneCurrentflightGet){
-
-   const points = flight.track.map(t => turf.point([t.longitude, t.latitude]))
-
-   const center = turf.center(turf.featureCollection(points))
-
-   return {
-      longitude: center.geometry.coordinates[0],
-      latitude: center.geometry.coordinates[1]
-   }
-}
-
-function getMaxHeightForFlight(flight: ApiResponse_DroneCurrentflightGet){
-   let maxHeight = -1
-
-   for(const t of flight.track){
-      if(t.height > maxHeight){
-         maxHeight = t.height
-      }
-   }
-
-   if(flight.track.length === 0){
-      return 3000
-   }
-
-   return maxHeight
-}
+import TimestampDisplay from '@/components/display/TimestampDisplay.vue';
+import SmartTable from '@/components/general/SmartTable.vue';
+import LoadApiArray from '@/components/functional/LoadApiArray.vue';
 
 </script>
 
@@ -55,30 +18,32 @@ function getMaxHeightForFlight(flight: ApiResponse_DroneCurrentflightGet){
       <Padding id="outer">
          <h1>Drone {{ drone.data.name }}</h1>
 
-         <h1>Current Flight</h1>
+         <h1>Flights</h1>
 
-         <LoadApi :api-method="api.rest.drone.currentFlight.get" :params="{droneId: drone.data.id}" v-slot="currentFlight">
+         <LoadApiArray :api-method="api.rest.drone.flights.get" :params="{droneId: drone.data.id}" v-slot="flights">
 
-            <div id="map-container" ref="mapContainer">
-               <template v-if="currentFlight.data.track.length === 0">
-                  Invalid Location
+            <SmartTable :column-labels="{id: 'ID', started_at: 'Takeoff at', landed_at: 'Landed at', ended_at: 'Ended at'}" :data="flights.data" sort-by-id="desc">
+
+               <template #cell(id)="data">
+                  {{ data.value }}&nbsp;<RouterLink :to="'/flight/' + data.row.id">view details</RouterLink>
                </template>
-               <template v-else>
-
-                  <Map id="map" :start-point="getCenterPointForFlight(currentFlight.data)" :start-height="getMaxHeightForFlight(currentFlight.data) + 200" :start-camera-pitch="-90" @viewer-loaded="(v)=>{viewer = v; viewerIsLoaded = true}"></Map>
-
-                  <template v-if="viewerIsLoaded">
-
-                     <HubWorkspaceMapDrone :drone-id="drone.data.id" :viewer="viewer" :map-container="mapContainer" :show-current-flight="true"></HubWorkspaceMapDrone>
-
-                  </template>
+               <template #cell(started_at)="data">
+                  <TimestampDisplay v-if="data.value" :timestamp="data.value"></TimestampDisplay>
+                  <span v-else>-</span>
                </template>
+               <template #cell(landed_at)="data">
+                  <TimestampDisplay v-if="data.value" :timestamp="data.value"></TimestampDisplay>
+                  <span v-else>-</span>
+               </template>
+               <template #cell(ended_at)="data">
+                  <TimestampDisplay v-if="data.value" :timestamp="data.value"></TimestampDisplay>
+                  <span v-else>-</span>
+               </template>
+            </SmartTable>
+         </LoadApiArray>
 
-            </div>
-         </LoadApi>
 
-
-         <h1>Drone Media</h1>
+         <h1>All Drone Media</h1>
          <LoadApi :api-method="api.rest.drone.media.get" :params="{droneId: drone.data.id}" v-slot="droneMedia">
             <List :horizontal="true">
                <template v-for="media in droneMedia.data">

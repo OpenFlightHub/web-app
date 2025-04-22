@@ -18,10 +18,11 @@
     "@types/ovenplayer": "^0.10.12",
     "cesium": "^1.124.0",
     "dayjs": "^1.11.13",
-    "openflighthub-api-client-sdk": "^2.10.1",
+    "openflighthub-api-client-sdk": "^2.11.0",
     "ovenplayer": "^0.10.37",
     "pinia": "^3.0.2",
     "primevue": "^4.2.4",
+    "string-similarity-js": "^2.1.4",
     "vue": "^3.5.11",
     "vue-i18n": "^11.1.3",
     "vue-router": "^4.4.5"
