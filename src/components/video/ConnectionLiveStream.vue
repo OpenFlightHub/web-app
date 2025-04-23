@@ -25,7 +25,7 @@ const showFullscreen = ref(false)
         <div id="top-info">
             <span>Connection {{ props.connectionId }}</span>
         </div>
-        <IconVue id="close" :name="showFullscreen ? 'x-lg' : 'arrows-fullscreen'" @click="showFullscreen = !showFullscreen"></IconVue>
+        <IconVue id="fullscreen-toggle" :name="showFullscreen ? 'x-lg' : 'arrows-fullscreen'" @click="showFullscreen = !showFullscreen"></IconVue>
         <LiveVideo v-if="myStreamToken" class="live_video" :ws-url="'wss://stream.openflighthub.org:3334/ofh/' + props.connectionId + '?auth=' + myStreamToken" :hide-controls="true"></LiveVideo>
     </div>
 
@@ -42,22 +42,15 @@ const showFullscreen = ref(false)
     cursor: pointer;
     background-color: var(--neutral-darkest);
 
-    #close {
+    #fullscreen-toggle {
         position: absolute;
         font-size: 1.3em;
         top: 0.5em;
         right: 0.5em;
         color: var(--primary);
-        display: none;
 
         &:hover {
             color: var(--neutral-light);
-        }
-    }
-
-    &:hover {
-        #close {
-            display: block;
         }
     }
 
