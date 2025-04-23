@@ -10,7 +10,7 @@ import { Tabs, TabList, Tab, TabPanels, TabPanel } from 'primevue';
 import Padding from '@/components/layout/Padding.vue';
 import { useRoute, useRouter } from 'vue-router';
 import { getIdQueryFromRouteOrUseDefault } from '@/util/url';
-import LiveStream from '@/components/video/LiveStream.vue';
+import ConnectionLiveStream from '@/components/video/ConnectionLiveStream.vue';
 import HubWorkspaceFiles from '@/components/workspace/HubWorkspaceFiles.vue';
 import DroneSnippet from '@/components/drone/DroneSnippet.vue';
 
@@ -48,10 +48,7 @@ const router = useRouter()
                   </TabPanel>
                   <TabPanel :value="2">
                      <List :horizontal="true">
-                        <div v-for="connection in connections.data" style="width: 300px; height: 200px" :key="connection.id">
-                           <span>Connection {{ connection.id }}</span>
-                           <LiveStream :id="connection.id"></LiveStream>
-                        </div>
+                        <ConnectionLiveStream v-for="connection in connections.data" :key="connection.id" :connectionId="connection.id"></ConnectionLiveStream>
                      </List>
                   </TabPanel>
                   <TabPanel :value="3">

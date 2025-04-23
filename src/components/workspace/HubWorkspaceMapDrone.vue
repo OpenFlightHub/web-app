@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import { ApiResponse_ConnectionGet, ApiResponse_DroneLastpositionGet, ApiResponse_RemotecontrollerLastpositionGet, ApiResponse_DroneLastbatteryGet, ApiResponse_DroneGet, ApiResponse_DroneCurrentflightGet } from 'openflighthub-api-client-sdk';
+import { ApiResponse_DroneLastpositionGet, ApiResponse_DroneLastbatteryGet, ApiResponse_DroneGet, ApiResponse_DroneCurrentflightGet } from 'openflighthub-api-client-sdk';
 import MapMarker from '../map/MapMarker.vue';
 import { Color, Viewer } from 'cesium';
 import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { updateObject } from '@/util/vue';
 import api from '@/api';
-import MapLine from '../map/MapLine.vue';
-import LiveStream from '../video/LiveStream.vue';
+import ConnectionLiveStream from '../video/ConnectionLiveStream.vue';
 import MapPolyline from '../map/MapPolyline.vue';
 
 const props = defineProps<{
@@ -124,7 +123,7 @@ const currentFlight = reactive({} as ApiResponse_DroneCurrentflightGet)
 
             <br/>
 
-            <LiveStream v-if="infoHasBeenShownAtLeastOnce" :id="drone.last_connection_id"></LiveStream>
+            <ConnectionLiveStream v-if="infoHasBeenShownAtLeastOnce && (typeof drone.last_connection_id === 'number')" :connection-id="drone.last_connection_id"></ConnectionLiveStream>
         </div>
 
     </div>
