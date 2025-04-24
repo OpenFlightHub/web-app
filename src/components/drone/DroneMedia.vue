@@ -9,6 +9,8 @@ import MapPolygon from '../map/MapPolygon.vue';
 import MapMarker from '../map/MapMarker.vue';
 import MapLine from '../map/MapLine.vue';
 import MapPolyline from '../map/MapPolyline.vue';
+import HubWorkspaceFile from '../workspace/HubWorkspaceFile.vue';
+import LoadApi from '../functional/LoadApi.vue';
 
 const props = defineProps<{
     media: ApiResponse_DroneMediaGet[0]
@@ -116,7 +118,9 @@ const mapContainer = ref<HTMLElement>(null)
 
     <div id="drone-media-container">
         <div class="media_file">
-            <img :src="api.getFileDataUrl(props.media.file_id)" loading="lazy" fetchpriority="low">
+            <LoadApi :api-method="api.rest.file.get" :params="{fileId: props.media.file_id}" v-slot="file">
+                <HubWorkspaceFile :file="file.data"></HubWorkspaceFile>
+            </LoadApi>
         </div>
 
         <div class="media_map" ref="mapContainer">
