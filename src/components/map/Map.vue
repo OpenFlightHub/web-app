@@ -2,8 +2,9 @@
 import { ApiResponse_ConnectionGet } from 'openflighthub-api-client-sdk';
 import { ref, onMounted } from 'vue';
 
-import { Cartesian3, createOsmBuildingsAsync, Ion, Math as MathCesium, Terrain, Viewer, Cartographic, OpenStreetMapImageryProvider, ScreenSpaceCameraController, PerspectiveFrustum, IonImageryProvider } from "cesium";
+import { Cartesian3, createOsmBuildingsAsync, Ion, Math as MathCesium, Terrain, Viewer, Cartographic, OpenStreetMapImageryProvider, ScreenSpaceCameraController, PerspectiveFrustum, IonImageryProvider, BaseLayerPicker } from "cesium";
 import "cesium/Build/Cesium/Widgets/widgets.css";
+import { getSetting } from '@/util/settings';
 
 const props = defineProps<{
     startPoint: {
@@ -44,7 +45,7 @@ onMounted(async()=>{
         navigationInstructionsInitiallyVisible: props.disableUserControl !== true,
         //projectionPicker: props.disableUserControl !== true,
         selectionIndicator: props.disableUserControl !== true,
-        baseLayerPicker: false,
+        baseLayerPicker: getSetting('allow-bing-maps') === true,
         sceneModePicker: props.disableUserControl !== true,
         geocoder: props.disableUserControl !== true
     })

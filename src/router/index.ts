@@ -5,6 +5,7 @@ import type { Pinia } from 'pinia'
 
 
 import HomeView from '@/views/HomeView.vue'
+import SettingsView from '@/views/SettingsView.vue'
 
 //Auth
 import AuthView from '@/views/auth/AuthView.vue';
@@ -173,6 +174,11 @@ export function makeRouter(pinia: Pinia){
             {
                 path: '/drone-media/:mediaId',
                 component: DroneMediaView
+            },
+
+            {
+                path: '/settings',
+                component: SettingsView
             },
 
             {
