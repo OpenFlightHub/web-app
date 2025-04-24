@@ -5,12 +5,13 @@ import Padding from '../layout/Padding.vue';
 import { Button } from 'primevue';
 import IconVue from '../general/IconVue.vue';
 import { downloadUrl } from '@/util/download';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { ApiResponse_FileGet } from 'openflighthub-api-client-sdk';
 
 
 const props = defineProps<{
     file: ApiResponse_FileGet
+    alwaysLoadOriginal?: boolean
 }>()
 
 const showFullscreen = ref(false)
@@ -23,14 +24,18 @@ function closeFullScreen(){
     showFullscreen.value = false
 }
 
+const showOriginal = computed(()=>{
+    return showFullscreen || !props.file.has_thumbnail || props.alwaysLoadOriginal === true
+})
+
 </script>
 
 <template>
 
     <div id="file" :class="{fullscreen: showFullscreen}">
         <div id="view" @click.stop="handleClick">
-            <img v-show="showFullscreen || !props.file.has_thumbnail" :src="api.getFileDataUrl(props.file.id)" loading="lazy" fetchpriority="low">
-            <img v-show="!showFullscreen && props.file.has_thumbnail" :src="api.getFileThumbnailUrl(props.file.id)" loading="lazy" fetchpriority="low">
+            <img v-show="showOriginal" :src="api.getFileDataUrl(props.file.id)" loading="lazy" fetchpriority="low">
+            <img v-show="!showOriginal" :src="api.getFileThumbnailUrl(props.file.id)" loading="lazy" fetchpriority="low">
         </div>
         <div id="actions">
             <Padding>

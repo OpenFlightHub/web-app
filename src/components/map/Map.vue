@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { ApiResponse_ConnectionGet } from 'openflighthub-api-client-sdk';
 import { ref, onMounted } from 'vue';
 
-import { Cartesian3, createOsmBuildingsAsync, Ion, Math as MathCesium, Terrain, Viewer, Cartographic, OpenStreetMapImageryProvider, ScreenSpaceCameraController, PerspectiveFrustum, IonImageryProvider, BaseLayerPicker } from "cesium";
+import { Cartesian3, Ion, Math as MathCesium, Terrain, Viewer, Cartographic, PerspectiveFrustum, IonImageryProvider } from "cesium";
 import "cesium/Build/Cesium/Widgets/widgets.css";
 import { getSetting } from '@/util/settings';
 
@@ -63,21 +62,7 @@ onMounted(async()=>{
     // })
     //viewer.imageryLayers.addImageryProvider(openstreetmap) //TODO add attribution see https://operations.osmfoundation.org/policies/tiles/
 
-    viewer.camera.setView({
-        destination: Cartesian3.fromDegrees(props.startPoint.longitude, props.startPoint.latitude, props.startHeight),
-        orientation: {
-            heading: MathCesium.toRadians(typeof props.startCameraHeading === 'number' ? props.startCameraHeading : 0),
-            pitch: MathCesium.toRadians(typeof props.startCameraPitch === 'number' ? props.startCameraPitch : -15),
-        }
-    })
-
-    if(typeof props.cameraFOV === 'number'){
-
-        viewer.camera.frustum = new PerspectiveFrustum({
-            fov: MathCesium.toRadians(props.cameraFOV),
-            aspectRatio: viewer.canvas.clientWidth / viewer.canvas.clientHeight
-        })
-    }
+    resetCamera()
 
     /*
     // Add Cesium OSM Buildings, a global 3D buildings layer.
@@ -114,11 +99,33 @@ onMounted(async()=>{
 
 })
 
+function resetCamera(){
+
+    viewer.camera.setView({
+        destination: Cartesian3.fromDegrees(props.startPoint.longitude, props.startPoint.latitude, props.startHeight),
+        orientation: {
+            heading: MathCesium.toRadians(typeof props.startCameraHeading === 'number' ? props.startCameraHeading : 0),
+            pitch: MathCesium.toRadians(typeof props.startCameraPitch === 'number' ? props.startCameraPitch : -15),
+        }
+    })
+
+    if(typeof props.cameraFOV === 'number'){
+
+        viewer.camera.frustum = new PerspectiveFrustum({
+            fov: MathCesium.toRadians(props.cameraFOV),
+            aspectRatio: viewer.canvas.clientWidth / viewer.canvas.clientHeight
+        })
+    }
+}
+
 </script>
 
 <template>
 
     <div id="map" ref="mapContainer">
+
+        <slot v-bind="{resetCamera}"></slot>
+
     </div>
 
 </template>

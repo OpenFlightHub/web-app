@@ -70,9 +70,11 @@
 
     "time_and_data": {
         "time": {
+            "d": "0 days | {n} day | {n} days",
             "h": "0 hours | {n} hour | {n} hours",
             "m": "0 mins | {n} min | {n} mins",
-            "s": "0 secs | {n} sec | {n} secs"
+            "s": "0 secs | {n} sec | {n} secs",
+            "ms": "0 ms | {n} ms | {n} ms"
         },
         "duration": "Duration",
         "formats": {

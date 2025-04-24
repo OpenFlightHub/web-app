@@ -3,14 +3,17 @@ import { onMounted, reactive, ref, watch } from 'vue';
 import { ApiResponse_DroneMediaGet } from 'openflighthub-api-client-sdk';
 import Map from '../map/Map.vue';
 import api from '@/api';
-import { updateArray, updateObject } from '@/util/vue';
+import { updateArray } from '@/util/vue';
 import { Color, Viewer } from 'cesium';
 import MapPolygon from '../map/MapPolygon.vue';
-import MapMarker from '../map/MapMarker.vue';
 import MapLine from '../map/MapLine.vue';
 import MapPolyline from '../map/MapPolyline.vue';
 import HubWorkspaceFile from '../workspace/HubWorkspaceFile.vue';
 import LoadApi from '../functional/LoadApi.vue';
+import { Button } from 'primevue';
+import TimestampDisplay from '../display/TimestampDisplay.vue';
+import dayjs from 'dayjs';
+import TimeDisplay from '../display/TimeDisplay.vue';
 
 const props = defineProps<{
     media: ApiResponse_DroneMediaGet[0]
@@ -19,42 +22,49 @@ const props = defineProps<{
 
 onMounted(parseData)
 watch(()=>{
-    return props.media.meta
-}, parseData)
+    return props.media
+}, parseData, {deep: true})
 
 const cameraLongitude = ref(0)
 const cameraLatitude = ref(0)
 const cameraHeight = ref(0)
 const cameraHeading = ref(0)
+const cameraPitch = ref(0)
 const cameraFOV = ref(0)
 
 const hasValidLocationInformation = ref(false)
+const hasValidHeightInformation = ref(false)
+const hasValidCameraAngleInformation = ref(false)
 
 function parseData(){
-    try {
-        const parsedMeta = JSON.parse(props.media.meta)
 
-        //TODO this should not be done in the frontend
-        //TODO read gimbal pitch from exif data
-
-        if(typeof parsedMeta.metadata?.shoot_position?.lat === 'number' && typeof parsedMeta.metadata?.shoot_position?.lng === 'number' && typeof parsedMeta.metadata?.absolute_altitude === 'number' && typeof parsedMeta.metadata?.gimbal_yaw_degree === 'number'){
-            cameraLongitude.value = parsedMeta.metadata.shoot_position.lng
-            cameraLatitude.value = parsedMeta.metadata.shoot_position.lat
-            cameraHeight.value = parsedMeta.metadata.absolute_altitude
-            cameraHeading.value = parsedMeta.metadata.gimbal_yaw_degree - 14 //TODO fix heading, looks like gimbal yaw degree is not correct
-            cameraFOV.value = 48.5 //is Thermal Image of Mavic3 TODO make it work for visual images too
-
-            if(!(cameraLongitude.value === 0 && cameraLatitude.value === 0)){
-                hasValidLocationInformation.value = true
-            }
-
-            return
-        }
-    } catch (err){
-        // ignore
+    hasValidLocationInformation.value = !!props.media.camera_location?.position
+    if(hasValidLocationInformation.value){
+        cameraLongitude.value = props.media.camera_location.position.longitude
+        cameraLatitude.value = props.media.camera_location.position.latitude
+    } else {
+        return
     }
 
-    hasValidLocationInformation.value = false
+    hasValidHeightInformation.value = typeof props.media.camera_location?.height === 'number'
+
+    if(hasValidHeightInformation.value){
+        cameraHeight.value = props.media.camera_location.height
+    }
+
+    if(typeof props.media.camera_angles?.heading === 'number'){
+        cameraHeading.value = props.media.camera_angles.heading
+    }
+
+    if(typeof props.media.camera_angles?.pitch === 'number'){
+        cameraPitch.value = props.media.camera_angles.pitch
+    }
+
+    hasValidCameraAngleInformation.value = typeof props.media.camera_angles?.heading === 'number' && typeof props.media.camera_angles?.pitch === 'number'
+
+    // cameraHeading.value = parsedMeta.metadata.gimbal_yaw_degree - 14 //TODO fix heading, looks like gimbal yaw degree is not correct
+
+    cameraFOV.value = 48.5 //is Thermal Image of Mavic3 TODO make it work for visual images too
 }
 
 type Location = {
@@ -118,14 +128,39 @@ const mapContainer = ref<HTMLElement>(null)
 
     <div id="drone-media-container">
         <div class="media_file">
-            <LoadApi :api-method="api.rest.file.get" :params="{fileId: props.media.file_id}" v-slot="file">
-                <HubWorkspaceFile :file="file.data"></HubWorkspaceFile>
-            </LoadApi>
+            <div class="file">
+                <LoadApi :api-method="api.rest.file.get" :params="{fileId: props.media.file_id}" v-slot="file">
+                    <HubWorkspaceFile :file="file.data" always-load-original class="workspace_file"></HubWorkspaceFile>
+                </LoadApi>
+            </div>
+            <div class="info">
+                <div>
+                    Captured at: <TimestampDisplay v-if="props.media.captured_at" :timestamp="props.media.captured_at"></TimestampDisplay><span v-else>?</span>
+                </div>
+                <div>
+                    Uploaded at: <TimestampDisplay :timestamp="props.media.received_at"></TimestampDisplay>&nbsp;(<TimeDisplay v-if="props.media.captured_at" :time-in-ms="dayjs(props.media.received_at).diff(props.media.captured_at, 'ms')" lowest="s"></TimeDisplay>&nbsp;later)
+                </div>
+                <div>
+                    Location:
+                    <div v-if="props.media.camera_location" style="padding-left: 1em">
+                        <div>Lng {{ props.media.camera_location.position?.longitude }}</div>
+                        <div>Lat {{ props.media.camera_location.position?.latitude }}</div>
+                        <div v-if="typeof props.media.camera_location?.height === 'number'">{{ props.media.camera_location?.height }} MSL</div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="media_map" ref="mapContainer">
             <template v-if="hasValidLocationInformation">
-                <Map :start-point="{longitude: cameraLongitude, latitude: cameraLatitude}" :start-height="cameraHeight" :start-camera-heading="cameraHeading" :start-camera-pitch="0" :disable-user-control="false" :camera-f-o-v="cameraFOV" @viewer-loaded="(v)=>{viewer = v; viewerIsLoaded = true}"></Map>
+
+                <Map :start-point="{longitude: cameraLongitude, latitude: cameraLatitude}" :start-height="hasValidHeightInformation ? cameraHeight : 1000" :start-camera-heading="hasValidCameraAngleInformation ? cameraHeading : undefined" :start-camera-pitch="hasValidCameraAngleInformation ? cameraPitch : -90" :disable-user-control="false" :camera-f-o-v="cameraFOV" @viewer-loaded="(v)=>{viewer = v; viewerIsLoaded = true}" v-slot="map">
+
+                    <div id="reset-camera-view">
+                        <Button @click="map.resetCamera()">Reset</Button>
+                    </div>
+
+                </Map>
 
                 <template v-if="viewerIsLoaded && coverage.all.length > 0 && false">
                     <MapLine v-for="p in coverage.all" :viewer="viewer" :from="{position: [cameraLongitude, cameraLatitude], elevation: cameraHeight}" :to="{position: [p.position.longitude, p.position.latitude], elevation: p.elevation}" :color="(p.debug === 'failed' ? Color.RED : p.debug === 'hole-start' ? Color.YELLOW : p.debug == 'hole-end' ? Color.ORANGE : Color.WHITE).withAlpha(0.4)"></MapLine>
@@ -136,7 +171,7 @@ const mapContainer = ref<HTMLElement>(null)
 
                 </template>
 
-                <MapPolyline key="outer" v-if="viewerIsLoaded" :viewer="viewer" :points="coverage.outer.concat(coverage.outer[0])" :clamp-to-ground="true" :color="Color.GREENYELLOW.withAlpha(0.5)"></MapPolyline>
+                <MapPolyline key="outer" v-if="viewerIsLoaded" :viewer="viewer" :points="coverage.outer.length === 0 ? [] : coverage.outer.concat(coverage.outer[0])" :clamp-to-ground="true" :color="Color.GREENYELLOW.withAlpha(0.5)"></MapPolyline>
 
             </template>
             <div v-else>No valid location</div>
@@ -158,14 +193,31 @@ const mapContainer = ref<HTMLElement>(null)
     }
 
     .media_file {
+        display: flex;
+        flex-direction: column;
 
-        img {
-            object-fit: contain;
-            object-position: center;
-            margin: auto;
+        .file {
+            flex-grow: 1;
+            flex-shrink: 1;
+            flex-basis: 0;
+            display: flex;
+        }
+    }
+
+    .media_map {
+        position: relative;
+
+        #reset-camera-view {
+            position: absolute;
+            z-index: 1;
+            top: 0;
+            left: 50%;
+            padding: 0.5em;
+            transform: translateX(-50%);
             width: 100%;
-            height: 100%;
-            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
     }
 }
