@@ -14,6 +14,7 @@ import { Button } from 'primevue';
 import TimestampDisplay from '../display/TimestampDisplay.vue';
 import dayjs from 'dayjs';
 import TimeDisplay from '../display/TimeDisplay.vue';
+import MapMarker from '../map/MapMarker.vue';
 
 const props = defineProps<{
     media: ApiResponse_DroneMediaGet[0]
@@ -161,6 +162,8 @@ const mapContainer = ref<HTMLElement>(null)
                     </div>
 
                 </Map>
+
+                <MapMarker :viewer="viewer" :map-container="mapContainer" :position="[cameraLongitude, cameraLatitude]" :elevation="hasValidHeightInformation ? cameraHeight : undefined" :bearing="hasValidCameraAngleInformation ? cameraHeading : undefined" icon-url="/images/drone/icon_simple.png" :icon-width="32" :icon-height="32" :color="Color.CYAN"></MapMarker>
 
                 <template v-if="viewerIsLoaded && coverage.all.length > 0 && false">
                     <MapLine v-for="p in coverage.all" :viewer="viewer" :from="{position: [cameraLongitude, cameraLatitude], elevation: cameraHeight}" :to="{position: [p.position.longitude, p.position.latitude], elevation: p.elevation}" :color="(p.debug === 'failed' ? Color.RED : p.debug === 'hole-start' ? Color.YELLOW : p.debug == 'hole-end' ? Color.ORANGE : Color.WHITE).withAlpha(0.4)"></MapLine>
