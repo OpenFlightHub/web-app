@@ -154,7 +154,7 @@ const mapContainer = ref<HTMLElement>(null)
         <div class="media_map" ref="mapContainer">
             <template v-if="hasValidLocationInformation">
 
-                <Map :start-point="{longitude: cameraLongitude, latitude: cameraLatitude}" :start-height="hasValidHeightInformation ? cameraHeight : 1000" :start-camera-heading="hasValidCameraAngleInformation ? cameraHeading : undefined" :start-camera-pitch="hasValidCameraAngleInformation ? cameraPitch : -90" :disable-user-control="false" :camera-f-o-v="cameraFOV" @viewer-loaded="(v)=>{viewer = v; viewerIsLoaded = true}" v-slot="map">
+                <Map :start-point="{longitude: cameraLongitude, latitude: cameraLatitude}" :start-height="hasValidHeightInformation ? cameraHeight : 10000" :start-camera-heading="hasValidCameraAngleInformation ? cameraHeading : undefined" :start-camera-pitch="hasValidCameraAngleInformation ? cameraPitch : -90" :disable-user-control="false" :camera-f-o-v="cameraFOV" @viewer-loaded="(v)=>{viewer = v; viewerIsLoaded = true}" v-slot="map">
 
                     <div id="reset-camera-view">
                         <Button @click="map.resetCamera()">Reset</Button>
