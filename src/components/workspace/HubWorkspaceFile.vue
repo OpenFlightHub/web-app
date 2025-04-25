@@ -15,9 +15,13 @@ const props = defineProps<{
 }>()
 
 const showFullscreen = ref(false)
+const wasFullscreenAtLeastOnce = ref(false)
 
 function handleClick(){
     showFullscreen.value = !showFullscreen.value
+    if(showFullscreen.value){
+        wasFullscreenAtLeastOnce.value = true
+    }
 }
 
 function closeFullScreen(){
@@ -25,7 +29,7 @@ function closeFullScreen(){
 }
 
 const showOriginal = computed(()=>{
-    return showFullscreen || !props.file.has_thumbnail || props.alwaysLoadOriginal === true
+    return showFullscreen.value || !props.file.has_thumbnail || props.alwaysLoadOriginal === true
 })
 
 </script>
@@ -81,17 +85,20 @@ const showOriginal = computed(()=>{
         }
 
         #view {
-            width: 100%;
-            height: 100%;
+            display: flex;
+            position: relative;
             flex-grow: 1;
             background: var(--neutral-darkest);
 
             img {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
                 object-fit: contain;
                 object-position: center;
                 margin: auto;
-                width: 100%;
-                height: 100%;
                 background-color: #000;
             }
         }
