@@ -37,7 +37,7 @@ const router = useRouter()
                </TabList>
                <TabPanels>
                   <TabPanel :value="0">
-                     <HubWorkspaceMap :connections="connections.data" style="width: 100%; height: 70vh;"></HubWorkspaceMap>
+                     <HubWorkspaceMap :connections="connections.data" :longitude="workspace.data.longitude" :latitude="workspace.data.latitude" style="width: 100%; height: 70vh;"></HubWorkspaceMap>
                   </TabPanel>
                   <TabPanel :value="1">
                      <List>

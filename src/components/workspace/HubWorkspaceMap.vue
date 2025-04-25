@@ -15,6 +15,8 @@ import Map from '../map/Map.vue';
 
 const props = defineProps<{
     connections: ApiResponse_ConnectionGet[]
+    longitude: number
+    latitude: number
 }>()
 
 const mapContainer = ref(null as HTMLElement)
@@ -31,7 +33,7 @@ const showMedia = ref(false)
 
     <div id="outer-container">
         <div id="map-container" ref="mapContainer">
-            <Map id="map" :start-point="{longitude: 10.31261, latitude: 47.48063}" :start-height="3200" @viewer-loaded="(v)=>{viewer = v; viewerIsLoaded = true}"></Map>
+            <Map id="map" :start-point="{longitude: props.longitude, latitude: props.latitude}" :start-height="10000" :start-camera-pitch="-90" @viewer-loaded="(v)=>{viewer = v; viewerIsLoaded = true}"></Map>
 
             <template v-if="viewerIsLoaded && geoidIsLoaded">
                 <HubWorkspaceMapConnection v-for="connection in props.connections" :key="connection.id" :map-container="mapContainer" :connection="connection" :viewer="viewer"></HubWorkspaceMapConnection>
