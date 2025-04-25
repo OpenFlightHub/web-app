@@ -55,7 +55,6 @@ async function load(){
 <style scoped lang="scss">
     #container {
         position: relative;
-        flex-grow: 1;
 
         #overlay {
             position: absolute;

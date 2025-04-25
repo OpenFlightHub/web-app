@@ -129,7 +129,7 @@ const mapContainer = ref<HTMLElement>(null)
     <div id="drone-media-container">
         <div class="media_file">
             <div class="file">
-                <LoadApi :api-method="api.rest.file.get" :params="{fileId: props.media.file_id}" v-slot="file">
+                <LoadApi class="load_api" :api-method="api.rest.file.get" :params="{fileId: props.media.file_id}" v-slot="file">
                     <HubWorkspaceFile :file="file.data" always-load-original class="workspace_file"></HubWorkspaceFile>
                 </LoadApi>
             </div>
@@ -201,6 +201,10 @@ const mapContainer = ref<HTMLElement>(null)
             flex-shrink: 1;
             flex-basis: 0;
             display: flex;
+
+            .load_api {
+                flex-grow: 1;
+            }
         }
     }
 
