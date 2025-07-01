@@ -200,7 +200,7 @@ const viewSize = reactive({
                             </Padding>
 
                             <template v-slot:marker>
-                                <IconVue name="person-arms-up" :style="{'color':'#0f0', 'font-size': '' + (1.8 * currentFocusPoint.location.meterSize.vertical * viewSize.height) + 'px'}"></IconVue>
+                                <IconVue name="person-arms-up" :style="{'color':'#0f0', 'font-size': '' + (1.8 /* average human size */ * currentFocusPoint.location.meterSize.vertical * viewSize.height) + 'px'}"></IconVue>
                             </template>
 
                         </RelativeContainer>
