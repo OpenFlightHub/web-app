@@ -15,6 +15,10 @@ import TimestampDisplay from '../display/TimestampDisplay.vue';
 import dayjs from 'dayjs';
 import TimeDisplay from '../display/TimeDisplay.vue';
 import MapMarker from '../map/MapMarker.vue';
+import { GetCompletionsAtPositionOptions } from 'typescript';
+import Padding from '../layout/Padding.vue';
+import RelativeContainer from '../layout/RelativeContainer.vue';
+import IconVue from '../general/IconVue.vue';
 
 const props = defineProps<{
     media: ApiResponse_DroneMediaGet[0]
@@ -74,11 +78,12 @@ type Location = {
         latitude: number
     }
     elevation: number
+    directDistance: number
     debug?: 'failed' | 'hole-start' | 'hole-end'
 }
 
 let coverage = reactive<{
-    all: Location[]
+    all: (Location & {ray: {bearing: number, pitch: number, imagePosition: {x: number, y: number}}})[]
     outer: Location[]
     holes: Location[][]
 }>({all: [], outer: [], holes: []})
@@ -117,11 +122,55 @@ async function loadCoverage(){
     }
 }
 
+/**
+ *
+ * @param x to right
+ * @param y to bottom
+ */
+function getClosestLocationForRelativeImagePosition(x: number, y: number){
+    let closestRay: typeof coverage.all[0] | false = false
+    let closestRayDistance: number = Number.MAX_VALUE
+
+    for(const loc of coverage.all){
+        const dist = Math.sqrt((loc.ray.imagePosition.x - x)**2 + (loc.ray.imagePosition.y - y)**2)
+
+        if(dist < closestRayDistance){
+            closestRayDistance = dist
+            closestRay = loc
+        }
+    }
+
+    return closestRay
+}
 
 const viewerIsLoaded = ref(false)
 let viewer: Viewer = null // if we make Viewer a reactive object, performance goes down the tube ...
 
 const mapContainer = ref<HTMLElement>(null)
+
+
+let hasCalculatedLastFocusPoint = ref(false)
+let currentFocusPoint: {x: number, y: number, location: ReturnType<typeof getClosestLocationForRelativeImagePosition>} = reactive({
+    x: 0.5,
+    y: 0.5,
+    location: false
+})
+let lastTimeFocusPointHasChanged = Date.now()
+
+function focusPointChange(x: number, y: number){
+    hasCalculatedLastFocusPoint.value = false
+    lastTimeFocusPointHasChanged = Date.now()
+    currentFocusPoint.x = x
+    currentFocusPoint.y = y
+}
+
+setInterval(()=>{
+    if(!hasCalculatedLastFocusPoint.value && (Date.now() - lastTimeFocusPointHasChanged) > 1000){
+        console.log('clculcating current focus point')
+        hasCalculatedLastFocusPoint.value = true
+        currentFocusPoint.location = getClosestLocationForRelativeImagePosition(currentFocusPoint.x, currentFocusPoint.y)
+    }
+}, 100)
 
 </script>
 
@@ -131,7 +180,26 @@ const mapContainer = ref<HTMLElement>(null)
         <div class="media_file">
             <div class="file">
                 <LoadApi class="load_api" :api-method="api.rest.file.get" :params="{fileId: props.media.file_id}" v-slot="file">
-                    <HubWorkspaceFile :file="file.data" always-load-original class="workspace_file"></HubWorkspaceFile>
+                    <HubWorkspaceFile :file="file.data" always-load-original class="workspace_file" @focus-point-change="focusPointChange">
+
+                        <RelativeContainer v-if="currentFocusPoint.location" :x="currentFocusPoint.location.ray.imagePosition.x" :y="currentFocusPoint.location.ray.imagePosition.y">
+                            <Padding class="ray_info" @mousemove.stop @click.stop>
+                                <div>Distance:&nbsp;{{ currentFocusPoint.location.directDistance }}</div>
+                                <div>Elevation:&nbsp;{{ Math.round(currentFocusPoint.location.elevation) }}m</div>
+                                <div>Long:&nbsp;{{ currentFocusPoint.location.position.longitude.toFixed(6) }}</div>
+                                <div>Lat:&nbsp;{{ currentFocusPoint.location.position.latitude.toFixed(6) }}</div>
+                                <a :href="`https://www.outdooractive.com/en/map/?wt=(${currentFocusPoint.location.position.latitude},${currentFocusPoint.location.position.longitude})#zc=20,${currentFocusPoint.location.position.longitude},${currentFocusPoint.location.position.latitude}`" target="_blank">outdooractive</a>
+                            </Padding>
+
+                            <template v-slot:marker>
+                                <IconVue name="bullseye"></IconVue>
+                            </template>
+
+                        </RelativeContainer>
+
+                    </HubWorkspaceFile>
+
+
                 </LoadApi>
             </div>
             <div class="info">
@@ -163,7 +231,7 @@ const mapContainer = ref<HTMLElement>(null)
 
                 </Map>
 
-                <MapMarker :viewer="viewer" :map-container="mapContainer" :position="[cameraLongitude, cameraLatitude]" :elevation="hasValidHeightInformation ? cameraHeight : undefined" :bearing="hasValidCameraAngleInformation ? cameraHeading : undefined" icon-url="/images/drone/icon_simple.png" :icon-width="32" :icon-height="32" :color="Color.CYAN"></MapMarker>
+                <MapMarker v-if="viewerIsLoaded" :viewer="viewer" :map-container="mapContainer" :position="[cameraLongitude, cameraLatitude]" :elevation="hasValidHeightInformation ? cameraHeight : undefined" :bearing="hasValidCameraAngleInformation ? cameraHeading : undefined" icon-url="/images/drone/icon_simple.png" :icon-width="32" :icon-height="32" :color="Color.CYAN"></MapMarker>
 
                 <template v-if="viewerIsLoaded && coverage.all.length > 0 && false">
                     <MapLine v-for="p in coverage.all" :viewer="viewer" :from="{position: [cameraLongitude, cameraLatitude], elevation: cameraHeight}" :to="{position: [p.position.longitude, p.position.latitude], elevation: p.elevation}" :color="(p.debug === 'failed' ? Color.RED : p.debug === 'hole-start' ? Color.YELLOW : p.debug == 'hole-end' ? Color.ORANGE : Color.WHITE).withAlpha(0.4)"></MapLine>
@@ -226,6 +294,11 @@ const mapContainer = ref<HTMLElement>(null)
             justify-content: center;
             align-items: center;
         }
+    }
+
+    .ray_info {
+        background-color: #222a;
+        border-radius: 0.5em;
     }
 }
 

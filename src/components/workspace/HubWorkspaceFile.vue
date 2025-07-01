@@ -14,6 +14,10 @@ const props = defineProps<{
     alwaysLoadOriginal?: boolean
 }>()
 
+const emits = defineEmits<{
+    focusPointChange: [x: number, y: number]
+}>()
+
 const showFullscreen = ref(false)
 const wasFullscreenAtLeastOnce = ref(false)
 
@@ -32,14 +36,32 @@ const showOriginal = computed(()=>{
     return showFullscreen.value || !props.file.has_thumbnail || props.alwaysLoadOriginal === true
 })
 
+const view = ref<HTMLElement>(null)
+
+function mouseMove(evt: MouseEvent){
+    //@ts-ignore
+    const rect = evt.target.getBoundingClientRect()
+    const x = evt.clientX - rect.left
+    const y = evt.clientY - rect.top
+
+    const ratioX = x / view.value.offsetWidth
+    const ratioY = y / view.value.offsetHeight
+
+    console.log(x, y, ratioX, ratioY)
+
+    emits('focusPointChange', ratioX, ratioY)//TODO fix this! Its not correct because the img inside the view div is adjusting its size to fit into the container
+}
+
 </script>
 
 <template>
 
     <div id="file" :class="{fullscreen: showFullscreen}">
-        <div id="view" @click.stop="handleClick">
+        <div id="view" @click.stop="handleClick" @mousemove="mouseMove" ref="view">
             <img v-show="showOriginal" :src="api.getFileDataUrl(props.file.id)" loading="lazy" fetchpriority="low">
             <img v-show="!showOriginal" :src="api.getFileThumbnailUrl(props.file.id)" loading="lazy" fetchpriority="low">
+
+            <slot/>
         </div>
         <div id="actions">
             <Padding>
