@@ -5,7 +5,7 @@ import Padding from '../layout/Padding.vue';
 import { Button } from 'primevue';
 import IconVue from '../general/IconVue.vue';
 import { downloadUrl } from '@/util/download';
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { ApiResponse_FileGet } from 'openflighthub-api-client-sdk';
 
 
@@ -15,6 +15,7 @@ const props = defineProps<{
 }>()
 
 const emits = defineEmits<{
+    imageSizeChange: [width: number, height: number]
     focusPointChange: [x: number, y: number]
 }>()
 
@@ -50,6 +51,16 @@ function mouseMove(evt: MouseEvent){
     console.log(x, y, ratioX, ratioY)
 
     emits('focusPointChange', ratioX, ratioY)//TODO fix this! Its not correct because the img inside the view div is adjusting its size to fit into the container
+}
+
+onMounted(()=>{
+    window.addEventListener('resize', triggerImageSizeChange)
+    triggerImageSizeChange()
+})
+
+function triggerImageSizeChange(){
+    const rect = view.value.getBoundingClientRect()
+    emits('imageSizeChange', rect.width, rect.height)
 }
 
 </script>

@@ -83,7 +83,7 @@ type Location = {
 }
 
 let coverage = reactive<{
-    all: (Location & {ray: {bearing: number, pitch: number, imagePosition: {x: number, y: number}}})[]
+    all: (Location & {ray: {bearing: number, pitch: number, imagePosition: {x: number, y: number}}, meterSize: {horizontal: number, vertical: number}})[]
     outer: Location[]
     holes: Location[][]
 }>({all: [], outer: [], holes: []})
@@ -172,6 +172,11 @@ setInterval(()=>{
     }
 }, 100)
 
+const viewSize = reactive({
+    width: 0,
+    height: 0
+})
+
 </script>
 
 <template>
@@ -180,7 +185,10 @@ setInterval(()=>{
         <div class="media_file">
             <div class="file">
                 <LoadApi class="load_api" :api-method="api.rest.file.get" :params="{fileId: props.media.file_id}" v-slot="file">
-                    <HubWorkspaceFile :file="file.data" always-load-original class="workspace_file" @focus-point-change="focusPointChange">
+                    <HubWorkspaceFile :file="file.data" always-load-original class="workspace_file" @focus-point-change="focusPointChange" @image-size-change="(width, height)=>{
+                        viewSize.width = width
+                        viewSize.height = height
+                    }">
 
                         <RelativeContainer v-if="currentFocusPoint.location" :x="currentFocusPoint.location.ray.imagePosition.x" :y="currentFocusPoint.location.ray.imagePosition.y">
                             <Padding class="ray_info" @mousemove.stop @click.stop>
@@ -192,7 +200,7 @@ setInterval(()=>{
                             </Padding>
 
                             <template v-slot:marker>
-                                <IconVue name="bullseye"></IconVue>
+                                <IconVue name="person-arms-up" :style="{'color':'#0f0', 'font-size': '' + (1.8 * currentFocusPoint.location.meterSize.vertical * viewSize.height) + 'px'}"></IconVue>
                             </template>
 
                         </RelativeContainer>
