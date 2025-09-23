@@ -55,6 +55,7 @@ const store = useMainStore()
     justify-content: space-between;
     align-items: center;
     padding: 10px;
+    z-index: 3;
 
     #left {
         display: flex;

@@ -7,11 +7,12 @@ import { RouterView, useRoute } from 'vue-router'
 import App from '@/components/app/App.vue';
 import AppNavBar from '@/components/app/AppNavBar.vue';
 import AppContent from '@/components/app/AppContent.vue';
+import AppBackground from './components/app/AppBackground.vue';
 import AutomaticFileDownload from './automatic-file-download/AutomaticFileDownload.vue';
 
 export default defineComponent({
 
-    components: { RouterView, App, AppNavBar, AppContent }
+    components: { RouterView, App, AppNavBar, AppContent, AppBackground }
 
 })
 
@@ -39,6 +40,8 @@ const routeIsAuth = computed(()=>{
         <AppContent :no-nav-bar="routeIsAuth">
             <RouterView/>
         </AppContent>
+
+        <AppBackground :animated="route.name === 'login'"></AppBackground>
 
         <AutomaticFileDownload></AutomaticFileDownload>
     </App>
