@@ -1,20 +1,5 @@
 <script lang="ts">
 
-import { computed, defineComponent } from 'vue';
-import { RouterView, useRoute } from 'vue-router'
-
-
-import App from '@/components/app/App.vue';
-import AppNavBar from '@/components/app/AppNavBar.vue';
-import AppContent from '@/components/app/AppContent.vue';
-import AppBackground from './components/app/AppBackground.vue';
-import AutomaticFileDownload from './automatic-file-download/AutomaticFileDownload.vue';
-
-export default defineComponent({
-
-    components: { RouterView, App, AppNavBar, AppContent, AppBackground }
-
-})
 
 
 // fix cesium static url
@@ -24,26 +9,12 @@ window.CESIUM_BASE_URL = '/cesiumStatic'
 
 <script lang="ts" setup>
 
-const route = useRoute()
-
-const routeIsAuth = computed(()=>{
-    return route.path.startsWith('/auth')
-})
+import App from '@/components/app/App.vue';
 
 </script>
 
 <template>
     <App>
-        <AppNavBar v-if="!routeIsAuth">
-        </AppNavBar>
-
-        <AppContent :no-nav-bar="routeIsAuth">
-            <RouterView/>
-        </AppContent>
-
-        <AppBackground :animated="route.name === 'login'"></AppBackground>
-
-        <AutomaticFileDownload></AutomaticFileDownload>
     </App>
 
 </template>
