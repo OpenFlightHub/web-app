@@ -150,9 +150,13 @@ export class OpenFlightHubConnectLinkClient<ModuleName extends string> extends E
         return this.platformConfig.workspace_name
     }
 
+    getConnectionId(){
+        return this.platformConfig.connection_id
+    }
+
     async unlink(){
         //TODO
-        //api.connectionLink.
+        // properly delete all the module configs via js bridge?
     }
 }
 
