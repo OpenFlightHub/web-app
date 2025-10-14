@@ -150,9 +150,13 @@ export class OpenFlightHubConnectLinkClient<ModuleName extends string> extends E
         return this.platformConfig.workspace_name
     }
 
+    getConnectionId(){
+        return this.platformConfig.connection_id
+    }
+
     async unlink(){
         //TODO
-        //api.connectionLink.
+        // properly delete all the module configs via js bridge?
     }
 }
 
@@ -322,7 +326,7 @@ export class OpenFlightHubConnectLinkClient_DjiPilot2 extends OpenFlightHubConne
         })
 
         return {
-            connected: modules.find(m => !m.connected) ? false : true,
+            connected: modules.filter(m=>m.name !== 'stream').find(m => !m.connected) ? false : true,// stream reports connected only when stream is live
             modules
         }
     }
@@ -333,5 +337,14 @@ export class OpenFlightHubConnectLinkClient_DjiPilot2 extends OpenFlightHubConne
 
     getAircraftSerialNumber(){
         return this.sdk.getAircraftSN()
+    }
+
+    async toggleMediaModuleEnabled(){
+        if(this.sdk.media_moduleIsLoaded()){
+            await this.sdk.media_unloadModule()
+        } else {
+            await this.sdk.media_loadModule(true, 0, false)
+            this.sdk.media_setDownloadRemoteController('mine')//TODO check if this is required
+        }
     }
 }

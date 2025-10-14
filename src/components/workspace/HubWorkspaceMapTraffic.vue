@@ -2,7 +2,7 @@
 import api from '@/api'
 //TODO fix this import import {Message_Type_Event_Object_Data_Traffic} from 'openflighthub-api-client-sdk'
 import {watch, onMounted, onUnmounted, reactive} from 'vue'
-import MapMarker from '../cesium/MapMarker.vue';
+import MapMarker from '../map/MapMarker.vue';
 import { Viewer, Color } from 'cesium';
 
 
@@ -53,7 +53,9 @@ onUnmounted(destroy)
 
 <template>
 
-    <MapMarker v-for="t of traffic" :key="t.id" :viewer="props.viewer" :map-container="props.mapContainer" :position="[t.position.longitude, t.position.latitude]" :elevation="t.position.height" :label="t.id" icon-url="/images/traffic/icon.png" :icon-width="51" :icon-height="51" :show-height-indicator="true" :color="Color.RED"></MapMarker>
+    <template v-for="t of traffic" :key="t.id">
+        <MapMarker v-if="t.position.height < 3000" :viewer="props.viewer" :map-container="props.mapContainer" :position="[t.position.longitude, t.position.latitude]" :elevation="t.position.height" :label="t.id" icon-url="/images/traffic/icon.png" :icon-width="32" :icon-height="32" :show-height-indicator="true" :color="Color.RED"></MapMarker>
+    </template>
 
 </template>
 

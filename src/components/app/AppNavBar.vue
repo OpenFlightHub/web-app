@@ -4,6 +4,7 @@ import LogoVue from '../branding/LogoVue.vue';
 import LogoutButton from '@/components/general/LogoutButton.vue';
 import useMainStore from '@/stores/main';
 import { Button } from 'primevue';
+import IconVue from '../general/IconVue.vue';
 
 const router = useRouter()
 
@@ -21,6 +22,12 @@ const store = useMainStore()
 
         <div id="right">
             <slot></slot>
+
+            <template v-if="store.isAdmin">
+                <RouterLink to="/settings">
+                    <IconVue name="gear"></IconVue>
+                </RouterLink>
+            </template>
 
             <template v-if="store.isLoggedIn">
                 <LogoutButton></LogoutButton>
@@ -48,6 +55,7 @@ const store = useMainStore()
     justify-content: space-between;
     align-items: center;
     padding: 10px;
+    z-index: 3;
 
     #left {
         display: flex;

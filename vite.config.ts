@@ -7,7 +7,7 @@ import vue from '@vitejs/plugin-vue'
 import {viteStaticCopy} from 'vite-plugin-static-copy'
 //fix cesium statics
 const cesiumSource = "node_modules/cesium/Build/Cesium";
-const cesiumBaseUrl = "/cesiumStatic";
+const cesiumBaseUrl = "/cesiumStatic";//TODO fix that this creates a folder in C:/cesiumStatic
 
 
 
@@ -55,5 +55,8 @@ export default defineConfig({
   },
   define: {
     __INTLIFY_JIT_COMPILATION__: true
+  },
+  build: {
+    sourcemap: true
   }
 })

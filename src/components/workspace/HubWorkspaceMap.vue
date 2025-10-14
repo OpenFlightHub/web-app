@@ -1,93 +1,109 @@
 <script setup lang="ts">
 import { ApiResponse_ConnectionGet } from 'openflighthub-api-client-sdk';
-import { ref, onMounted } from 'vue';
+import { ref } from 'vue';
 
-import { Cartesian3, createOsmBuildingsAsync, Ion, Math, Terrain, Viewer, Cartographic, OpenStreetMapImageryProvider } from "cesium";
+import { Viewer } from "cesium";
 import "cesium/Build/Cesium/Widgets/widgets.css";
 
 import HubWorkspaceMapConnection from './HubWorkspaceMapConnection.vue';
 import { geoidIsLoaded } from '@/util/geoid';
 import HubWorkspaceMapTraffic from './HubWorkspaceMapTraffic.vue';
+import Checkbox from 'primevue/checkbox'
+import { Button } from 'primevue';
+import HubWorkspaceMapDroneMedia from './HubWorkspaceMapDroneMedia.vue';
+import Map from '../map/Map.vue';
 
 const props = defineProps<{
     connections: ApiResponse_ConnectionGet[]
+    longitude: number
+    latitude: number
 }>()
 
 const mapContainer = ref(null as HTMLElement)
 
-let viewer: Viewer
+const viewerIsLoaded = ref(false)
+let viewer: Viewer = null // if we make Viewer a reactive object, performance goes down the tube ...
 
-//TODO dont hardcode this token
-Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI5MTFkYzVkNy03ZmJkLTQyYTAtYTQ5Zi05ZDMxMGQ2YjU5N2QiLCJpZCI6MjYyNzgwLCJpYXQiOjE3MzQzNDM0NDF9.9NxftItZvbyOrcMENhulF4eKoLGI_-7lYjTkia2racg'
-
-onMounted(()=>{
-
-    viewer = new Viewer(mapContainer.value, {
-        terrain: Terrain.fromWorldTerrain(),
-        animation: false,
-        timeline: false
-    })
-
-
-    //TODO currently switching to 2D crashes cesium
-    // const openstreetmap = new OpenStreetMapImageryProvider({
-    //     url : 'https://tile.openstreetmap.org/'
-    // })
-    //viewer.imageryLayers.addImageryProvider(openstreetmap) //TODO add attribution see https://operations.osmfoundation.org/policies/tiles/
-
-    viewer.camera.flyTo({
-        destination: Cartesian3.fromDegrees(10.31261, 47.48063, 3200),
-        orientation: {
-            heading: Math.toRadians(0),
-            pitch: Math.toRadians(-15)
-        },
-        duration: 1
-    })
-
-    /*
-    // Add Cesium OSM Buildings, a global 3D buildings layer.
-    createOsmBuildingsAsync().then(buildingTileset => {
-        viewer.scene.primitives.add(buildingTileset)
-    })
-    */
-
-
-    viewer.camera.moveEnd.addEventListener(evt=>{
-        const carto = Cartographic.fromCartesian(viewer.camera.position)
-        console.log('camera.moveEnd', Math.toDegrees(carto.longitude), Math.toDegrees(carto.latitude), carto.height)
-        //TODO append to url
-    })
-
-
-})
+const sidebarIsOpen = ref(false)
+const showMedia = ref(false)
 
 </script>
 
 <template>
 
-    <div id="container">
-        <div id="map" ref="mapContainer">
+    <div id="outer-container">
+        <div id="map-container" ref="mapContainer">
+            <Map id="map" :start-point="{longitude: props.longitude, latitude: props.latitude}" :start-height="10000" :start-camera-pitch="-90" @viewer-loaded="(v)=>{viewer = v; viewerIsLoaded = true}"></Map>
+
+            <template v-if="viewerIsLoaded && geoidIsLoaded">
+                <HubWorkspaceMapConnection v-for="connection in props.connections" :key="connection.id" :map-container="mapContainer" :connection="connection" :viewer="viewer"></HubWorkspaceMapConnection>
+
+                <!-- TODO implement center of map (but lazy load, so a small change in distance does not actually trigger a reset) -->
+                <HubWorkspaceMapTraffic :viewer="viewer" :map-container="mapContainer" :latitude="47.554" :longitude="10.22" :radius="50000"></HubWorkspaceMapTraffic>
+            </template>
+
+            <template v-if="viewerIsLoaded && showMedia">
+                <HubWorkspaceMapDroneMedia v-for="connection in props.connections" :key="connection.id" :viewer="viewer" :map-container="mapContainer" :connection="connection"></HubWorkspaceMapDroneMedia>
+            </template>
         </div>
 
-        <template v-if="viewer && geoidIsLoaded">
-            <HubWorkspaceMapConnection v-for="connection in props.connections" :key="connection.id" :map-container="mapContainer" :connection="connection" :viewer="viewer"></HubWorkspaceMapConnection>
-
-            <!-- TODO implement center of map (but lazy load, so a small change in distance does not actually trigger a reset) -->
-            <HubWorkspaceMapTraffic :viewer="viewer" :map-container="mapContainer" :latitude="47.554" :longitude="10.22" :radius="50000"></HubWorkspaceMapTraffic>
-        </template>
+        <div id="sidebar">
+            <Button @click="sidebarIsOpen = !sidebarIsOpen" id="sidebar-close">
+                <template v-if="sidebarIsOpen">&gt;&gt;</template>
+                <template v-else>&lt;&lt;</template>
+            </Button>
+            <div v-show="sidebarIsOpen" id="sidebar-inner">
+                <label for="show-media">
+                    <Checkbox v-model="showMedia" binary input-id="show-media"></Checkbox>
+                    Show Media
+                </label>
+            </div>
+        </div>
     </div>
 
 </template>
 
 <style scoped lang="scss">
 
-#container {
-    position: relative;
+#outer-container {
+    display: flex;
+    flex-direction: row;
 
-    #map {
-        height: 100%;
-        width: 100%;
+    #map-container {
+        position: relative;
+        flex-shrink: 1;
+        flex-grow: 1;
+
+        // #map {
+        //     height: 100%;
+        //     width: 100%;
+        // }
+
     }
 
+    #sidebar {
+        display: flex;
+        flex-direction: row;
+        flex-shrink: 0;
+        flex-grow: 0;
+        background: var(--neutral-darker);
+
+        #sidebar-close {
+            height: 100%;
+        }
+
+        #sidebar-inner {
+            padding: 0.5em;
+
+            label {
+                cursor: pointer;
+
+                .p-checkbox {
+                    margin-right: 0.5em;
+                }
+            }
+
+        }
+    }
 }
 </style>

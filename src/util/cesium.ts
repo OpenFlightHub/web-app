@@ -1,4 +1,5 @@
-import { Cartesian2, defaultValue, defined, Entity, Viewer } from "cesium";
+import { Cartesian2, Cartesian3, Cartographic, defaultValue, defined, Entity, HeadingPitchRoll, Viewer, Math as MathCesium, Transforms, Matrix3, Ray } from "cesium";
+import { toRaw } from "vue";
 
 export type ClickMyEntityHandle = {
     readonly mapContainer: HTMLElement
@@ -8,7 +9,7 @@ export type ClickMyEntityHandle = {
 export function setupClickMyEntity(mapContainer: HTMLElement, viewer: Viewer, entity: Entity, callback: ()=>void){
 
     const handle: ClickMyEntityHandle = {
-        mapContainer,
+      mapContainer,
         f: evt => {
             const clickX = evt.pageX
             const clickY = evt.pageY
@@ -84,3 +85,29 @@ function pickEntity(viewer: Viewer, windowPosition: Cartesian2) : Entity | undef
     }
     return result;
   }
+
+
+/**
+ * @param originLonLat in degrees
+ * @param originElevation in meters
+ * @param bearing in degrees, 0 is north
+ * @param distance in meters
+ */
+export function getPointFromOriginWithBearingAndDistance(originLonLat: [number, number], originElevation: number, bearing: number, distance: number){
+
+    const origin = Cartesian3.fromDegrees(originLonLat[0], originLonLat[1], originElevation)
+
+    const hpr = HeadingPitchRoll.fromDegrees(bearing, 0, 0)
+    hpr.heading -= MathCesium.PI_OVER_TWO // fix cesium 0 = east
+
+    const orientation = Transforms.headingPitchRollQuaternion(origin, hpr)
+    const direction = Matrix3.multiplyByVector(Matrix3.fromQuaternion(orientation), Cartesian3.UNIT_X, new Cartesian3())
+    const ray = new Ray(origin, direction)
+
+    const destination = Ray.getPoint(ray, distance)
+
+    const carto = Cartographic.fromCartesian(destination)
+    const destinationWithCorrectedElevation = Cartesian3.fromRadians(carto.longitude, carto.latitude, originElevation)
+
+    return destinationWithCorrectedElevation
+}

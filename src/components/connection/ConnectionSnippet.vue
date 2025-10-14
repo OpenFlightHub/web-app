@@ -16,7 +16,7 @@ const props = defineProps<{
 
     <LoadApi :api-method="api.rest.connection.get" :params="{connectionId: props.connectionId}" v-slot="scope">
         <Snippet :to-url="'/connection/' + props.connectionId">
-            <LinkVue>Connection #{{ scope.data.id }}</LinkVue>
+            <LinkVue>Connection {{ scope.data.name }}</LinkVue>
 
             <RemoteControllerSnippet v-if="typeof scope.data.remote_controller_id === 'number'" :id="scope.data.remote_controller_id"></RemoteControllerSnippet>
 

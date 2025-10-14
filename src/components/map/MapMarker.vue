@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
-import { Cartesian2, Cartesian3, Cartographic, Color, Ellipsoid, Entity, HeightReference, JulianDate, LabelStyle, PolylineDashMaterialProperty, SampledPositionProperty, sampleTerrainMostDetailed, VerticalOrigin, Viewer } from 'cesium';
+import { Cartesian2, Cartesian3, Cartographic, Color, Ellipsoid, Entity, HeadingPitchRoll, HeightReference, JulianDate, LabelStyle, Math as MathCesium, Matrix3, PolylineArrowMaterialProperty, PolylineDashMaterialProperty, Ray, SampledPositionProperty, sampleTerrainMostDetailed, Transforms, VerticalOrigin, Viewer } from 'cesium';
 import { getElevationAtPosition } from '@/util/terrain';
-import { convertEllisoidalHeightToOrthometricHeight } from '@/util/geoid';
-import { cleanupClickMyEntity, ClickMyEntityHandle, setupClickMyEntity } from '@/util/cesium';
+import { convertEllipsoidalHeightToOrthometricHeight } from '@/util/geoid';
+import { cleanupClickMyEntity, ClickMyEntityHandle, getPointFromOriginWithBearingAndDistance, setupClickMyEntity } from '@/util/cesium';
 
 //TODO if marker elevation is below cesium terrain, clamp it to ground
 const props = defineProps<{
@@ -15,9 +15,11 @@ const props = defineProps<{
     iconWidth: number
     iconHeight: number
     label?: string
-    color: Color
+    color?: Color
     fontSize?: number
     showHeightIndicator?: boolean
+    showHeightMeanSeaLevelInLabel?: boolean
+    bearing?: number//TODO implement
 }>()
 
 
@@ -28,21 +30,37 @@ const emit = defineEmits<{
 let marker: Entity
 let markerClickMyEntityHandle: ClickMyEntityHandle
 let heightIndicator: Entity
+let bearingIndicator: Entity
 
 const myId = crypto.randomUUID()
 
+watch(()=>props.bearing, update, {deep: true})
+watch(()=>props.color, update, {deep: true})
+watch(()=>props.elevation, update, {deep: true})
+watch(()=>props.fontSize, update, {deep: true})
+watch(()=>props.iconHeight, update, {deep: true})
+watch(()=>props.iconUrl, update, {deep: true})
+watch(()=>props.iconWidth, update, {deep: true})
+watch(()=>props.label, update, {deep: true})
+watch(()=>props.mapContainer, update, {deep: true})
 watch(()=>props.position, update, {deep: true})
-watch(()=>props.elevation, update)
+watch(()=>props.showHeightIndicator, update, {deep: true})
+watch(()=>props.showHeightMeanSeaLevelInLabel, update, {deep: true})
 
 onMounted(update)
 
 onBeforeUnmount(()=>{
     removeMarker()
     removeHeightIndicator()
+    removeBearingIndicator()
 })
 
 
 async function update(){//TODO cesium fails to repaint polygons (height marker) if we update it too quickly (e.g. every 10ms)
+
+    if(!props.mapContainer){
+        return
+    }
 
     if(marker){
         removeMarker()
@@ -56,6 +74,13 @@ async function update(){//TODO cesium fails to repaint polygons (height marker) 
     }
 
     await addHeightIndicator()
+
+
+    if(bearingIndicator){
+        removeBearingIndicator()
+    }
+
+    await addBearingIndicator()
 }
 
 
@@ -73,10 +98,10 @@ function addMarker(){
             height: props.iconHeight,
             color: props.color,
             heightReference: heightIsNotZero() ? HeightReference.NONE : HeightReference.CLAMP_TO_TERRAIN,
-            disableDepthTestDistance: heightIsNotZero() ? 5000000 : Number.POSITIVE_INFINITY // show always above terrain https://community.cesium.com/t/points-labels-stuck-under-terrain/11141
+            disableDepthTestDistance: heightIsNotZero() ? 5000000 : Number.POSITIVE_INFINITY // show always above terrain https://community.cesium.com/t/points-labels-stuck-under-terrain/11141,
         },
         label: {
-            text: (props.label ? props.label + ' ' : '') + (typeof props.elevation === 'number' ? Math.floor(convertEllisoidalHeightToOrthometricHeight(props.position[0], props.position[1], props.elevation)) + 'm MSL' : ''),
+            text: (props.label ? props.label + ' ' : '') + (props.showHeightMeanSeaLevelInLabel ? (typeof props.elevation === 'number' ? Math.floor(convertEllipsoidalHeightToOrthometricHeight(props.position[0], props.position[1], props.elevation)) + 'm' : '') : ''),
             font: (typeof props.fontSize === 'number' ? props.fontSize : 14) + 'pt monospace',
             style: LabelStyle.FILL_AND_OUTLINE,
             outlineWidth: 2,
@@ -122,7 +147,7 @@ async function addHeightIndicator(){
             positions: makeHeightIndicatorPositions(props.position, props.elevation),
             width: 2,
             material: new PolylineDashMaterialProperty({
-                color: props.color
+                color: props.color || Color.WHITE
             })
         }
     })
@@ -140,9 +165,51 @@ function removeHeightIndicator(){
     heightIndicator = undefined
 }
 
+
+async function addBearingIndicator(){
+
+    if(typeof props.bearing !== 'number'){
+        return
+    }
+
+    bearingIndicator = props.viewer.entities.add({
+        id: 'map-marker-bearing-indicator-' + myId,
+        polyline: {
+            positions: await makeBearingIndicatorPositions(props.position, props.bearing, props.elevation),
+            width: 10,
+            material: new PolylineArrowMaterialProperty(props.color || Color.WHITE)
+        }
+    })
+}
+
+async function makeBearingIndicatorPositions(lonLat: [number, number], bearing: number, elevation: number){
+
+    const terrainElevation = (await getElevationAtPosition(props.viewer, lonLat[0], lonLat[1])).height
+
+    if(elevation < (terrainElevation + 1)){
+        elevation = terrainElevation + 1
+    }
+
+    const origin = Cartesian3.fromDegrees(lonLat[0], lonLat[1], elevation)
+
+    return [
+        origin, getPointFromOriginWithBearingAndDistance(lonLat, elevation, bearing, 20)
+    ]
+}
+
+
+function removeBearingIndicator(){
+    if(!bearingIndicator){
+        return
+    }
+    props.viewer.entities.remove(bearingIndicator)
+    bearingIndicator = undefined
+}
+
 onBeforeUnmount(()=>{
     removeMarker()
     removeHeightIndicator()
+    removeBearingIndicator
 })
 
 </script>

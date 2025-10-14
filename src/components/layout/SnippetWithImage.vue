@@ -4,13 +4,14 @@ import Snippet from './Snippet.vue';
 
 const props = defineProps<{
     imageUrl: string
+    toUrl?: string
 }>()
 
 </script>
 
 <template>
 
-    <Snippet>
+    <Snippet :to-url="props.toUrl">
         <div id="snippet-with-image">
             <div id="left" :style="'background-image: url(\'' + props.imageUrl + '\')'">
 

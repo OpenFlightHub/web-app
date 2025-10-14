@@ -19,7 +19,9 @@
     "link": {
         "linked_to": "Linked to Workspace \"{workspace}\" on {platform}",
         "select_workspace": "Select workspace to link to",
+        "set_name_for_link": "Set a name for this connection",
         "connection_name": "Connection Name",
+        "link": "Link",
         "unlink_workspace": "Unlink Workspace",
         "is_connected": "Connected",
         "is_not_connected": "Not connected",
@@ -68,9 +70,11 @@
 
     "time_and_data": {
         "time": {
+            "d": "0 days | {n} day | {n} days",
             "h": "0 hours | {n} hour | {n} hours",
             "m": "0 mins | {n} min | {n} mins",
-            "s": "0 secs | {n} sec | {n} secs"
+            "s": "0 secs | {n} sec | {n} secs",
+            "ms": "0 ms | {n} ms | {n} ms"
         },
         "duration": "Duration",
         "formats": {

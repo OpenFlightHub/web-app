@@ -27,7 +27,10 @@ export const useMainStore = defineStore('main', {
     },
 
     getters: {
-        isLoggedIn: state => !!state.user
+        isLoggedIn: state => !!state.user,
+        isAdmin: state => {
+            return state.userSelf && [1, 4].includes(state.userSelf.id)
+        }
     },
 
     actions:{
