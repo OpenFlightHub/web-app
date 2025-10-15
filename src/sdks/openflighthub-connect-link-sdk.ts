@@ -268,9 +268,9 @@ export class OpenFlightHubConnectLinkClient_DjiPilot2 extends OpenFlightHubConne
         if(this.sdk.ws_moduleIsLoaded()){
             await this.sdk.ws_unloadModule()
         }
-        await this.sdk.ws_loadModule('wss://' + sdkConfig.ws_url + ':443/api/connection-link/dji-pilot-2/ws/?x-auth-token=' + this.platformConfig.secret, this.platformConfig.secret)
+        await this.sdk.ws_loadModule(sdkConfig.ws_url + '/?x-auth-token=' + this.platformConfig.secret, this.platformConfig.secret)
 
-        this.sdk.ws_connect('wss://' + sdkConfig.ws_url + ':443/api/connection-link/dji-pilot-2/ws/?x-auth-token=' + this.platformConfig.secret, this.platformConfig.secret)
+        this.sdk.ws_connect(sdkConfig.ws_url + '/?x-auth-token=' + this.platformConfig.secret, this.platformConfig.secret)
 
 
 
