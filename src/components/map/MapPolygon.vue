@@ -17,9 +17,12 @@ const props = defineProps<{
     clampToGround?: boolean
     color: Color
     filled?: boolean
+    outlineColor?: Color
+    outlineWidth?: number
 }>()
 
 let polygon: Entity
+let outline: Entity
 
 const myId = crypto.randomUUID()
 
@@ -30,19 +33,19 @@ watch(()=>props.points, update, {deep: true})
 
 onMounted(update)
 onBeforeUnmount(()=>{
-    removePolygon()
+    removeAll()
 })
 
 async function update(){
 
-    if(polygon){
-        removePolygon()
+    if(polygon || outline){
+        removeAll()
     }
 
-    await addPolygon()
+    await addAll()
 }
 
-async function addPolygon(){
+async function addAll(){
 
 
     const positions: Cartesian3[] = []
@@ -71,20 +74,42 @@ async function addPolygon(){
             },
             filled: true,
             material: props.color,
+            outline: true,
+            outlineColor: props.outlineColor || props.color,
             perPositionHeight: false, //props.clampToGround !== false
+        }
+    })
+
+    //extra polyline because outlineWidth is bugged in cesium and will never be fixed
+
+    positions.push(positions[0])// polyline needs the first point again
+
+    outline = props.viewer.entities.add({
+        id: 'map-polygon_outline-' + myId,
+        polyline: {
+            positions,
+            width: typeof props.outlineWidth === 'number' ? props.outlineWidth : 3,
+            clampToGround: props.clampToGround,
+            material: props.outlineColor || props.color
         }
     })
 }
 
-function removePolygon(){
-    if(!polygon){
-        return
+
+
+function removeAll(){
+    if(polygon){
+        props.viewer.entities.remove(polygon)
+        polygon = undefined
     }
-    props.viewer.entities.remove(polygon)
-    polygon = undefined
+
+    if(outline){
+        props.viewer.entities.remove(outline)
+        outline = undefined
+    }
 }
 
-onBeforeUnmount(removePolygon)
+onBeforeUnmount(removeAll)
 
 </script>
 

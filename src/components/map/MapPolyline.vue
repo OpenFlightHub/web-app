@@ -66,7 +66,7 @@ async function addPolyline(){
             positions,
             width: 4,
             clampToGround: props.clampToGround === true,
-            material: props.color// TODO implement material
+            material: props.color
         }
     })
 }

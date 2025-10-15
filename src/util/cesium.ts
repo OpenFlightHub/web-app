@@ -1,4 +1,4 @@
-import { Cartesian2, Cartesian3, Cartographic, defaultValue, defined, Entity, HeadingPitchRoll, Viewer, Math as MathCesium, Transforms, Matrix3, Ray } from "cesium";
+import { Cartesian2, Cartesian3, Cartographic, defined, Entity, HeadingPitchRoll, Viewer, Math as MathCesium, Transforms, Matrix3, Ray, Color } from "cesium";
 import { toRaw } from "vue";
 
 export type ClickMyEntityHandle = {
@@ -9,24 +9,24 @@ export type ClickMyEntityHandle = {
 export function setupClickMyEntity(mapContainer: HTMLElement, viewer: Viewer, entity: Entity, callback: ()=>void){
 
     const handle: ClickMyEntityHandle = {
-      mapContainer,
-        f: evt => {
-            const clickX = evt.pageX
-            const clickY = evt.pageY
-            const bounds = mapContainer.getBoundingClientRect()
+        mapContainer,
+            f: evt => {
+                const clickX = evt.pageX
+                const clickY = evt.pageY
+                const bounds = mapContainer.getBoundingClientRect()
 
-            const containerX = bounds.left + window.scrollX
-            const containerY = bounds.top + window.scrollY
+                const containerX = bounds.left + window.scrollX
+                const containerY = bounds.top + window.scrollY
 
-            const relativeX = clickX - containerX
-            const relativeY = clickY - containerY
+                const relativeX = clickX - containerX
+                const relativeY = clickY - containerY
 
-            const clickedEntity = pickEntity(viewer, new Cartesian2(relativeX, relativeY))
+                const clickedEntity = pickEntity(viewer, new Cartesian2(relativeX, relativeY))
 
-            if(clickedEntity === entity){
-                callback()
-            }
-        }
+                if(clickedEntity === entity){
+                    callback()
+                }
+          }
     }
 
     mapContainer.addEventListener('click', handle.f)
@@ -51,13 +51,13 @@ export function cleanupClickMyEntity(handle: ClickMyEntityHandle){
 function pickEntity(viewer: Viewer, windowPosition: Cartesian2) : Entity | undefined {
     const picked = viewer.scene.pick(windowPosition);
     if (defined(picked)) {
-      const id = defaultValue(picked.id, picked.primitive.id);
-      if (id instanceof Entity) {
-        return id;
-      }
+        const id = defaultValue(picked.id, picked.primitive.id);
+        if (id instanceof Entity) {
+            return id;
+        }
     }
     return undefined;
-  }
+}
 
   /**
    * Returns the list of entities at the provided window coordinates.
@@ -69,21 +69,21 @@ function pickEntity(viewer: Viewer, windowPosition: Cartesian2) : Entity | undef
    * @returns The picked entities or undefined.
    */
   function drillPickEntities(viewer: Viewer, windowPosition: Cartesian2): Entity[] | undefined {
-    let picked, entity, i;
-    const pickedPrimitives = viewer.scene.drillPick(windowPosition);
-    const length = pickedPrimitives.length;
-    const result: Entity[] = [];
-    const hash = {};
+      let picked, entity, i;
+      const pickedPrimitives = viewer.scene.drillPick(windowPosition);
+      const length = pickedPrimitives.length;
+      const result: Entity[] = [];
+      const hash = {};
 
-    for (i = 0; i < length; i++) {
-      picked = pickedPrimitives[i];
-      entity = defaultValue(picked.id, picked.primitive.id);
-      if (entity instanceof Entity && !defined(hash[entity.id])) {
-        result.push(entity);
-        hash[entity.id] = true;
+      for (i = 0; i < length; i++) {
+          picked = pickedPrimitives[i];
+          entity = defaultValue(picked.id, picked.primitive.id);
+          if (entity instanceof Entity && !defined(hash[entity.id])) {
+              result.push(entity);
+              hash[entity.id] = true;
+          }
       }
-    }
-    return result;
+      return result;
   }
 
 
@@ -110,4 +110,19 @@ export function getPointFromOriginWithBearingAndDistance(originLonLat: [number, 
     const destinationWithCorrectedElevation = Cartesian3.fromRadians(carto.longitude, carto.latitude, originElevation)
 
     return destinationWithCorrectedElevation
+}
+
+/**
+ *
+ * @param alpha 0-1
+ */
+export function getColorForHex(hexString: string, alpha?: number){
+
+    const match = hexString.match(/#([\dabcdefABCDEF]{2,2})([\dabcdefABCDEF]{2,2})([\dabcdefABCDEF]{2,2})/)
+
+    return new Color(parseInt(match[1], 16)/255, parseInt(match[2], 16)/255, parseInt(match[3], 16)/255, alpha)
+}
+
+function defaultValue(a, b){
+    return typeof a !== 'undefined' ? a : b
 }
