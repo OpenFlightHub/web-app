@@ -106,7 +106,7 @@ export function makeRouter(pinia: Pinia){
             },
 
             {
-                path: '/workspaces',
+                path: '/my-workspaces',
                 name: 'workspaces',
                 component: MyWorkspacesView
             },

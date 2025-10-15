@@ -30,7 +30,7 @@ const isExtended = ref(false)
                 </div>
 
                 <div id="middle">
-                    <AppSideBarGroup to="/" name="Workspaces" icon="textarea">
+                    <AppSideBarGroup to="/my-workspaces" name="Workspaces" icon="textarea">
                         <AppSideBarEntry v-for="workspace in store.myWorkspaces" :to="'/workspace/' + workspace.id">{{ workspace.name }}</AppSideBarEntry>
                     </AppSideBarGroup>
                 </div>
