@@ -15,9 +15,9 @@ const isExtended = ref(false)
 
 <template>
 
-    <div id="sidebar" @mouseenter="isExtended = true" @mouseleave="isExtended = false">
+    <div id="sidebar">
 
-        <div id="inner">
+        <div id="inner" @mouseenter="isExtended = true" @mouseleave="isExtended = false">
             <IconVue name="list" @click="isExtended = !isExtended"></IconVue>
 
             <div id="menu" :style="{'display': isExtended ? '' : 'none'}">
@@ -48,6 +48,10 @@ const isExtended = ref(false)
 
             </div>
         </div>
+
+        <div v-if="isExtended" id="cover">
+
+        </div>
     </div>
 
 </template>
@@ -66,6 +70,7 @@ const isExtended = ref(false)
 
     #inner {
         position: absolute;
+        z-index: 4;
         top: 0;
         left: 0;
         display: flex;
@@ -101,6 +106,16 @@ const isExtended = ref(false)
                 white-space: nowrap;
             }
         }
+    }
+
+    #cover {
+        position: absolute;
+        z-index: 3;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: #0006;
     }
 }
 
