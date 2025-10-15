@@ -127,6 +127,13 @@ export type DjiBridge = {
     apiGetHost: () => DjiBridgeResponse<string>
 
 
+    wsGetConnectState: () => DjiBridgeResponse<boolean>
+    wsConnect: (host: string, token: string, callback: string) => DjiBridgeResponse<EmptyObject>
+    wsDisconnect: () => DjiBridgeResponse<EmptyObject>
+    wsSend: (msg: string) => DjiBridgeResponse<EmptyObject>
+
+    mapSetUserName: (username: string) => DjiBridgeResponse<EmptyObject>
+    mapSetElementPreName: (preName: string) => DjiBridgeResponse<EmptyObject>
 
     thingGetConnectState: () => DjiBridgeResponse<boolean>
     thingConnect: (username: string, password: string, callback: string) => DjiBridgeResponse<EmptyObject>

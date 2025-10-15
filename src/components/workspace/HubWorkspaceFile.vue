@@ -48,8 +48,6 @@ function mouseMove(evt: MouseEvent){
     const ratioX = x / view.value.offsetWidth
     const ratioY = y / view.value.offsetHeight
 
-    console.log(x, y, ratioX, ratioY)
-
     emits('focusPointChange', ratioX, ratioY)//TODO fix this! Its not correct because the img inside the view div is adjusting its size to fit into the container
 }
 

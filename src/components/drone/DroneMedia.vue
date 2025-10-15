@@ -19,6 +19,7 @@ import { GetCompletionsAtPositionOptions } from 'typescript';
 import Padding from '../layout/Padding.vue';
 import RelativeContainer from '../layout/RelativeContainer.vue';
 import IconVue from '../general/IconVue.vue';
+import LinkVue from '../general/LinkVue.vue';
 
 const props = defineProps<{
     media: ApiResponse_DroneMediaGet[0]
@@ -83,7 +84,7 @@ type Location = {
 }
 
 let coverage = reactive<{
-    all: (Location & {ray: {bearing: number, pitch: number, imagePosition: {x: number, y: number}}, meterSize: {horizontal: number, vertical: number}})[]
+    all: (Location & {ray?: {bearing: number, pitch: number, imagePosition: {x: number, y: number}}, meterSize: {horizontal: number, vertical: number}})[]
     outer: Location[]
     holes: Location[][]
 }>({all: [], outer: [], holes: []})
@@ -132,6 +133,10 @@ function getClosestLocationForRelativeImagePosition(x: number, y: number){
     let closestRayDistance: number = Number.MAX_VALUE
 
     for(const loc of coverage.all){
+        if(!loc.ray){
+            continue
+        }
+
         const dist = Math.sqrt((loc.ray.imagePosition.x - x)**2 + (loc.ray.imagePosition.y - y)**2)
 
         if(dist < closestRayDistance){
@@ -166,7 +171,7 @@ function focusPointChange(x: number, y: number){
 
 setInterval(()=>{
     if(!hasCalculatedLastFocusPoint.value && (Date.now() - lastTimeFocusPointHasChanged) > 1000){
-        console.log('clculcating current focus point')
+        console.log('calculcating current focus point')
         hasCalculatedLastFocusPoint.value = true
         currentFocusPoint.location = getClosestLocationForRelativeImagePosition(currentFocusPoint.x, currentFocusPoint.y)
     }
@@ -192,11 +197,18 @@ const viewSize = reactive({
 
                         <RelativeContainer v-if="currentFocusPoint.location" :x="currentFocusPoint.location.ray.imagePosition.x" :y="currentFocusPoint.location.ray.imagePosition.y">
                             <Padding class="ray_info" @mousemove.stop @click.stop>
-                                <div>Distance:&nbsp;{{ currentFocusPoint.location.directDistance }}</div>
-                                <div>Elevation:&nbsp;{{ Math.round(currentFocusPoint.location.elevation) }}m</div>
-                                <div>Long:&nbsp;{{ currentFocusPoint.location.position.longitude.toFixed(6) }}</div>
-                                <div>Lat:&nbsp;{{ currentFocusPoint.location.position.latitude.toFixed(6) }}</div>
-                                <a :href="`https://www.outdooractive.com/en/map/?wt=(${currentFocusPoint.location.position.latitude},${currentFocusPoint.location.position.longitude})#zc=20,${currentFocusPoint.location.position.longitude},${currentFocusPoint.location.position.latitude}`" target="_blank">outdooractive</a>
+                                <div class="list">
+                                    <div>Distance:&nbsp;{{ currentFocusPoint.location.directDistance }}</div>
+                                    <div>Elevation:&nbsp;{{ Math.round(currentFocusPoint.location.elevation) }}m</div>
+                                    <div>Long:&nbsp;{{ currentFocusPoint.location.position.longitude.toFixed(6) }}</div>
+                                    <div>Lat:&nbsp;{{ currentFocusPoint.location.position.latitude.toFixed(6) }}</div>
+                                    <LinkVue :url="`https://www.outdooractive.com/en/map/?wt=(${currentFocusPoint.location.position.latitude},${currentFocusPoint.location.position.longitude})#zc=20,${currentFocusPoint.location.position.longitude},${currentFocusPoint.location.position.latitude}`" :force-new-tab="true">Outdooractive</LinkVue>
+                                    <LinkVue :url="`https://www.google.com/maps/search/?api=1&query=${currentFocusPoint.location.position.latitude}%2C${currentFocusPoint.location.position.longitude}`" :force-new-tab="true">Google Maps</LinkVue>
+                                </div>
+
+                                <div class="icon_inner">
+                                    <IconVue name="person-arms-up" :style="{'color':'#0f0', 'font-size': '' + (1.8 /* average human size */ * currentFocusPoint.location.meterSize.vertical * viewSize.height) + 'px'}"></IconVue>
+                                </div>
                             </Padding>
 
                             <template v-slot:marker>
@@ -215,7 +227,9 @@ const viewSize = reactive({
                     Captured at: <TimestampDisplay v-if="props.media.captured_at" :timestamp="props.media.captured_at"></TimestampDisplay><span v-else>?</span>
                 </div>
                 <div>
-                    Uploaded at: <TimestampDisplay :timestamp="props.media.received_at"></TimestampDisplay>&nbsp;(<TimeDisplay v-if="props.media.captured_at" :time-in-ms="dayjs(props.media.received_at).diff(props.media.captured_at, 'ms')" lowest="s"></TimeDisplay>&nbsp;later)
+                    Uploaded at: <TimestampDisplay :timestamp="props.media.received_at"></TimestampDisplay>
+                    <template v-if="typeof props.media.captured_at === 'number'">&nbsp;(<TimeDisplay v-if="props.media.captured_at" :time-in-ms="dayjs(props.media.received_at).diff(props.media.captured_at, 'ms')" lowest="s"></TimeDisplay>&nbsp;later)
+                    </template>
                 </div>
                 <div>
                     Location:
@@ -305,8 +319,24 @@ const viewSize = reactive({
     }
 
     .ray_info {
+        display: flex;
+        flex-direction: row;
+        gap: 5px;
         background-color: #222a;
         border-radius: 0.5em;
+        position: relative;
+
+        .list {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .icon_inner {
+            background: black;
+            padding: 5px;
+            line-height: 0;
+            height: fit-content;
+        }
     }
 }
 
