@@ -1,6 +1,7 @@
 @use '_reset.scss';
+@use '_variables.scss';
 @use '_colors.scss';
-@use '_fonts.scss';;
+@use '_fonts.scss';
 @use '_fix_vueprime.scss';
 
 @import '/icons/bootstrap/bootstrap-icons.css';//TODO linking this to /fonts creates warnings in vite

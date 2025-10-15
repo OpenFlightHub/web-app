@@ -20,7 +20,7 @@ const store = useMainStore()
 
         <List>
             <div v-if="store.isAdmin">
-                <label>Allow Bing Maps Terrain</label><Button @click="setSetting('allow-bing-maps', true)">Allow</Button>
+                <label>Allow Bing Maps Terrain</label>&nbsp;<Button @click="setSetting('allow-bing-maps', true)">Allow</Button>
             </div>
         </List>
 

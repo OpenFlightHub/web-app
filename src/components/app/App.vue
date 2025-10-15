@@ -35,7 +35,7 @@ const animateBackground = computed(()=>{
         <AppSideBar v-if="!routeIsAuth">
         </AppSideBar>
 
-        <AppContent>
+        <AppContent :full-width="!routeIsAuth">
             <RouterView/>
         </AppContent>
 
@@ -51,6 +51,7 @@ const animateBackground = computed(()=>{
 #app {
     display: flex;
     flex-direction: row;
+    justify-content: center;
     min-height: 100vh;
     width: 100vw;
     overflow-y: auto;

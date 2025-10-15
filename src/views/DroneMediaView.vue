@@ -28,8 +28,8 @@ import DroneMedia from '@/components/drone/DroneMedia.vue';
 #outer {
    display: flex;
    flex-direction: column;
-   height: calc(100vh - var(--navbar-size) - 4em); // 4em for heading
-   width: 100vw;
+   height: calc(100vh - 4em); // 4em for heading
+   width: calc(100vw - var(--sidebar-min-size));
 
    .drone_media {
       flex-grow: 1;
