@@ -84,7 +84,7 @@ export class OpenFlightHubConnectLinkManager {
 
         const sdk = new DjiOpenPlatformConnectSDK(sdkConfig.app_id, sdkConfig.app_key, sdkConfig.app_license)
 
-        sdk.verifyLicense()
+        await sdk.verifyLicense()
 
         sdk.setWorkspaceUUID(config.workspace_uuid)
 
@@ -178,7 +178,7 @@ export class OpenFlightHubConnectLinkClient_DjiPilot2 extends OpenFlightHubConne
 
         this.sdk = new DjiOpenPlatformConnectSDK(sdkConfig.app_id, sdkConfig.app_key, sdkConfig.app_license)
 
-        this.sdk.verifyLicense()
+        await this.sdk.verifyLicense()
 
         this.sdk.setPlatformInformation(this.platformConfig.platform_name, this.platformConfig.workspace_name, 'on ' + this.platformConfig.platform_name)
 

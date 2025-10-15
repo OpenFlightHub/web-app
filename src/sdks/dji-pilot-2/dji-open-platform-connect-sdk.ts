@@ -1,3 +1,4 @@
+import { sleep } from "@/util/sleep.js"
 import { ComponentName, DjiBridge, DjiBridgeEncapsulatedResponse, DjiBridgeResponse, DjiBridgeResponseFail, DjiBridgeResponseSuccess, EmptyObject } from "./DjiBridge.js"
 
 
@@ -121,10 +122,12 @@ export class DjiOpenPlatformConnectSDK extends EventManager<DjiOpenPlatformConne
 
     // -- GENERAL --
 
-    verifyLicense = this.wrapWithLog('verifyLicense', ()=>{
+    verifyLicense = this.wrapWithLog('verifyLicense', async ()=>{
         const ret = this.unwrapResponse(this.djiBridge.platformVerifyLicense(this.appId, this.appKey, this.appLicense))
 
         this.licenseIsVerified = ret
+
+        await sleep(200) // sometimes the verification takes some time (LoL)
 
         return ret
     })
