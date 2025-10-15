@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import IconVue from './IconVue.vue';
 
 const props = defineProps<{
     url?: string
@@ -32,6 +33,7 @@ const target = computed(()=>{
 <template>
 
     <a :class="['link', isExternal ? 'external' : '']" :href="props.url" :target="target">
+        <IconVue v-if="isExternal" name="box-arrow-up-right" id="external-icon"></IconVue>
         <slot></slot>
     </a>
 
@@ -43,6 +45,11 @@ const target = computed(()=>{
         text-decoration: underline;
         cursor: pointer;
         color: var(--neutral-light);
+        white-space: nowrap;
+
+        #external-icon {
+            margin-right: 0.5em;
+        }
 
         &:hover {
             color: var(--neutral-lighter) !important;
