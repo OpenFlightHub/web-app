@@ -229,7 +229,7 @@ async function toggleMediaModule(){
 
                         <h3>State: <span v-if="connectionState.connected">{{ $t("link.is_connected") }}</span><span v-else>{{ $t("link.is_not_connected") }}</span></h3>
                         <div class="connection_state" v-if="connectionState.modules">
-                            <div v-for="module_state of connectionState.modules" :key="module_state.name" :class="['module_state', {connected: module_state.connected}]">{{ module_state.name }}</div>
+                            <div v-for="module_state of connectionState.modules" :key="module_state.name" :class="['module_state', {connected: module_state.connected, soft_connect: module_state.name === 'stream'}]">{{ module_state.name }}</div>
                         </div>
 
                         <div style="margin-bottom: 1em">
@@ -278,6 +278,10 @@ async function toggleMediaModule(){
             width: 1em;
             border-radius: 10000px;
             margin-right: 0.5em;
+            background: var(--error);
+        }
+
+        &.soft_connect:not(.connected):before {
             background: var(--warning);
         }
 
