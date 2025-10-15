@@ -39,8 +39,6 @@ const animateBackground = computed(()=>{
             <RouterView/>
         </AppContent>
 
-        <AppBackground :animated="route.name === 'login'"></AppBackground>
-
         <AutomaticFileDownload></AutomaticFileDownload>
     </div>
 

@@ -2,7 +2,7 @@
 import IconVue from '../general/IconVue.vue';
 
 const props = defineProps<{
-    icon: string
+    icon?: string
     to: string
 }>()
 </script>
@@ -10,7 +10,7 @@ const props = defineProps<{
 <template>
 
     <RouterLink :to="props.to" id="link">
-        <IconVue :name="props.icon"></IconVue>&nbsp;<slot></slot>
+        <IconVue v-if="typeof props.icon === 'string'" id="icon" :name="props.icon"></IconVue><slot></slot>
     </RouterLink>
 
 </template>
@@ -19,6 +19,10 @@ const props = defineProps<{
 
 #link {
     white-space: nowrap;
+
+    #icon {
+        margin-right: 1em;
+    }
 }
 
 </style>

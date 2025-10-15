@@ -1,5 +1,6 @@
 import api from '@/api/index.js';
-import { ApiResponse_AuthLoginPost, ApiResponse_UserSelfGet } from 'openflighthub-api-client-sdk';
+import { updateArray } from '@/util/vue.js';
+import { ApiResponse_AuthLoginPost, ApiResponse_UserSelfGet, ApiResponse_WorkspaceMyworkspacesGet } from 'openflighthub-api-client-sdk';
 import { defineStore } from 'pinia'
 
 /**
@@ -21,6 +22,7 @@ export const useMainStore = defineStore('main', {
             apiDisconnected: false,//this is used once initial checks are done and login was performed (state is monitored via websocket)
             user: null as ApiResponse_AuthLoginPost,
             userSelf: null as ApiResponse_UserSelfGet,
+            myWorkspaces: [] as ApiResponse_WorkspaceMyworkspacesGet,
 
             isForceLoggedOut: false,//true when someone else has logged into this account
         }
@@ -48,6 +50,7 @@ export const useMainStore = defineStore('main', {
             })
             this.userSelf = await api.rest.user.self.get()
             this.user = user
+            this.myWorkspaces = await api.rest.workspace.myWorkspaces.get()
         },
 
         async loginWithToken(token: string){
@@ -56,6 +59,7 @@ export const useMainStore = defineStore('main', {
             })
             this.userSelf = await api.rest.user.self.get()
             this.user = user
+            this.myWorkspaces = await api.rest.workspace.myWorkspaces.get()
         },
 
         async loginCheck(){
@@ -63,6 +67,7 @@ export const useMainStore = defineStore('main', {
                 const user = await api.rest.auth.check.get()
                 this.userSelf = await api.rest.user.self.get()
                 this.user = user
+                updateArray(this.myWorkspaces, await api.rest.workspace.myWorkspaces.get())
                 return true
             } catch(err) {
 
