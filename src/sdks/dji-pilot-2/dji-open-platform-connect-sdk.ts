@@ -122,12 +122,10 @@ export class DjiOpenPlatformConnectSDK extends EventManager<DjiOpenPlatformConne
 
     // -- GENERAL --
 
-    verifyLicense = this.wrapWithLog('verifyLicense', async ()=>{
+    verifyLicense = this.wrapWithLog('verifyLicense', ()=>{
         const ret = this.unwrapResponse(this.djiBridge.platformVerifyLicense(this.appId, this.appKey, this.appLicense))
 
         this.licenseIsVerified = ret
-
-        await sleep(200) // sometimes the verification takes some time (LoL)
 
         return ret
     })
