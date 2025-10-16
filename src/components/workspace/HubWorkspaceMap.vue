@@ -13,6 +13,8 @@ import { Button } from 'primevue';
 import HubWorkspaceMapDroneMedia from './HubWorkspaceMapDroneMedia.vue';
 import Map from '../map/Map.vue';
 import HubWorkspaceMapElements from './HubWorkspaceMapElements.vue';
+import LoadApi from '../functional/LoadApi.vue';
+import api from '@/api';
 
 const props = defineProps<{
     connections: ApiResponse_ConnectionGet[]
@@ -41,7 +43,7 @@ const showMedia = ref(false)
                 <HubWorkspaceMapConnection v-for="connection in props.connections" :key="connection.id" :map-container="mapContainer" :connection="connection" :viewer="viewer"></HubWorkspaceMapConnection>
 
                 <!-- TODO implement center of map (but lazy load, so a small change in distance does not actually trigger a reset) -->
-                <HubWorkspaceMapTraffic :viewer="viewer" :map-container="mapContainer" :latitude="47.554" :longitude="10.22" :radius="50000"></HubWorkspaceMapTraffic>
+                <HubWorkspaceMapTraffic :viewer="viewer" :map-container="mapContainer" :latitude="props.latitude" :longitude="props.longitude" :radius="50000"></HubWorkspaceMapTraffic>
 
                 <HubWorkspaceMapElements :viewer="viewer" :map-container="mapContainer" :workspace-id="props.workspaceId"></HubWorkspaceMapElements>
             </template>
