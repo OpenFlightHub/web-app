@@ -41,6 +41,7 @@ onMounted(async ()=>{
             <h3>Latest Changes:</h3>
             <ul>
                 <li>Show traffic around your drone inside the DJI Pilot App</li>
+                <li>Show all map elements from the DJI Pilot App on the website</li>
             </ul>
         </Padding>
 
