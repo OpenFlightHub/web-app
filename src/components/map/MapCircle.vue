@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, watch } from 'vue';
-import { Cartesian3, CircleGeometry, CircleOutlineGeometry, Color, Entity, HeightReference, Viewer, Cartographic, LabelStyle } from 'cesium';
+import { Cartesian3, CircleGeometry, CircleOutlineGeometry, Color, Entity, HeightReference, Viewer, Cartographic, LabelStyle, PolylineDashMaterialProperty } from 'cesium';
 import * as turf from '@turf/turf'
 import { getElevationAtPosition } from '@/util/terrain';
 
@@ -16,6 +16,7 @@ const props = defineProps<{
     filled?: boolean
     outlineWidth?: number
     label?: string
+    outlineDashed?: boolean
 }>()
 
 let circle: Entity
@@ -32,6 +33,7 @@ watch(()=>props.outlineColor, update, {deep: true})
 watch(()=>props.filled, update, {deep: true})
 watch(()=>props.outlineWidth, update, {deep: true})
 watch(()=>props.label, update, {deep: true})
+watch(()=>props.outlineDashed, update, {deep: true})
 
 onMounted(update)
 onBeforeUnmount(()=>{
@@ -55,34 +57,31 @@ async function update(){
 
 async function addCircle(){
 
-    if(props.filled){
+    const height = props.clampToGround ? undefined : (await getElevationAtPosition(props.viewer, props.longitude, props.latitude)).height
 
-        const height = props.clampToGround ? undefined : (await getElevationAtPosition(props.viewer, props.longitude, props.latitude)).height
+    circle = props.viewer.entities.add({
+        id: 'map-circle-' + myId,
 
-        circle = props.viewer.entities.add({
-            id: 'map-circle-' + myId,
+        position: Cartesian3.fromDegrees(props.longitude, props.latitude, height),
 
-            position: Cartesian3.fromDegrees(props.longitude, props.latitude, height),
+        label: typeof props.label === 'string' ? {
+            text: props.label,
+            font: '14pt monospace',
+            style: LabelStyle.FILL_AND_OUTLINE,
+            outlineWidth: 2,
+            heightReference: props.clampToGround ? HeightReference.CLAMP_TO_TERRAIN: HeightReference.NONE,
+            disableDepthTestDistance: typeof height === 'number' ? 5000000 : Number.POSITIVE_INFINITY, // show always above terrain https://community.cesium.com/t/points-labels-stuck-under-terrain/11141
+        } : undefined,
 
-            label: typeof props.label === 'string' ? {
-                text: props.label,
-                font: '14pt monospace',
-                style: LabelStyle.FILL_AND_OUTLINE,
-                outlineWidth: 2,
-                heightReference: props.clampToGround ? HeightReference.CLAMP_TO_TERRAIN: HeightReference.NONE,
-                disableDepthTestDistance: typeof height === 'number' ? 5000000 : Number.POSITIVE_INFINITY, // show always above terrain https://community.cesium.com/t/points-labels-stuck-under-terrain/11141
-            } : undefined,
-
-            ellipse: {
-                semiMinorAxis: props.radius,
-                semiMajorAxis: props.radius,
-                fill: props.filled,
-                material: props.color,
-                height,
-                heightReference: props.clampToGround ? HeightReference.CLAMP_TO_GROUND : undefined
-            }
-        })
-    }
+        ellipse: {
+            semiMinorAxis: props.radius,
+            semiMajorAxis: props.radius,
+            fill: props.filled,
+            material: props.color,
+            height,
+            heightReference: props.clampToGround ? HeightReference.CLAMP_TO_GROUND : undefined
+        }
+    })
 }
 
 async function addOutline(){
@@ -104,7 +103,10 @@ async function addOutline(){
             positions,
             width: typeof props.outlineWidth === 'number' ? props.outlineWidth : 3,
             clampToGround: props.clampToGround,
-            material: props.outlineColor || props.color
+            material: props.outlineDashed ? new PolylineDashMaterialProperty({
+                color: props.outlineColor || props.color,
+                dashLength: 32
+            }) : (props.outlineColor || props.color),
         }
     })
 }
