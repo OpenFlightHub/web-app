@@ -90,7 +90,7 @@ function pickEntity(viewer: Viewer, windowPosition: Cartesian2) : Entity | undef
 /**
  * @param originLonLat in degrees
  * @param originElevation in meters
- * @param bearing in degrees, 0 is north
+ * @param bearing in degrees, 0 is north (360)
  * @param distance in meters
  */
 export function getPointFromOriginWithBearingAndDistance(originLonLat: [number, number], originElevation: number, bearing: number, distance: number){

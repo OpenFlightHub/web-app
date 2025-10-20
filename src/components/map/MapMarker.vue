@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
-import { Cartesian2, Cartesian3, Cartographic, Color, Ellipsoid, Entity, HeadingPitchRoll, HeightReference, JulianDate, LabelStyle, Math as MathCesium, Matrix3, PolylineArrowMaterialProperty, PolylineDashMaterialProperty, Ray, SampledPositionProperty, sampleTerrainMostDetailed, Transforms, VerticalOrigin, Viewer } from 'cesium';
+import { Cartesian2, Cartesian3, Cartographic, Color, Ellipsoid, Entity, HeadingPitchRoll, HeightReference, JulianDate, LabelStyle, Math as MathCesium, Matrix3, PolylineArrowMaterialProperty, PolylineDashMaterialProperty, PositionProperty, Ray, SampledPositionProperty, sampleTerrainMostDetailed, Transforms, VerticalOrigin, Viewer } from 'cesium';
 import { getElevationAtPosition } from '@/util/terrain';
 import { convertEllipsoidalHeightToOrthometricHeight } from '@/util/geoid';
 import { cleanupClickMyEntity, ClickMyEntityHandle, getPointFromOriginWithBearingAndDistance, setupClickMyEntity } from '@/util/cesium';
+import * as turf from '@turf/turf';
 
 //TODO if marker elevation is below cesium terrain, clamp it to ground
 const props = defineProps<{
@@ -19,8 +20,11 @@ const props = defineProps<{
     fontSize?: number
     showHeightIndicator?: boolean
     showHeightMeanSeaLevelInLabel?: boolean
-    bearing?: number//TODO implement
+    bearing?: number // in 360 degrees, 0 = north
+    autoBearing?: boolean //calculate bearing from last to current position
 }>()
+
+let lastPosition: [number, number]
 
 
 const emit = defineEmits<{
@@ -36,14 +40,16 @@ const myId = crypto.randomUUID()
 
 watch(()=>props.bearing, update, {deep: true})
 watch(()=>props.color, update, {deep: true})
-watch(()=>props.elevation, update, {deep: true})
+watch(()=>props.elevation, ()=>{
+    updatePosition(null, null)
+}, {deep: true})
 watch(()=>props.fontSize, update, {deep: true})
 watch(()=>props.iconHeight, update, {deep: true})
 watch(()=>props.iconUrl, update, {deep: true})
 watch(()=>props.iconWidth, update, {deep: true})
 watch(()=>props.label, update, {deep: true})
 watch(()=>props.mapContainer, update, {deep: true})
-watch(()=>props.position, update, {deep: true})
+watch(()=>props.position, updatePosition, {deep: true})
 watch(()=>props.showHeightIndicator, update, {deep: true})
 watch(()=>props.showHeightMeanSeaLevelInLabel, update, {deep: true})
 
@@ -54,6 +60,39 @@ onBeforeUnmount(()=>{
     removeHeightIndicator()
     removeBearingIndicator()
 })
+
+let autoBearing = 0
+
+
+async function updatePosition(newValue: typeof props.position, oldValue: typeof props.position){//TODO add this optimization for all the other map elements too (and for all the properties if possible)
+
+    if(newValue && (newValue[0] !== oldValue[0] && newValue[1] !== oldValue[1])){
+        lastPosition = oldValue
+
+        autoBearing = turf.bearing(lastPosition, newValue)
+        if(autoBearing < 0){
+            autoBearing += 360
+        }
+    }
+
+    if(marker){
+        //@ts-ignore
+        marker.position = Cartesian3.fromDegrees(props.position[0], props.position[1], props.elevation)
+    }
+
+
+    if(heightIndicator){
+        //@ts-ignore
+        heightIndicator.polyline.positions = makeHeightIndicatorPositions(props.position, props.elevation)
+    }
+
+
+    if(bearingIndicator){
+        //@ts-ignore
+        bearingIndicator.polyline.positions = await makeBearingIndicatorPositions(props.position, typeof props.bearing === 'number' ? props.bearing : autoBearing, props.elevation)
+    }
+
+}
 
 
 async function update(){//TODO cesium fails to repaint polygons (height marker) if we update it too quickly (e.g. every 10ms)
@@ -168,32 +207,42 @@ function removeHeightIndicator(){
 
 async function addBearingIndicator(){
 
-    if(typeof props.bearing !== 'number'){
+    if(typeof props.bearing !== 'number' && props.autoBearing !== true){
         return
     }
 
     bearingIndicator = props.viewer.entities.add({
         id: 'map-marker-bearing-indicator-' + myId,
         polyline: {
-            positions: await makeBearingIndicatorPositions(props.position, props.bearing, props.elevation),
+            positions: await makeBearingIndicatorPositions(props.position, typeof props.bearing === 'number' ? props.bearing : autoBearing, props.elevation),
             width: 10,
-            material: new PolylineArrowMaterialProperty(props.color || Color.WHITE)
+            material: new PolylineArrowMaterialProperty(props.color || Color.WHITE),
         }
     })
 }
 
-async function makeBearingIndicatorPositions(lonLat: [number, number], bearing: number, elevation: number){
+/**
+ *
+ * @param lonLat
+ * @param bearing
+ * @param elevation
+ */
+async function makeBearingIndicatorPositions(lonLat: [number, number], bearing: number, elevation?: number){
 
     const terrainElevation = (await getElevationAtPosition(props.viewer, lonLat[0], lonLat[1])).height
 
-    if(elevation < (terrainElevation + 1)){
-        elevation = terrainElevation + 1
+    if(typeof elevation === 'number'){
+        if(elevation < (terrainElevation + 1)){
+            elevation = terrainElevation + 1
+        }
+    } else {
+        elevation = terrainElevation
     }
 
     const origin = Cartesian3.fromDegrees(lonLat[0], lonLat[1], elevation)
 
     return [
-        origin, getPointFromOriginWithBearingAndDistance(lonLat, elevation, bearing, 20)
+        origin, getPointFromOriginWithBearingAndDistance(lonLat, elevation, bearing, 500)//TODO this hardcoded length does not work with dynmic zoom (using velocitiy of traffic would be nice)
     ]
 }
 
