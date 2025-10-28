@@ -24,14 +24,15 @@ const props = defineProps<{
     position: relative;
     display: flex;
     min-height: 100vh;
+    max-height: 100vh;
     overflow-y: auto;
     z-index: 2;
     max-width: calc(100vw - var(--sidebar-min-size));
 
     #inner {
         position: relative;
-        min-height: 100%;
-        min-width: 100%;
+        height: 100%;
+        width: 100%;
     }
 }
 
