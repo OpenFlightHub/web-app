@@ -160,7 +160,7 @@ export class OpenFlightHubConnectLinkClient<ModuleName extends string> extends E
     }
 }
 
-export type OpenFlightHubConnectLinkClient_DjiPilot2_ModuleName = 'api' | 'mqtt' | 'stream' | 'ws' | 'media' | 'map'
+export type OpenFlightHubConnectLinkClient_DjiPilot2_ModuleName = 'api' | 'mqtt' | 'stream' | 'ws' | 'media' | 'map' | 'situational_awareness'
 
 export class OpenFlightHubConnectLinkClient_DjiPilot2 extends OpenFlightHubConnectLinkClient<OpenFlightHubConnectLinkClient_DjiPilot2_ModuleName> {
 
@@ -282,7 +282,17 @@ export class OpenFlightHubConnectLinkClient_DjiPilot2 extends OpenFlightHubConne
             await this.sdk.map_unloadModule()
         }
 
-        await this.sdk.map_loadModule(this.getRemoteControllerSerialNumber(), '')//TODO use connection name as prefix
+        await this.sdk.map_loadModule(this.getRemoteControllerSerialNumber(), 'Conn ' + this.getConnectionId())//TODO use connection name as prefix
+
+
+        console.debug('  setup situational awareness ...')
+
+        // Situational Awareness
+        if(this.sdk.situational_awareness_moduleIsLoaded()){
+            await this.sdk.situational_awareness_unloadModule()
+        }
+
+        await this.sdk.situational_awareness_loadModule()
 
 
         console.debug('init done')
@@ -323,6 +333,12 @@ export class OpenFlightHubConnectLinkClient_DjiPilot2 extends OpenFlightHubConne
         modules.push({
             name: 'map',
             connected: this.sdk.map_moduleIsLoaded()
+        })
+
+
+        modules.push({
+            name: 'situational_awareness',
+            connected: this.sdk.situational_awareness_moduleIsLoaded()
         })
 
         return {

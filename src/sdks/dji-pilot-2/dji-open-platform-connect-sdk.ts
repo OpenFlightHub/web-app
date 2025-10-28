@@ -577,7 +577,24 @@ export class DjiOpenPlatformConnectSDK extends EventManager<DjiOpenPlatformConne
         return this.unwrapResponse(this.djiBridge.mapSetElementPreName(elementNamePrefix))
     }
 
+    // Situational Awareness (TSA)
 
+    situational_awareness_loadModule(){
+
+        this.guardModuleLoaded('api')
+
+        this.guardModuleLoaded('ws')
+
+        return this.loadModule('tsa', {})
+    }
+
+    situational_awareness_moduleIsLoaded(){
+        return this.moduleIsLoaded('tsa')
+    }
+
+    situational_awareness_unloadModule(){
+        return this.unloadModule('tsa')
+    }
 
 
 
