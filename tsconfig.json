@@ -12,9 +12,16 @@
     }
   ],
   "compilerOptions": {
-    "lib": ["es2018"],
+    "target": "es2020",
+    "lib": ["es2020"],
     "skipLibCheck": true,
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext"
-  }
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    /* TODO if possible enable "strict": true,*/
+    "paths": {
+      "@/*": ["./src/*"],
+      "$/*": ["./*"]
+    },
+  },
+  "include": ["src"]
 }
