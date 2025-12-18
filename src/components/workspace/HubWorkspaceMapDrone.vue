@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ApiResponse_DroneLastpositionGet, ApiResponse_DroneLastbatteryGet, ApiResponse_DroneGet, ApiResponse_DroneCurrentflightGet } from 'openflighthub-api-client-sdk';
+import { ApiResponse_DroneLastPositionGet, ApiResponse_DroneLastBatteryGet, ApiResponse_DroneGet, ApiResponse_DroneCurrentFlightGet } from 'openflighthub-api-client-sdk';
 import MapMarker from '../map/MapMarker.vue';
 import { Color, Viewer } from 'cesium';
 import { computed, onMounted, reactive, ref, watch } from 'vue';
@@ -16,13 +16,13 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-    'drone-position': [ApiResponse_DroneLastpositionGet]
+    'drone-position': [ApiResponse_DroneLastPositionGet]
 }>()
 
 
 const drone = reactive({} as ApiResponse_DroneGet)
 
-const lastDronePosition = reactive({} as ApiResponse_DroneLastpositionGet)
+const lastDronePosition = reactive({} as ApiResponse_DroneLastPositionGet)
 
 const isValidLastDronePosition = computed(()=>{
     return typeof lastDronePosition.height === 'number'
@@ -36,10 +36,10 @@ watch(()=>{
 
 async function setup(){
 
-    api.live.subscribeToDbRowUpdate('drones', props.droneId, (a)=>{
-        updateObject(drone, api.rest.drone.get({droneId: props.droneId}))
+    api.live.subscribeToDbRowUpdate('drones', props.droneId, async(a)=>{
+        updateObject(drone, await api.rest.drone.get({droneId: props.droneId}))
     })
-    updateObject(drone, api.rest.drone.get({droneId: props.droneId}))
+    updateObject(drone, await api.rest.drone.get({droneId: props.droneId}))
 
     api.live.subscribeToDronePosition(props.droneId, (evt, filter, data)=>{
         updateObject(lastDronePosition, data.position)
@@ -85,7 +85,7 @@ function clickMarker(){
 
 const currentBatteryPercent = ref(0)
 
-const lastDroneBattery = reactive({} as ApiResponse_DroneLastbatteryGet)
+const lastDroneBattery = reactive({} as ApiResponse_DroneLastBatteryGet)
 const isValidLastDroneBattery = computed(()=>{
     return typeof lastDroneBattery.capacity_percent_left === 'number'
 })
@@ -98,7 +98,7 @@ const currentBatteryPercentString = computed(()=>{
     }
 })
 
-const currentFlight = reactive({} as ApiResponse_DroneCurrentflightGet)
+const currentFlight = reactive({} as ApiResponse_DroneCurrentFlightGet)
 
 
 </script>
@@ -109,7 +109,7 @@ const currentFlight = reactive({} as ApiResponse_DroneCurrentflightGet)
 
 
     <MapPolyline v-if="props.showCurrentFlight && typeof currentFlight.id === 'number'" :points="currentFlight.track.map(t => {
-        return {position: {longitude: t.longitude, latitude: t.latitude}, elevation: t.height}
+        return [t.longitude, t.latitude, t.height]
     })" :viewer="viewer" :color="Color.BLUE"></MapPolyline>
 
     <div v-show="showInfo" id="info">
