@@ -7,7 +7,7 @@ import "cesium/Build/Cesium/Widgets/widgets.css";
 
 import HubWorkspaceMapConnection from './HubWorkspaceMapConnection.vue';
 import { geoidIsLoaded } from '@/util/geoid';
-import HubWorkspaceMapTraffic from './HubWorkspaceMapTraffic.vue';
+//import HubWorkspaceMapTraffic from './HubWorkspaceMapTraffic.vue';
 import Checkbox from 'primevue/checkbox'
 import { Button } from 'primevue';
 import HubWorkspaceMapDroneMedia from './HubWorkspaceMapDroneMedia.vue';
@@ -43,7 +43,7 @@ const showMedia = ref(false)
                 <HubWorkspaceMapConnection v-for="connection in props.connections" :key="connection.id" :map-container="mapContainer" :connection="connection" :viewer="viewer"></HubWorkspaceMapConnection>
 
                 <!-- TODO implement center of map (but lazy load, so a small change in distance does not actually trigger a reset) -->
-                <HubWorkspaceMapTraffic :viewer="viewer" :map-container="mapContainer" :latitude="props.latitude" :longitude="props.longitude" :radius="100 * 1000" :show-coverage="true"></HubWorkspaceMapTraffic>
+                <!--<HubWorkspaceMapTraffic :viewer="viewer" :map-container="mapContainer" :latitude="props.latitude" :longitude="props.longitude" :radius="100 * 1000" :show-coverage="true"></HubWorkspaceMapTraffic>-->
 
                 <HubWorkspaceMapElements :viewer="viewer" :map-container="mapContainer" :workspace-id="props.workspaceId"></HubWorkspaceMapElements>
             </template>
