@@ -7,8 +7,7 @@ import { getElevationAtPosition } from '@/util/terrain';
 //TODO if line elevation is below cesium terrain, clamp it to ground
 const props = defineProps<{
     viewer: Viewer
-    longitude: number
-    latitude: number
+    position: [number, number, number?]
     radius: number
     clampToGround?: boolean
     color: Color
@@ -24,8 +23,7 @@ let outline: Entity
 
 const myId = crypto.randomUUID()
 
-watch(()=>props.longitude, update, {deep: true})
-watch(()=>props.latitude, update, {deep: true})
+watch(()=>props.position, update, {deep: true})
 watch(()=>props.radius, update, {deep: true})
 watch(()=>props.clampToGround, update, {deep: true})
 watch(()=>props.color, update, {deep: true})
@@ -57,12 +55,12 @@ async function update(){
 
 async function addCircle(){
 
-    const height = props.clampToGround ? undefined : (await getElevationAtPosition(props.viewer, props.longitude, props.latitude)).height
+    const height = props.clampToGround ? undefined : (typeof props.position[2] === 'number' ? props.position[2] : (await getElevationAtPosition(props.viewer, props.position[0], props.position[1])).height)
 
     circle = props.viewer.entities.add({
         id: 'map-circle-' + myId,
 
-        position: Cartesian3.fromDegrees(props.longitude, props.latitude, height),
+        position: Cartesian3.fromDegrees(props.position[0], props.position[1], height),
 
         label: typeof props.label === 'string' ? {
             text: props.label,
@@ -88,9 +86,9 @@ async function addOutline(){
 
     //extra polyline because outlineWidth is bugged in cesium and will never be fixed
 
-    const turfCircle = turf.circle([props.longitude, props.latitude], props.radius, {units: 'meters'})
+    const turfCircle = turf.circle(props.position, props.radius, {units: 'meters'})
 
-    const circleHeight = props.clampToGround ? 0 : (await getElevationAtPosition(props.viewer, props.longitude, props.latitude)).height
+    const circleHeight = props.clampToGround ? 0 : ( typeof props.position[2] === 'number' ? props.position[2] : (await getElevationAtPosition(props.viewer, props.position[0], props.position[1])).height )
 
     const positions = turfCircle.geometry.coordinates[0].map(c => {
         const cartographicPosition = Cartographic.fromDegrees(c[0], c[1], circleHeight)

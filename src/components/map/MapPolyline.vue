@@ -7,13 +7,7 @@ import { getElevationAtPosition } from '@/util/terrain';
 //TODO if line elevation is below cesium terrain, clamp it to ground
 const props = defineProps<{
     viewer: Viewer
-    points: {
-        position: {
-            longitude: number
-            latitude: number
-        },
-        elevation?: number
-    }[],
+    points: [number, number, number][],//lng, lat, elevation
     clampToGround?: boolean
     color: Color
 }>()
@@ -48,13 +42,17 @@ async function addPolyline(){
 
         let cartographicPosition: Cartographic
 
+        const lng = p[0]
+        const lat = p[1]
+        const elevation = p[2]
+
         if(props.clampToGround){
-            cartographicPosition = Cartographic.fromDegrees(p.position.longitude, p.position.latitude)
-        } else if(typeof p.elevation !== 'number' || p.elevation === 0){
-            cartographicPosition = await getElevationAtPosition(props.viewer, p.position.longitude, p.position.latitude)
+            cartographicPosition = Cartographic.fromDegrees(lng, lat)
+        } else if(typeof elevation !== 'number' || elevation === 0){
+            cartographicPosition = await getElevationAtPosition(props.viewer, lng, lat)
             cartographicPosition.height += 10
         } else {
-            cartographicPosition = Cartographic.fromDegrees(p.position.longitude, p.position.latitude, p.elevation)
+            cartographicPosition = Cartographic.fromDegrees(lng, lat, elevation)
         }
 
         positions.push(Cartographic.toCartesian(cartographicPosition))

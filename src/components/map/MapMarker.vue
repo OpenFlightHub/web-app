@@ -10,8 +10,7 @@ import * as turf from '@turf/turf';
 const props = defineProps<{
     mapContainer: HTMLElement
     viewer: Viewer
-    position: [number, number] // longitude, latitude
-    elevation?: number //if not present, marker will sit on the ground
+    position: [number, number, number?] // longitude, latitude, elevation (if not present, marker will sit on the ground)
     iconUrl: string
     iconWidth: number
     iconHeight: number
@@ -24,7 +23,7 @@ const props = defineProps<{
     autoBearing?: boolean //calculate bearing from last to current position
 }>()
 
-let lastPosition: [number, number]
+let lastPosition: [number, number, number?]
 
 
 const emit = defineEmits<{
@@ -40,9 +39,6 @@ const myId = crypto.randomUUID()
 
 watch(()=>props.bearing, update, {deep: true})
 watch(()=>props.color, update, {deep: true})
-watch(()=>props.elevation, ()=>{
-    updatePosition(null, null)
-}, {deep: true})
 watch(()=>props.fontSize, update, {deep: true})
 watch(()=>props.iconHeight, update, {deep: true})
 watch(()=>props.iconUrl, update, {deep: true})
@@ -124,13 +120,13 @@ async function update(){//TODO cesium fails to repaint polygons (height marker) 
 
 
 function heightIsNotZero(){
-    return typeof props.elevation === 'number' && props.elevation > 0
+    return typeof props.position[2] === 'number' && props.position[2] > 0
 }
 
 function addMarker(){
     marker = props.viewer.entities.add({
         id: 'map-marker-' + myId,
-        position: Cartesian3.fromDegrees(props.position[0], props.position[1], props.elevation),
+        position: Cartesian3.fromDegrees(props.position[0], props.position[1], props.position[2]),
         billboard: {
             image: props.iconUrl,
             width: props.iconWidth,
@@ -140,7 +136,7 @@ function addMarker(){
             disableDepthTestDistance: heightIsNotZero() ? 5000000 : Number.POSITIVE_INFINITY // show always above terrain https://community.cesium.com/t/points-labels-stuck-under-terrain/11141,
         },
         label: {
-            text: (props.label ? props.label + ' ' : '') + (props.showHeightMeanSeaLevelInLabel ? (typeof props.elevation === 'number' ? Math.floor(convertEllipsoidalHeightToOrthometricHeight(props.position[0], props.position[1], props.elevation)) + 'm' : '') : ''),
+            text: (props.label ? props.label + ' ' : '') + (props.showHeightMeanSeaLevelInLabel ? (typeof props.position[2] === 'number' ? Math.floor(convertEllipsoidalHeightToOrthometricHeight(props.position[0], props.position[1], props.position[2])) + 'm' : '') : ''),
             font: (typeof props.fontSize === 'number' ? props.fontSize : 14) + 'pt monospace',
             style: LabelStyle.FILL_AND_OUTLINE,
             outlineWidth: 2,
@@ -183,7 +179,7 @@ async function addHeightIndicator(){
     heightIndicator = props.viewer.entities.add({
         id: 'map-marker-height-indicator-' + myId,
         polyline: {
-            positions: makeHeightIndicatorPositions(props.position, props.elevation),
+            positions: makeHeightIndicatorPositions(props.position),
             width: 2,
             material: new PolylineDashMaterialProperty({
                 color: props.color || Color.WHITE
@@ -192,8 +188,8 @@ async function addHeightIndicator(){
     })
 }
 
-function makeHeightIndicatorPositions(lonLat: [number, number], elevation: number){
-    return [Cartesian3.fromDegrees(lonLat[0], lonLat[1], elevation), Cartesian3.fromDegrees(lonLat[0], lonLat[1], 0)]
+function makeHeightIndicatorPositions(position: [number, number, number?]){
+    return [Cartesian3.fromDegrees(position[0], position[1], position[2]), Cartesian3.fromDegrees(position[0], position[1], 0)]
 }
 
 function removeHeightIndicator(){
@@ -214,7 +210,7 @@ async function addBearingIndicator(){
     bearingIndicator = props.viewer.entities.add({
         id: 'map-marker-bearing-indicator-' + myId,
         polyline: {
-            positions: await makeBearingIndicatorPositions(props.position, typeof props.bearing === 'number' ? props.bearing : autoBearing, props.elevation),
+            positions: await makeBearingIndicatorPositions(props.position, typeof props.bearing === 'number' ? props.bearing : autoBearing),
             width: 10,
             material: new PolylineArrowMaterialProperty(props.color || Color.WHITE),
         }
@@ -223,14 +219,15 @@ async function addBearingIndicator(){
 
 /**
  *
- * @param lonLat
+ * @param position
  * @param bearing
  * @param elevation
  */
-async function makeBearingIndicatorPositions(lonLat: [number, number], bearing: number, elevation?: number){
+async function makeBearingIndicatorPositions(position: [number, number, number?], bearing: number){
 
-    const terrainElevation = (await getElevationAtPosition(props.viewer, lonLat[0], lonLat[1])).height
+    const terrainElevation = (await getElevationAtPosition(props.viewer, position[0], position[1])).height
 
+    let elevation = position[2]
     if(typeof elevation === 'number'){
         if(elevation < (terrainElevation + 1)){
             elevation = terrainElevation + 1
@@ -239,10 +236,10 @@ async function makeBearingIndicatorPositions(lonLat: [number, number], bearing: 
         elevation = terrainElevation
     }
 
-    const origin = Cartesian3.fromDegrees(lonLat[0], lonLat[1], elevation)
+    const origin = Cartesian3.fromDegrees(position[0], position[1], elevation)
 
     return [
-        origin, getPointFromOriginWithBearingAndDistance(lonLat, elevation, bearing, 500)//TODO this hardcoded length does not work with dynmic zoom (using velocitiy of traffic would be nice)
+        origin, getPointFromOriginWithBearingAndDistance(position, elevation, bearing, 500)//TODO this hardcoded length does not work with dynmic zoom (using velocitiy of traffic would be nice)
     ]
 }
 
