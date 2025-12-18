@@ -8,7 +8,7 @@ import {viteStaticCopy} from 'vite-plugin-static-copy'
 import * as path from 'path'
 //fix cesium statics
 const cesiumSource = "node_modules/cesium/Build/Cesium";
-const cesiumBaseUrl = "/cesiumStatic";//TODO fix that this creates a folder in C:/cesiumStatic
+const cesiumBaseUrl = path.join(path.resolve(__dirname), 'dist/cesiumStatic')
 
 
 const projectRootDir = path.resolve(__dirname)
