@@ -21,7 +21,11 @@ const props = defineProps<{
     showHeightMeanSeaLevelInLabel?: boolean
     bearing?: number // in 360 degrees, 0 = north
     autoBearing?: boolean //calculate bearing from last to current position
+    backgroundCircle?: Color
 }>()
+
+
+const BACKGROUND_CIRCLE_OVERLAP = 0.3
 
 let lastPosition: [number, number, number?]
 
@@ -36,6 +40,48 @@ let heightIndicator: Entity
 let bearingIndicator: Entity
 
 const myId = crypto.randomUUID()
+
+const image = document.createElement('img')
+
+const canvas = document.createElement('canvas')
+
+
+function makeCanvas(){
+    return new Promise<void>((resolve, reject)=>{
+
+        image.addEventListener('load', ()=>{
+
+            const ctx = canvas.getContext('2d')
+
+            const size = Math.max(image.width, image.height)
+
+
+            canvas.width = size
+            canvas.height = size
+
+            if(props.backgroundCircle){
+                ctx.beginPath()
+                ctx.arc(size/2, size/2, size/2, 0, Math.PI*2)
+                ctx.fillStyle = props.backgroundCircle.toCssHexString()
+                ctx.fill()
+            }
+
+            const targetWidth = (1 - BACKGROUND_CIRCLE_OVERLAP) * image.width
+            const targetHeight = (1 - BACKGROUND_CIRCLE_OVERLAP) * image.height
+
+            // if image width and height differ, keep aspect ratio
+            ctx.drawImage(image, 0,0,image.width,image.height, (size - targetWidth)/2, (size - targetHeight)/2,targetWidth,targetHeight)
+
+            resolve()
+        })
+
+        image.addEventListener('error', err=>{
+            reject(err)
+        })
+
+        image.src = props.iconUrl
+    })
+}
 
 watch(()=>props.bearing, update, {deep: true})
 watch(()=>props.color, update, {deep: true})
@@ -101,6 +147,9 @@ async function update(){//TODO cesium fails to repaint polygons (height marker) 
         removeMarker()
     }
 
+
+    await makeCanvas()
+
     addMarker()
 
 
@@ -128,7 +177,7 @@ function addMarker(){
         id: 'map-marker-' + myId,
         position: Cartesian3.fromDegrees(props.position[0], props.position[1], props.position[2]),
         billboard: {
-            image: props.iconUrl,
+            image: canvas,
             width: props.iconWidth,
             height: props.iconHeight,
             color: props.color,
@@ -239,7 +288,7 @@ async function makeBearingIndicatorPositions(position: [number, number, number?]
     const origin = Cartesian3.fromDegrees(position[0], position[1], elevation)
 
     return [
-        origin, getPointFromOriginWithBearingAndDistance(position, elevation, bearing, 500)//TODO this hardcoded length does not work with dynmic zoom (using velocitiy of traffic would be nice)
+        origin, getPointFromOriginWithBearingAndDistance([position[0], position[1], elevation], bearing, 500)//TODO this hardcoded length does not work with dynmic zoom (using velocitiy of traffic would be nice)
     ]
 }
 
