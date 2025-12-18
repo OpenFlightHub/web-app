@@ -39,6 +39,10 @@ let timeoutHandle: any
 
 function setupPlayer(){
 
+    if(notSupported.value){
+        return
+    }
+
     if(player.value){
         player.value.remove()
     }
@@ -49,20 +53,24 @@ function setupPlayer(){
 
     isPlaying.value = false
 
-    player.value = ovenplayer.create(myId, {
-        autoStart: true,
-        autoFallback: true,
-        mute: true,
-        controls: props.hideControls !== true,
-        sources: [{
-            type: 'webrtc',
-            file: props.wsUrl
-        }],
-        webrtcConfig: {
-            timeoutMaxRetry: 999,
-            connectionTimeout: 5000
-        }
-    })
+    try {
+        player.value = ovenplayer.create(myId, {
+            autoStart: true,
+            autoFallback: true,
+            mute: true,
+            controls: props.hideControls !== true,
+            sources: [{
+                type: 'webrtc',
+                file: props.wsUrl
+            }],
+            webrtcConfig: {
+                timeoutMaxRetry: 999,
+                connectionTimeout: 5000
+            }
+        })
+    } catch (err){
+        console.warn('failed to setup ovenplayer for livevideo', myId, video.value)
+    }
 
     player.value.on('stateChanged', evt => {
         isPlaying.value = evt.newstate === 'playing'
@@ -79,19 +87,23 @@ function setupPlayer(){
 
 <template>
 
-    <template v-if="notSupported">Your device does not support WebRTC!</template>
-    <div id="container" v-else :class="[{hide_controls: props.hideControls === true}]">
-        <div id="video" ref="video">
+    <div id="container" :class="[{hide_controls: props.hideControls === true}]">
 
-        </div>
-        <div id="info-overlay" v-if="isPlaying">
-            <div id="live">
-                <IconVue name="record2"></IconVue>live
+        <template v-if="notSupported">Your device does not support WebRTC!</template>
+
+        <template v-else>
+            <div id="video" ref="video">
+
             </div>
-        </div>
-        <div id="disconnected-cover" v-else>
-            <IconVue name="arrow-repeat"></IconVue>&nbsp;connecting ...
-        </div>
+            <div id="info-overlay" v-if="isPlaying">
+                <div id="live">
+                    <IconVue name="record2"></IconVue>live
+                </div>
+            </div>
+            <div id="disconnected-cover" v-else>
+                <IconVue name="arrow-repeat"></IconVue>&nbsp;connecting ...
+            </div>
+        </template>
     </div>
 
 </template>
