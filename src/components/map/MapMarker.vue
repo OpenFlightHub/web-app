@@ -112,20 +112,23 @@ async function updatePosition(newValue: typeof props.position, oldValue: typeof 
     }
 
     if(marker){
+        const pos = Cartesian3.fromDegrees(props.position[0], props.position[1], props.position[2])
         //@ts-ignore
-        marker.position = Cartesian3.fromDegrees(props.position[0], props.position[1], props.elevation)
+        marker.position = pos
     }
 
 
     if(heightIndicator){
+        const pos = makeHeightIndicatorPositions(props.position)
         //@ts-ignore
-        heightIndicator.polyline.positions = makeHeightIndicatorPositions(props.position, props.elevation)
+        heightIndicator.polyline.positions = pos
     }
 
 
     if(bearingIndicator){
+        const pos = await makeBearingIndicatorPositions(props.position, typeof props.bearing === 'number' ? props.bearing : autoBearing)
         //@ts-ignore
-        bearingIndicator.polyline.positions = await makeBearingIndicatorPositions(props.position, typeof props.bearing === 'number' ? props.bearing : autoBearing, props.elevation)
+        bearingIndicator.polyline.positions = pos
     }
 
 }
@@ -172,8 +175,6 @@ async function updateCanvasAndIcon(){
     if(marker){
         //@ts-ignore
         marker.billboard.image = canvas
-        // //@ts-ignore
-        // marker.billboard.color = blinker.value ? (props.backgroundCircle ? props.backgroundCircle : Color.TRANSPARENT) : props.color
     }
 }
 
@@ -297,6 +298,10 @@ async function addHeightIndicator(){
         return
     }
 
+    if(typeof props.position[2] !== 'number'){
+        return
+    }
+
     // TODO reenable this code
     // if(Math.abs(inAirPos.height - onGroundPos.height) < 5){
     //     return
@@ -345,9 +350,8 @@ async function addBearingIndicator(){
 
 /**
  *
- * @param position
+ * @param position [lng, lat, elevation]
  * @param bearing
- * @param elevation
  */
 async function makeBearingIndicatorPositions(position: [number, number, number?], bearing: number){
 
