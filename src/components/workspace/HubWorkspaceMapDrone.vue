@@ -51,22 +51,28 @@ async function setup(){
         emit('drone-position', data.position)
     })
 
-    updateObject(lastDronePosition, await api.rest.drone.lastPosition.get({
-        droneId: props.droneId
-    }))
+    try {
+        updateObject(lastDronePosition, await api.rest.drone.lastPosition.get({
+            droneId: props.droneId
+        }))
+    } catch (_){}
 
-    updateObject(currentFlight, await api.rest.drone.currentFlight.get({
-        droneId: props.droneId
-    }))
+    try {
+        updateObject(currentFlight, await api.rest.drone.currentFlight.get({
+            droneId: props.droneId
+        }))
+    } catch (_){}
 
 
     api.live.subscribeToDroneTelemetry(props.droneId, (evt, filter, data)=>{
         updateObject(lastDroneBattery, data.telemetry)
     })
 
-    updateObject(lastDroneBattery, await api.rest.drone.lastBattery.get({
-        droneId: props.droneId
-    }))
+    try {
+        updateObject(lastDroneBattery, await api.rest.drone.lastBattery.get({
+            droneId: props.droneId
+        }))
+    } catch (_){}
 }
 
 const showInfo = ref(false)
