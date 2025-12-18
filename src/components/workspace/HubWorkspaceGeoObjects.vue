@@ -75,11 +75,13 @@ onUnmounted(destroy)
 
             <!-- currently handled in HubWorkspaceMapTraffic.vue but this must be rewriten to use the geoobejcts api (code must then sit inside here) -->
 
+            <MapMarker :key="geoObject.id" :viewer="props.viewer" :map-container="props.mapContainer" :position="[geoObject.config.longitude, geoObject.config.latitude, geoObject.config.height/* TODO rename to elevation in client sdk */]" :label="geoObject.name + ' ' + Math.floor(geoObject.config.height) + ' m'" :icon-url="'/images/traffic/' + geoObject.sub_type + '.png'" :color="Color.RED" :icon-width="32" :icon-height="32" :show-height-indicator="true" :background-circle="Color.WHITE" :blink="geoObject.config.height < 3000 ? 500 : undefined"></MapMarker>
+
         </template>
 
         <template v-if="geoObject.type === 2 /* TODO use Message_Type_Event_Object_Data_Geo_Object_Type_Type_TYPES.traffic */">
 
-            <MapMarker :key="geoObject.id" :viewer="props.viewer" :map-container="props.mapContainer" :position="[geoObject.config.longitude, geoObject.config.latitude, geoObject.config.height/* TODO rename to elevation in client sdk */]" :label="geoObject.name" :icon-url="geoObject.config.symbol" :icon-width="32" :icon-height="32" :show-height-indicator="true" :background-circle="Color.RED"></MapMarker>
+            <MapMarker :key="geoObject.id" :viewer="props.viewer" :map-container="props.mapContainer" :position="[geoObject.config.longitude, geoObject.config.latitude, geoObject.config.height/* TODO rename to elevation in client sdk */]" :label="geoObject.name" :icon-url="geoObject.config.symbol" :icon-width="32" :icon-height="32" :show-height-indicator="true" :background-circle="getColorForHex('#2D8CF0')"></MapMarker>
 
         </template>
 
