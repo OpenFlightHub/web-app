@@ -93,9 +93,9 @@ function pickEntity(viewer: Viewer, windowPosition: Cartesian2) : Entity | undef
  * @param bearing in degrees, 0 is north (360)
  * @param distance in meters
  */
-export function getPointFromOriginWithBearingAndDistance(originLonLat: [number, number], originElevation: number, bearing: number, distance: number){
+export function getPointFromOriginWithBearingAndDistance(originLonLatElevation: [number, number, number], bearing: number, distance: number){
 
-    const origin = Cartesian3.fromDegrees(originLonLat[0], originLonLat[1], originElevation)
+    const origin = Cartesian3.fromDegrees(originLonLatElevation[0], originLonLatElevation[1], originLonLatElevation[2])
 
     const hpr = HeadingPitchRoll.fromDegrees(bearing, 0, 0)
     hpr.heading -= MathCesium.PI_OVER_TWO // fix cesium 0 = east
@@ -107,7 +107,7 @@ export function getPointFromOriginWithBearingAndDistance(originLonLat: [number, 
     const destination = Ray.getPoint(ray, distance)
 
     const carto = Cartographic.fromCartesian(destination)
-    const destinationWithCorrectedElevation = Cartesian3.fromRadians(carto.longitude, carto.latitude, originElevation)
+    const destinationWithCorrectedElevation = Cartesian3.fromRadians(carto.longitude, carto.latitude, originLonLatElevation[2])
 
     return destinationWithCorrectedElevation
 }
