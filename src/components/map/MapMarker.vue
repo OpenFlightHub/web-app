@@ -89,7 +89,6 @@ async function blink(){
     }
 
     if(oldBlinkerValue !== blinker.value){
-        console.log('updateCanvasAndIcon because of blink', props.label)
         await updateCanvasAndIcon()
     }
 
@@ -169,7 +168,6 @@ function heightIsNotZero(){
 }
 
 async function updateCanvasAndIcon(){
-    console.debug('updateCanvasAndIcon', props.label)
     await makeCanvas()
 
     if(marker){
@@ -184,8 +182,6 @@ function makeCanvas(){
         const onLoad = ()=>{
 
             let newCanvas = document.createElement('canvas')
-
-            console.debug('image loaded, drawing canvas ...', blinker.value)
 
             const size = Math.max(image.width, image.height)
 
@@ -203,7 +199,6 @@ function makeCanvas(){
 
             const iconColor = blinker.value === true ? (props.backgroundCircle ? props.backgroundCircle : Color.TRANSPARENT) : (props.color || Color.WHITE)
 
-            console.debug('iconColor', iconColor)
             colorizeCanvas(newCanvas, iconColor)
 
             if(props.backgroundCircle){
