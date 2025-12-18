@@ -2,7 +2,7 @@
 import api from '@/api'
 import {onMounted, onUnmounted, reactive} from 'vue'
 import MapMarker from '../map/MapMarker.vue';
-import { Viewer } from 'cesium';
+import { Color, Viewer } from 'cesium';
 import { ApiResponse_WorkspaceGeoObjectsGet } from 'openflighthub-api-client-sdk';
 import { updateArray, updateObject } from '@/util/vue';
 import { getColorForHex } from '@/util/cesium';
@@ -54,20 +54,20 @@ onUnmounted(destroy)
 
 <template>
 
-    <template v-for="geoObject of geoObjects" :key="geoObject.id">
+    <template v-for="geoObject of geoObjects">
 
         <template v-if="geoObject.type === 0/* TODO use Message_Type_Event_Object_Data_Geo_Object_Type_Type_TYPES.marking */">
 
-            <MapMarker v-if="geoObject.sub_type === 0/* TODO use Message_Type_Event_Object_Data_Geo_Object_Type_SubType_TYPES.marking*/" :viewer="props.viewer" :map-container="props.mapContainer" :position="geoObject.config.point" :label="geoObject.name" icon-url="/images/map_elements/point.png" :icon-width="24" :icon-height="24" :show-height-indicator="true" :color="getColorForHex(geoObject.config.color)"></MapMarker>
+            <MapMarker :key="geoObject.id" v-if="geoObject.sub_type === 0/* TODO use Message_Type_Event_Object_Data_Geo_Object_Type_SubType_TYPES.marking*/" :viewer="props.viewer" :map-container="props.mapContainer" :position="geoObject.config.point" :label="geoObject.name" icon-url="/images/map_elements/point.png" :icon-width="24" :icon-height="24" :show-height-indicator="true" :color="getColorForHex(geoObject.config.color)"></MapMarker>
 
             <!-- TODO implement configurable clamp to ground-->
-            <MapPolyline v-if="geoObject.sub_type === 1/* TODO use Message_Type_Event_Object_Data_Geo_Object_Type_SubType_TYPES.marking*/" :viewer="props.viewer" :map-container="props.mapContainer" :points="geoObject.config.line" :color="getColorForHex(geoObject.config.color)" :clamp-to-ground="true"></MapPolyline>
+            <MapPolyline :key="geoObject.id" v-if="geoObject.sub_type === 1/* TODO use Message_Type_Event_Object_Data_Geo_Object_Type_SubType_TYPES.marking*/" :viewer="props.viewer" :map-container="props.mapContainer" :points="geoObject.config.line" :color="getColorForHex(geoObject.config.color)" :clamp-to-ground="true"></MapPolyline>
 
             <!-- TODO implement configurable clamp to ground-->
-            <MapPolygon v-if="geoObject.sub_type === 2/* TODO use Message_Type_Event_Object_Data_Geo_Object_Type_SubType_TYPES.marking*/" :viewer="props.viewer" :map-container="props.mapContainer" :points="geoObject.config.polygon/*TODO support multi-array polygon*/" :color="getColorForHex(geoObject.config.color, 0.3)" :filled="true" :outline-color="getColorForHex(geoObject.config.color)" :clamp-to-ground="true"></MapPolygon>
+            <MapPolygon :key="geoObject.id" v-if="geoObject.sub_type === 2/* TODO use Message_Type_Event_Object_Data_Geo_Object_Type_SubType_TYPES.marking*/" :viewer="props.viewer" :map-container="props.mapContainer" :points="geoObject.config.polygon/*TODO support multi-array polygon*/" :color="getColorForHex(geoObject.config.color, 0.3)" :filled="true" :outline-color="getColorForHex(geoObject.config.color)" :clamp-to-ground="true"></MapPolygon>
 
             <!-- TODO implement configurable clamp to ground-->
-            <MapCircle v-if="geoObject.sub_type === 3/* TODO use Message_Type_Event_Object_Data_Geo_Object_Type_SubType_TYPES.marking*/" :viewer="props.viewer" :map-container="props.mapContainer" :label="geoObject.name" :position="geoObject.config.center" :radius="geoObject.config.radius" :color="getColorForHex(geoObject.config.color, 0.3)" :filled="true" :outline-color="getColorForHex(geoObject.config.color)" :clamp-to-ground="true"></MapCircle>
+            <MapCircle :key="geoObject.id" v-if="geoObject.sub_type === 3/* TODO use Message_Type_Event_Object_Data_Geo_Object_Type_SubType_TYPES.marking*/" :viewer="props.viewer" :map-container="props.mapContainer" :label="geoObject.name" :position="geoObject.config.center" :radius="geoObject.config.radius" :color="getColorForHex(geoObject.config.color, 0.3)" :filled="true" :outline-color="getColorForHex(geoObject.config.color)" :clamp-to-ground="true"></MapCircle>
 
         </template>
 
@@ -79,7 +79,7 @@ onUnmounted(destroy)
 
         <template v-if="geoObject.type === 2 /* TODO use Message_Type_Event_Object_Data_Geo_Object_Type_Type_TYPES.traffic */">
 
-            <MapMarker :viewer="props.viewer" :map-container="props.mapContainer" :position="[geoObject.config.longitude, geoObject.config.latitude, geoObject.config.height/* TODO rename to elevation in client sdk */]" :label="geoObject.name" :icon-url="geoObject.config.symbol" :icon-width="32" :icon-height="32" :show-height-indicator="true"></MapMarker>
+            <MapMarker :key="geoObject.id" :viewer="props.viewer" :map-container="props.mapContainer" :position="[geoObject.config.longitude, geoObject.config.latitude, geoObject.config.height/* TODO rename to elevation in client sdk */]" :label="geoObject.name" :icon-url="geoObject.config.symbol" :icon-width="32" :icon-height="32" :show-height-indicator="true" :background-circle="Color.RED"></MapMarker>
 
         </template>
 
