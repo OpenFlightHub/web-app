@@ -260,11 +260,11 @@ const viewSize = reactive({
                 </template>
 
                 <template v-if="viewerIsLoaded && coverage.holes.length > 0">
-                    <MapPolygon v-for="hole in coverage.holes" :viewer="viewer" :points="hole" :clamp-to-ground="true" :color="Color.RED.withAlpha(0.3)" :filled="true"></MapPolygon>
+                    <MapPolygon v-for="hole in coverage.holes" :viewer="viewer" :points="hole.map(p => [p.position.longitude, p.position.latitude, p.elevation])" :clamp-to-ground="true" :color="Color.RED.withAlpha(0.3)" :filled="true"></MapPolygon>
 
                 </template>
 
-                <MapPolyline key="outer" v-if="viewerIsLoaded" :viewer="viewer" :points="coverage.outer.length === 0 ? [] : coverage.outer.concat(coverage.outer[0])" :clamp-to-ground="true" :color="Color.GREENYELLOW.withAlpha(0.5)"></MapPolyline>
+                <MapPolyline key="outer" v-if="viewerIsLoaded" :viewer="viewer" :points="coverage.outer.length === 0 ? [] : coverage.outer.concat(coverage.outer[0]).map(p => [p.position.longitude, p.position.latitude, p.elevation])" :clamp-to-ground="true" :color="Color.GREENYELLOW.withAlpha(0.5)"></MapPolyline>
 
             </template>
             <div v-else>No valid location</div>
