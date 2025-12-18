@@ -43,8 +43,6 @@ let bearingIndicator: Entity
 
 const myId = crypto.randomUUID()
 
-const image = document.createElement('img')
-
 let canvas = document.createElement('canvas')
 //TODO check if we can use OffscreenCanvas for better performance: new Canvas.getContext('2d').putImageDate(offscreenCanvas.getImageData())
 
@@ -179,11 +177,17 @@ async function updateCanvasAndIcon(){
 function makeCanvas(){
     return new Promise<void>((resolve, reject)=>{
 
+
+        const image = document.createElement('img')
+        image.style.position = 'absolute'
+        image.style.top = '0'
+        image.style.left = '-9999px'
+
         const onLoad = ()=>{
 
             let newCanvas = document.createElement('canvas')
 
-            const size = Math.max(image.width, image.height)
+            const size = Math.min(Math.max(props.iconWidth, props.iconHeight), Math.max(image.width, image.height))
 
             newCanvas.width = size
             newCanvas.height = size
@@ -191,15 +195,23 @@ function makeCanvas(){
             const ctx = newCanvas.getContext('2d')
             ctx.clearRect(0, 0, newCanvas.width, newCanvas.height)
 
-            const targetWidth = (1 - BACKGROUND_CIRCLE_OVERLAP) * image.width
-            const targetHeight = (1 - BACKGROUND_CIRCLE_OVERLAP) * image.height
+            const imageAspectRatio = image.width / image.height
+
+            const targetSize = props.backgroundCircle ? (1 - BACKGROUND_CIRCLE_OVERLAP) : 1
+
+            const targetWidth = targetSize * size
+            const targetHeight = targetSize * size / imageAspectRatio
+
+            console.debug('drawing image onto canvas', image.width, image.height, image.complete, size, targetWidth, targetHeight)
 
             // if image width and height differ, keep aspect ratio
             ctx.drawImage(image, 0,0,image.width,image.height, (size - targetWidth)/2, (size - targetHeight)/2,targetWidth,targetHeight)
 
-            const iconColor = blinker.value === true ? (props.backgroundCircle ? props.backgroundCircle : Color.TRANSPARENT) : (props.color || Color.WHITE)
+            if(props.color){
+                const iconColor = blinker.value === true ? (props.backgroundCircle ? props.backgroundCircle : Color.TRANSPARENT) : props.color
 
-            colorizeCanvas(newCanvas, iconColor)
+                colorizeCanvas(newCanvas, iconColor)
+            }
 
             if(props.backgroundCircle){
 
@@ -217,13 +229,12 @@ function makeCanvas(){
                 tempCtx.fill()
 
 
-                tempCtx.drawImage(newCanvas, 0, 0)
+                tempCtx.drawImage(newCanvas, 0, 0, tempCanvas.width, tempCanvas.height)
 
-                newCanvas.getContext('2d').drawImage(tempCanvas, 0, 0)
+                newCanvas.getContext('2d').drawImage(tempCanvas, 0, 0, newCanvas.width, newCanvas.height)
             }
 
-            image.removeEventListener('error', onError)
-            image.removeEventListener('load', onLoad)
+            cleanup()
 
             canvas = newCanvas//must be new canvas element so cesium is forced to repaint
 
@@ -234,17 +245,32 @@ function makeCanvas(){
 
         const onError = (err)=>{
 
-            image.removeEventListener('error', onError)
-            image.removeEventListener('load', onLoad)
+            cleanup()
 
             console.error('failed to load MapMarker icon image', props.iconUrl, err)
 
             reject(err)
         }
 
+        const cleanup = ()=>{
+
+            image.removeEventListener('error', onError)
+            image.removeEventListener('load', onLoad)
+
+            image.remove()
+        }
+
         image.addEventListener('error', onError)
 
         image.src = props.iconUrl
+
+        setTimeout(()=>{
+            if(image.complete){
+                onLoad()
+            }
+        }, 1)
+
+        document.body.appendChild(image)
     })
 }
 
@@ -254,8 +280,8 @@ function addMarker(){
         position: Cartesian3.fromDegrees(props.position[0], props.position[1], props.position[2]),
         billboard: {
             image: canvas,
-            width: props.iconWidth,
-            height: props.iconHeight,
+            width: canvas.width,
+            height: canvas.height,
             heightReference: heightIsNotZero() ? HeightReference.NONE : HeightReference.CLAMP_TO_TERRAIN,
             disableDepthTestDistance: heightIsNotZero() ? 5000000 : Number.POSITIVE_INFINITY // show always above terrain https://community.cesium.com/t/points-labels-stuck-under-terrain/11141,
         },
