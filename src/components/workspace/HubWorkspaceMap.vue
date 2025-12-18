@@ -13,8 +13,6 @@ import { Button } from 'primevue';
 import HubWorkspaceMapDroneMedia from './HubWorkspaceMapDroneMedia.vue';
 import Map from '../map/Map.vue';
 import HubWorkspaceGeoObjects from './HubWorkspaceGeoObjects.vue';
-import LoadApi from '../functional/LoadApi.vue';
-import api from '@/api';
 
 const props = defineProps<{
     connections: ApiResponse_ConnectionGet[]
