@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, watch } from 'vue';
-import { Cartesian3, Cartographic, Color, Entity, PolygonGeometry, PolylineDashMaterialProperty, Property, Viewer } from 'cesium';
+import { onBeforeUnmount, onMounted, watch } from 'vue';
+import { Cartesian3, Cartographic, Color, Entity, Viewer } from 'cesium';
 import { getElevationAtPosition } from '@/util/terrain';
 
 

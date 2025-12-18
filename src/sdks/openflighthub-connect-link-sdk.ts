@@ -1,6 +1,6 @@
 import api from "@/api/index.js";
 import { deviceSupportsSDK, DjiOpenPlatformConnectSDK, EventManager } from "./dji-pilot-2/dji-open-platform-connect-sdk.js";
-import { ApiResponse_ConnectionlinkConfigGet } from "openflighthub-api-client-sdk";
+import { ApiResponse_ConnectionLinkConfigGet } from "openflighthub-api-client-sdk";
 
 export function deviceSupportsOpenFlightHubConnectLink(){
     // add more alternatives here once they exist
@@ -120,9 +120,9 @@ export type ModuleConnectionState<ModuleName extends string> = {
 
 export class OpenFlightHubConnectLinkClient<ModuleName extends string> extends EventManager<OpenFlightHubConnectLinkClient_Events> {
 
-    protected platformConfig: ApiResponse_ConnectionlinkConfigGet
+    protected platformConfig: ApiResponse_ConnectionLinkConfigGet
 
-    constructor(platformConfig: ApiResponse_ConnectionlinkConfigGet){
+    constructor(platformConfig: ApiResponse_ConnectionLinkConfigGet){
         super()
 
         this.platformConfig = platformConfig

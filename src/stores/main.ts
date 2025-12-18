@@ -1,6 +1,6 @@
 import api from '@/api/index.js';
 import { updateArray } from '@/util/vue.js';
-import { ApiResponse_AuthLoginPost, ApiResponse_UserSelfGet, ApiResponse_WorkspaceMyworkspacesGet } from 'openflighthub-api-client-sdk';
+import { ApiResponse_AuthLoginPost, ApiResponse_UserSelfGet, ApiResponse_WorkspaceMyWorkspacesGet } from 'openflighthub-api-client-sdk';
 import { defineStore } from 'pinia'
 
 /**
@@ -22,7 +22,7 @@ export const useMainStore = defineStore('main', {
             apiDisconnected: false,//this is used once initial checks are done and login was performed (state is monitored via websocket)
             user: null as ApiResponse_AuthLoginPost,
             userSelf: null as ApiResponse_UserSelfGet,
-            myWorkspaces: [] as ApiResponse_WorkspaceMyworkspacesGet,
+            myWorkspaces: [] as ApiResponse_WorkspaceMyWorkspacesGet,
 
             isForceLoggedOut: false,//true when someone else has logged into this account
         }

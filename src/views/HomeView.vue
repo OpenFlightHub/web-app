@@ -2,16 +2,14 @@
 
 import { onMounted, reactive } from 'vue';
 import api from '@/api';
-import {ApiResponse_WorkspaceMyworkspacesGet} from 'openflighthub-api-client-sdk'
+import {ApiResponse_WorkspaceMyWorkspacesGet} from 'openflighthub-api-client-sdk'
 import { updateArray } from '@/util/vue';
-import WorkspaceSnippet from '@/components/workspace/WorkspaceSnippet.vue';
-import List from '@/components/layout/List.vue';
 import Padding from '@/components/layout/Padding.vue';
 import LinkableDeviceInfo from '@/components/link/LinkableDeviceInfo.vue';
 import LogoVue from '@/components/branding/LogoVue.vue';
 
 
-const workspaces = reactive<ApiResponse_WorkspaceMyworkspacesGet>([])
+const workspaces = reactive<ApiResponse_WorkspaceMyWorkspacesGet>([])
 
 onMounted(async ()=>{
     updateArray(workspaces, await api.rest.workspace.myWorkspaces.get())

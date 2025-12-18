@@ -1,6 +1,6 @@
 // TODO once available, we should set up persistent version of the "grant access to local folder" popup: https://developer.chrome.com/blog/persistent-permissions-for-the-file-system-access-api
 
-import { ApiResponse_WorkspaceMyworkspacesGet } from "openflighthub-api-client-sdk";
+import { ApiResponse_WorkspaceMyWorkspacesGet } from "openflighthub-api-client-sdk";
 import { createFileStreamInDirectory, DirectoryPicker_StartIn, filesApiIsSupported, selectFolderToSaveFilesTo } from "./util.js";
 import type {FileSystemDirectoryHandle } from './types.js'
 
@@ -111,7 +111,7 @@ export class WorkspaceFilesDownloader extends FilesDownloader {
 
 
 
-    async setWorkspaces(workspaces: ApiResponse_WorkspaceMyworkspacesGet){
+    async setWorkspaces(workspaces: ApiResponse_WorkspaceMyWorkspacesGet){
         for(const workspace of workspaces){
             await this.getWorkspaceFolderOrCreate(workspace.id, workspace.name, true)
         }

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ApiResponse_ConnectionGet, ApiResponse_DroneLastpositionGet, ApiResponse_RemotecontrollerLastpositionGet } from 'openflighthub-api-client-sdk';
+import { ApiResponse_ConnectionGet, ApiResponse_DroneLastPositionGet, ApiResponse_RemoteControllerLastPositionGet } from 'openflighthub-api-client-sdk';
 import MapMarker from '../map/MapMarker.vue';
 import { Color, Viewer } from 'cesium';
 import { computed, onMounted, reactive, watch } from 'vue';
@@ -16,7 +16,7 @@ const props = defineProps<{
 
 
 
-const lastDronePosition = reactive({} as ApiResponse_DroneLastpositionGet)
+const lastDronePosition = reactive({} as ApiResponse_DroneLastPositionGet)
 
 const isValidLastDronePosition = computed(()=>{
     return typeof lastDronePosition.height === 'number'
@@ -41,7 +41,7 @@ async function setup(){
     }
 }
 
-const lastRemoteControllerPosition = reactive({} as ApiResponse_RemotecontrollerLastpositionGet)
+const lastRemoteControllerPosition = reactive({} as ApiResponse_RemoteControllerLastPositionGet)
 const isValidLastRemoteControllerPosition = computed(()=>{
     return typeof lastRemoteControllerPosition.height === 'number'
 })

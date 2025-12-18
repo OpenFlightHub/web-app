@@ -9,17 +9,15 @@ import HubWorkspaceFilePreview from '@/components/workspace/HubWorkspaceFilePrev
 import Map from '@/components/map/Map.vue';
 import { ref } from 'vue';
 import { Color, Viewer } from 'cesium';
-import { ApiResponse_DroneCurrentflightGet } from 'openflighthub-api-client-sdk';
+import { ApiResponse_DroneCurrentFlightGet } from 'openflighthub-api-client-sdk';
 import * as turf from '@turf/turf'
 import MapPolyline from '@/components/map/MapPolyline.vue';
 import TimestampDisplay from '@/components/display/TimestampDisplay.vue';
 
-const mapContainer = ref(null as HTMLElement)
-
 const viewerIsLoaded = ref(false)
 let viewer: Viewer = null // if we make Viewer a reactive object, performance goes down the tube ...
 
-function getCenterPointForFlight(flight: ApiResponse_DroneCurrentflightGet){
+function getCenterPointForFlight(flight: ApiResponse_DroneCurrentFlightGet){
 
    const points = flight.track.map(t => turf.point([t.longitude, t.latitude]))
 
@@ -31,7 +29,7 @@ function getCenterPointForFlight(flight: ApiResponse_DroneCurrentflightGet){
    }
 }
 
-function getMaxHeightForFlight(flight: ApiResponse_DroneCurrentflightGet){
+function getMaxHeightForFlight(flight: ApiResponse_DroneCurrentFlightGet){
    let maxHeight = -1
 
    for(const t of flight.track){
@@ -76,7 +74,7 @@ function getMaxHeightForFlight(flight: ApiResponse_DroneCurrentflightGet){
                      <template v-if="viewerIsLoaded">
 
                         <MapPolyline :points="flight.data.track.map(t => {
-                              return {position: {longitude: t.longitude, latitude: t.latitude}, elevation: t.height}
+                              return [t.longitude, t.latitude, t.height]
                         })" :viewer="viewer" :color="Color.BLUE"></MapPolyline>
 
                      </template>
