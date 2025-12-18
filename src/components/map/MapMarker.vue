@@ -237,6 +237,8 @@ function makeCanvas(){
             image.removeEventListener('error', onError)
             image.removeEventListener('load', onLoad)
 
+            console.error('failed to load MapMarker icon image', props.iconUrl, err)
+
             reject(err)
         }
 
