@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, onMounted, onUnmounted, ref, watch } from 'vue';
 import { Cartesian2, Cartesian3, Cartographic, Color, Ellipsoid, Entity, HeadingPitchRoll, HeightReference, JulianDate, LabelStyle, Math as MathCesium, Matrix3, PolylineArrowMaterialProperty, PolylineDashMaterialProperty, PositionProperty, Ray, SampledPositionProperty, sampleTerrainMostDetailed, Transforms, VerticalOrigin, Viewer } from 'cesium';
 import { getElevationAtPosition } from '@/util/terrain';
 import { convertEllipsoidalHeightToOrthometricHeight } from '@/util/geoid';
-import { cleanupClickMyEntity, ClickMyEntityHandle, getPointFromOriginWithBearingAndDistance, setupClickMyEntity } from '@/util/cesium';
+import { cleanupClickMyEntity, ClickMyEntityHandle, getPointFromOriginWithBearingAndDistance, setupClickMyEntity, toCssRGBA } from '@/util/cesium';
 import * as turf from '@turf/turf';
+import { colorizeCanvas } from '@/util/canvas';
 
 //TODO if marker elevation is below cesium terrain, clamp it to ground
 const props = defineProps<{
@@ -22,6 +23,7 @@ const props = defineProps<{
     bearing?: number // in 360 degrees, 0 = north
     autoBearing?: boolean //calculate bearing from last to current position
     backgroundCircle?: Color
+    blink?: number // switch between color and backgroundCircle (if both are set) or color and transparent. Time in ms
 }>()
 
 
@@ -43,45 +45,9 @@ const myId = crypto.randomUUID()
 
 const image = document.createElement('img')
 
-const canvas = document.createElement('canvas')
+let canvas = document.createElement('canvas')
+//TODO check if we can use OffscreenCanvas for better performance: new Canvas.getContext('2d').putImageDate(offscreenCanvas.getImageData())
 
-
-function makeCanvas(){
-    return new Promise<void>((resolve, reject)=>{
-
-        image.addEventListener('load', ()=>{
-
-            const ctx = canvas.getContext('2d')
-
-            const size = Math.max(image.width, image.height)
-
-
-            canvas.width = size
-            canvas.height = size
-
-            if(props.backgroundCircle){
-                ctx.beginPath()
-                ctx.arc(size/2, size/2, size/2, 0, Math.PI*2)
-                ctx.fillStyle = props.backgroundCircle.toCssHexString()
-                ctx.fill()
-            }
-
-            const targetWidth = (1 - BACKGROUND_CIRCLE_OVERLAP) * image.width
-            const targetHeight = (1 - BACKGROUND_CIRCLE_OVERLAP) * image.height
-
-            // if image width and height differ, keep aspect ratio
-            ctx.drawImage(image, 0,0,image.width,image.height, (size - targetWidth)/2, (size - targetHeight)/2,targetWidth,targetHeight)
-
-            resolve()
-        })
-
-        image.addEventListener('error', err=>{
-            reject(err)
-        })
-
-        image.src = props.iconUrl
-    })
-}
 
 watch(()=>props.bearing, update, {deep: true})
 watch(()=>props.color, update, {deep: true})
@@ -90,12 +56,16 @@ watch(()=>props.iconHeight, update, {deep: true})
 watch(()=>props.iconUrl, update, {deep: true})
 watch(()=>props.iconWidth, update, {deep: true})
 watch(()=>props.label, update, {deep: true})
-watch(()=>props.mapContainer, update, {deep: true})
 watch(()=>props.position, updatePosition, {deep: true})
 watch(()=>props.showHeightIndicator, update, {deep: true})
 watch(()=>props.showHeightMeanSeaLevelInLabel, update, {deep: true})
+watch(()=>props.backgroundCircle, updateCanvasAndIcon, {deep: true})
 
-onMounted(update)
+onMounted(async()=>{
+    await update()
+
+    await blink()
+})
 
 onBeforeUnmount(()=>{
     removeMarker()
@@ -105,6 +75,30 @@ onBeforeUnmount(()=>{
 
 let autoBearing = 0
 
+let blinker = ref(false)
+
+let blinkTimeout
+async function blink(){
+
+    const oldBlinkerValue = blinker.value
+
+    if(typeof props.blink === 'number'){
+        blinker.value = !blinker.value
+    } else {
+        blinker.value = false
+    }
+
+    if(oldBlinkerValue !== blinker.value){
+        console.log('updateCanvasAndIcon because of blink', props.label)
+        await updateCanvasAndIcon()
+    }
+
+    blinkTimeout = setTimeout(blink, typeof props.blink === 'number' ? props.blink : 200)
+}
+
+onUnmounted(()=>{
+    clearTimeout(blinkTimeout)
+})
 
 async function updatePosition(newValue: typeof props.position, oldValue: typeof props.position){//TODO add this optimization for all the other map elements too (and for all the properties if possible)
 
@@ -143,12 +137,11 @@ async function update(){//TODO cesium fails to repaint polygons (height marker) 
         return
     }
 
+    await makeCanvas()
+
     if(marker){
         removeMarker()
     }
-
-
-    await makeCanvas()
 
     addMarker()
 
@@ -172,6 +165,91 @@ function heightIsNotZero(){
     return typeof props.position[2] === 'number' && props.position[2] > 0
 }
 
+async function updateCanvasAndIcon(){
+    console.debug('updateCanvasAndIcon', props.label)
+    await makeCanvas()
+
+    if(marker){
+        //@ts-ignore
+        marker.billboard.image = canvas
+        // //@ts-ignore
+        // marker.billboard.color = blinker.value ? (props.backgroundCircle ? props.backgroundCircle : Color.TRANSPARENT) : props.color
+    }
+}
+
+function makeCanvas(){
+    return new Promise<void>((resolve, reject)=>{
+
+        const onLoad = ()=>{
+
+            let newCanvas = document.createElement('canvas')
+
+            console.debug('image loaded, drawing canvas ...', blinker.value)
+
+            const size = Math.max(image.width, image.height)
+
+            newCanvas.width = size
+            newCanvas.height = size
+
+            const ctx = newCanvas.getContext('2d')
+            ctx.clearRect(0, 0, newCanvas.width, newCanvas.height)
+
+            const targetWidth = (1 - BACKGROUND_CIRCLE_OVERLAP) * image.width
+            const targetHeight = (1 - BACKGROUND_CIRCLE_OVERLAP) * image.height
+
+            // if image width and height differ, keep aspect ratio
+            ctx.drawImage(image, 0,0,image.width,image.height, (size - targetWidth)/2, (size - targetHeight)/2,targetWidth,targetHeight)
+
+            const iconColor = blinker.value === true ? (props.backgroundCircle ? props.backgroundCircle : Color.TRANSPARENT) : (props.color || Color.WHITE)
+
+            console.debug('iconColor', iconColor)
+            colorizeCanvas(newCanvas, iconColor)
+
+            if(props.backgroundCircle){
+
+                // TODO refactor so that we cache the canvases instead of generating them every blink
+
+                const tempCanvas = document.createElement('canvas')
+                tempCanvas.width = newCanvas.width
+                tempCanvas.height = newCanvas.height
+
+                const tempCtx = tempCanvas.getContext('2d')
+
+                tempCtx.beginPath()
+                tempCtx.arc(size/2, size/2, size/2, 0, Math.PI*2)
+                tempCtx.fillStyle = toCssRGBA(blinker.value ? props.color : props.backgroundCircle)
+                tempCtx.fill()
+
+
+                tempCtx.drawImage(newCanvas, 0, 0)
+
+                newCanvas.getContext('2d').drawImage(tempCanvas, 0, 0)
+            }
+
+            image.removeEventListener('error', onError)
+            image.removeEventListener('load', onLoad)
+
+            canvas = newCanvas//must be new canvas element so cesium is forced to repaint
+
+            resolve()
+        }
+
+        image.addEventListener('load', onLoad)
+
+        const onError = (err)=>{
+
+            image.removeEventListener('error', onError)
+            image.removeEventListener('load', onLoad)
+
+            reject(err)
+        }
+
+        image.addEventListener('error', onError)
+
+        image.src = props.iconUrl
+    })
+}
+
 function addMarker(){
     marker = props.viewer.entities.add({
         id: 'map-marker-' + myId,
@@ -180,7 +258,6 @@ function addMarker(){
             image: canvas,
             width: props.iconWidth,
             height: props.iconHeight,
-            color: props.color,
             heightReference: heightIsNotZero() ? HeightReference.NONE : HeightReference.CLAMP_TO_TERRAIN,
             disableDepthTestDistance: heightIsNotZero() ? 5000000 : Number.POSITIVE_INFINITY // show always above terrain https://community.cesium.com/t/points-labels-stuck-under-terrain/11141,
         },

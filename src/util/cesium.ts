@@ -126,3 +126,7 @@ export function getColorForHex(hexString: string, alpha?: number){
 function defaultValue(a, b){
     return typeof a !== 'undefined' ? a : b
 }
+
+export function toCssRGBA(color: Color){
+    return `rgba(${color.red * 255},${color.green * 255},${color.blue * 255},${color.alpha})`
+}
