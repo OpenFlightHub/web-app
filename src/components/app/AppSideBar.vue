@@ -18,7 +18,7 @@ const isExtended = ref(false)
     <div id="sidebar">
 
         <div id="inner" @mouseenter="isExtended = true" @mouseleave="isExtended = false">
-            <IconVue name="list" @click="isExtended = !isExtended"></IconVue>
+            <IconVue name="list" @click="isExtended = !isExtended" style="font-size: 25px;"></IconVue>
 
             <div id="menu" :style="{'display': isExtended ? '' : 'none'}">
 
