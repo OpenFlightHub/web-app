@@ -7,7 +7,6 @@ import "cesium/Build/Cesium/Widgets/widgets.css";
 
 import HubWorkspaceMapConnection from './HubWorkspaceMapConnection.vue';
 import { geoidIsLoaded } from '@/util/geoid';
-//import HubWorkspaceMapTraffic from './HubWorkspaceMapTraffic.vue';
 import Checkbox from 'primevue/checkbox'
 import { Button } from 'primevue';
 import HubWorkspaceMapDroneMedia from './HubWorkspaceMapDroneMedia.vue';
