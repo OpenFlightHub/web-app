@@ -137,5 +137,9 @@ npm run lint
 ## Analyse bundle size
 execute `npx vite-bundle-visualizer` and open `stats.html`
 
+## Color Configuration / Theme
+see /src/config/colors.ts
+
 # Internationalisation / Translation via Vue I18n
 see INTERNATIONALISATION.md
+
