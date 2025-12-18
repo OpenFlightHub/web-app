@@ -75,7 +75,7 @@ onUnmounted(destroy)
 
             <!-- TODO add traffic coverage -->
 
-            <MapMarker :key="geoObject.id" :viewer="props.viewer" :map-container="props.mapContainer" :position="[geoObject.config.longitude, geoObject.config.latitude, geoObject.config.height/* TODO rename to elevation in client sdk */]" :label="geoObject.name + ' ' + Math.floor(geoObject.config.height) + ' m'" :icon-url="'/images/traffic/' + geoObject.sub_type + '.png'" :color="Color.RED" :icon-width="32" :icon-height="32" :show-height-indicator="true" :background-circle="Color.WHITE" :blink="geoObject.config.height < 3000 ? 500 : undefined"></MapMarker>
+            <MapMarker :key="geoObject.id" :viewer="props.viewer" :map-container="props.mapContainer" :position="[geoObject.config.longitude, geoObject.config.latitude, geoObject.config.height/* TODO rename to elevation in client sdk */]" :label="geoObject.name + ' ' + Math.floor(geoObject.config.height) + ' m'" :icon-url="'/images/geo_objects/traffic/' + geoObject.sub_type + '.png'" :color="Color.RED" :icon-width="32" :icon-height="32" :show-height-indicator="true" :background-circle="Color.WHITE" :blink="geoObject.config.height < 3000 ? 500 : undefined"></MapMarker>
 
         </template>
 
