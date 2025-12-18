@@ -49,10 +49,10 @@ onUnmounted(destroy)
 
     <template>
         <template v-for="t of traffic" :key="t.id">
-            <MapMarker v-if="t.position.height < 3000" :viewer="props.viewer" :map-container="props.mapContainer" :position="[t.position.longitude, t.position.latitude]" :elevation="t.position.height" :label="t.name" icon-url="/images/traffic/icon.png" :icon-width="32" :icon-height="32" :show-height-indicator="true" :color="Color.RED" :auto-bearing="true"></MapMarker>
+            <MapMarker v-if="t.position.height < 3000" :viewer="props.viewer" :map-container="props.mapContainer" :position="[t.position.longitude, t.position.latitude, t.position.height]" :label="t.name" icon-url="/images/traffic/icon.png" :icon-width="32" :icon-height="32" :show-height-indicator="true" :color="Color.RED" :auto-bearing="true"></MapMarker>
         </template>
 
-        <MapCircle v-if="props.showCoverage" :viewer="props.viewer" :longitude="props.longitude" :latitude="props.latitude" :radius="props.radius" :filled="false" :color="Color.BLUE" :clamp-to-ground="true" :outline-dashed="true"></MapCircle>
+        <MapCircle v-if="props.showCoverage" :viewer="props.viewer" :position="[props.longitude,props.latitude]" :radius="props.radius" :filled="false" :color="Color.BLUE" :clamp-to-ground="true" :outline-dashed="true"></MapCircle>
     </template>
 
 </template>
