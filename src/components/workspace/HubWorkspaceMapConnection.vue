@@ -7,6 +7,7 @@ import { updateObject } from '@/util/vue';
 import api from '@/api';
 import MapLine from '../map/MapLine.vue';
 import HubWorkspaceMapDrone from './HubWorkspaceMapDrone.vue';
+import { getColor } from '@/config/colors';
 
 const props = defineProps<{
     mapContainer: HTMLElement
@@ -53,9 +54,9 @@ const isValidLastRemoteControllerPosition = computed(()=>{
 
     <HubWorkspaceMapDrone v-if="typeof props.connection.drone_id === 'number'" :drone-id="props.connection.drone_id" :map-container="props.mapContainer" :viewer="props.viewer" @drone-position="(pos)=>updateObject(lastDronePosition, pos)"></HubWorkspaceMapDrone>
 
-    <MapMarker v-if="isValidLastRemoteControllerPosition" :map-container="props.mapContainer" :position="[lastRemoteControllerPosition.longitude, lastRemoteControllerPosition.latitude]" :elevation="lastRemoteControllerPosition.height" :viewer="props.viewer" :label="'RC #' + props.connection.remote_controller_id" icon-url="/images/remote_controller/icon_simple.png" :icon-width="32" :icon-height="32" :color="Color.CYAN"></MapMarker>
+    <MapMarker v-if="isValidLastRemoteControllerPosition" :map-container="props.mapContainer" :position="[lastRemoteControllerPosition.longitude, lastRemoteControllerPosition.latitude]" :elevation="lastRemoteControllerPosition.height" :viewer="props.viewer" :label="'RC #' + props.connection.remote_controller_id" icon-url="/images/remote_controller/icon.png" :icon-width="32" :icon-height="32" :color="getColor('accent')"></MapMarker>
 
-    <MapLine v-if="isValidLastDronePosition && isValidLastRemoteControllerPosition" :map-container="props.mapContainer" :from="{position: [lastDronePosition.longitude, lastDronePosition.latitude], elevation: lastDronePosition.height}" :to="{position: [lastRemoteControllerPosition.longitude, lastRemoteControllerPosition.latitude], elevation: lastRemoteControllerPosition.height}" :viewer="props.viewer" :color="Color.RED"></MapLine>
+    <MapLine v-if="isValidLastDronePosition && isValidLastRemoteControllerPosition" :map-container="props.mapContainer" :from="{position: [lastDronePosition.longitude, lastDronePosition.latitude], elevation: lastDronePosition.height}" :to="{position: [lastRemoteControllerPosition.longitude, lastRemoteControllerPosition.latitude], elevation: lastRemoteControllerPosition.height}" :viewer="props.viewer" :color="getColor('accent')"></MapLine>
 
 </template>
 
