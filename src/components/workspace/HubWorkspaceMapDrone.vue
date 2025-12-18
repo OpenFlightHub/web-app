@@ -105,7 +105,7 @@ const currentFlight = reactive({} as ApiResponse_DroneCurrentFlightGet)
 
 <template>
 
-    <MapMarker v-if="isValidLastDronePosition" :map-container="props.mapContainer" :position="[lastDronePosition.longitude, lastDronePosition.latitude]" :elevation="lastDronePosition.height" :viewer="props.viewer" :label="drone.name" icon-url="/images/drone/icon.png" :icon-width="32" :icon-height="32" @click="clickMarker" :color="Color.CYAN" :show-height-indicator="true" :show-height-mean-sea-level-in-label="true"></MapMarker>
+    <MapMarker v-if="isValidLastDronePosition" :map-container="props.mapContainer" :position="[lastDronePosition.longitude, lastDronePosition.latitude, lastDronePosition.height]" :viewer="props.viewer" :label="drone.name" icon-url="/images/drone/icon.png" :icon-width="32" :icon-height="32" @click="clickMarker" :color="Color.CYAN" :show-height-indicator="true" :show-height-mean-sea-level-in-label="true"></MapMarker>
 
 
     <MapPolyline v-if="props.showCurrentFlight && typeof currentFlight.id === 'number'" :points="currentFlight.track.map(t => {
