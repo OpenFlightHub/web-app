@@ -9,9 +9,9 @@
       "$/*": ["./*"]
     },
     "skipLibCheck": true,
-    "target": "ESNext",
+    "target": "es2020",
     "resolveJsonModule": true,
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext"
+    "module": "es2020",
+    "moduleResolution": "bundler"
   }
 }

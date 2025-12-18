@@ -5,11 +5,13 @@ import vue from '@vitejs/plugin-vue'
 
 //see https://cesium.com/blog/2024/02/13/configuring-vite-or-webpack-for-cesiumjs/
 import {viteStaticCopy} from 'vite-plugin-static-copy'
+import * as path from 'path'
 //fix cesium statics
 const cesiumSource = "node_modules/cesium/Build/Cesium";
 const cesiumBaseUrl = "/cesiumStatic";//TODO fix that this creates a folder in C:/cesiumStatic
 
 
+const projectRootDir = path.resolve(__dirname)
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -49,8 +51,8 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url)),
-      '$': fileURLToPath(new URL('./', import.meta.url)),
+      '@': path.resolve(projectRootDir, 'src'),
+      '$': path.resolve(projectRootDir)
     }
   },
   define: {

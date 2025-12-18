@@ -3,6 +3,11 @@
   "compilerOptions": {
     "composite": true,
     "types": ["node"],
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "$/*": ["./*"]
+    },
   }
 }
