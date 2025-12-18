@@ -12,7 +12,7 @@ import Checkbox from 'primevue/checkbox'
 import { Button } from 'primevue';
 import HubWorkspaceMapDroneMedia from './HubWorkspaceMapDroneMedia.vue';
 import Map from '../map/Map.vue';
-import HubWorkspaceMapElements from './HubWorkspaceMapElements.vue';
+import HubWorkspaceGeoObjects from './HubWorkspaceGeoObjects.vue';
 import LoadApi from '../functional/LoadApi.vue';
 import api from '@/api';
 
@@ -45,7 +45,7 @@ const showMedia = ref(false)
                 <!-- TODO implement center of map (but lazy load, so a small change in distance does not actually trigger a reset) -->
                 <!--<HubWorkspaceMapTraffic :viewer="viewer" :map-container="mapContainer" :latitude="props.latitude" :longitude="props.longitude" :radius="100 * 1000" :show-coverage="true"></HubWorkspaceMapTraffic>-->
 
-                <HubWorkspaceMapElements :viewer="viewer" :map-container="mapContainer" :workspace-id="props.workspaceId"></HubWorkspaceMapElements>
+                <HubWorkspaceGeoObjects :viewer="viewer" :map-container="mapContainer" :workspace-id="props.workspaceId"></HubWorkspaceGeoObjects>
             </template>
 
             <template v-if="viewerIsLoaded && showMedia">
