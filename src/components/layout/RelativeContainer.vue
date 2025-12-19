@@ -5,6 +5,7 @@ import { computed, StyleValue } from 'vue';
 const props = defineProps<{
     x: number
     y: number
+    zIndex?: number
 }>()
 
 const style = computed(() => {
@@ -16,7 +17,8 @@ const style = computed(() => {
         position: 'absolute',
         top: '' + (props.y * 100) + '%',
         left: '' + (props.x * 100) + '%',
-        transform: (towardsLeft ? 'translateX(-100%)' : '') + (towardsTop ? 'translateY(-100%)' : '')
+        transform: (towardsLeft ? 'translateX(-100%)' : '') + (towardsTop ? 'translateY(-100%)' : ''),
+        zIndex: props.zIndex
     } as StyleValue
 })
 

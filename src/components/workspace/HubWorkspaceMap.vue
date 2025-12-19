@@ -12,6 +12,7 @@ import { Button } from 'primevue';
 import HubWorkspaceMapDroneMedia from './HubWorkspaceMapDroneMedia.vue';
 import Map from '../map/Map.vue';
 import HubWorkspaceGeoObjects from './HubWorkspaceGeoObjects.vue';
+import Fullscreenable from '../functional/Fullscreenable.vue';
 
 const props = defineProps<{
     connections: ApiResponse_ConnectionGet[]
@@ -32,7 +33,7 @@ const showMedia = ref(false)
 
 <template>
 
-    <div id="outer-container">
+    <Fullscreenable flex="row">
         <div id="map-container" ref="mapContainer">
             <Map id="map" :start-point="{longitude: props.longitude, latitude: props.latitude}" :start-height="10000" :start-camera-pitch="-90" @viewer-loaded="(v)=>{viewer = v; viewerIsLoaded = true}"></Map>
 
@@ -62,51 +63,47 @@ const showMedia = ref(false)
                 </label>
             </div>
         </div>
-    </div>
+    </Fullscreenable>
 
 </template>
 
 <style scoped lang="scss">
 
-#outer-container {
+
+#map-container {
+    position: relative;
+    flex-shrink: 1;
+    flex-grow: 1;
+
+    // #map {
+    //     height: 100%;
+    //     width: 100%;
+    // }
+
+}
+
+#sidebar {
     display: flex;
     flex-direction: row;
+    flex-shrink: 0;
+    flex-grow: 0;
+    background: var(--neutral-darker);
 
-    #map-container {
-        position: relative;
-        flex-shrink: 1;
-        flex-grow: 1;
-
-        // #map {
-        //     height: 100%;
-        //     width: 100%;
-        // }
-
+    #sidebar-close {
+        height: 100%;
     }
 
-    #sidebar {
-        display: flex;
-        flex-direction: row;
-        flex-shrink: 0;
-        flex-grow: 0;
-        background: var(--neutral-darker);
+    #sidebar-inner {
+        padding: 0.5em;
 
-        #sidebar-close {
-            height: 100%;
-        }
+        label {
+            cursor: pointer;
 
-        #sidebar-inner {
-            padding: 0.5em;
-
-            label {
-                cursor: pointer;
-
-                .p-checkbox {
-                    margin-right: 0.5em;
-                }
+            .p-checkbox {
+                margin-right: 0.5em;
             }
-
         }
+
     }
 }
 </style>

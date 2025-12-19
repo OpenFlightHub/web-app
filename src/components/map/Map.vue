@@ -39,7 +39,7 @@ onMounted(async()=>{
         animation: false,
         timeline: false,
         homeButton: false,
-        fullscreenButton: props.disableUserControl !== true,
+        fullscreenButton: false,
         navigationHelpButton: props.disableUserControl !== true,
         navigationInstructionsInitiallyVisible: props.disableUserControl !== true,
         //projectionPicker: props.disableUserControl !== true,
