@@ -39,7 +39,7 @@ const showFullscreen = ref(false)
         <div id="top-info">
             <span>Connection {{ props.connectionId }}</span>
         </div>
-        <IconVue id="fullscreen-toggle" :name="showFullscreen ? 'x-lg' : 'arrows-fullscreen'" @click="showFullscreen = !showFullscreen"></IconVue>
+        <IconVue id="fullscreen-toggle" :name="showFullscreen ? 'x-lg' : 'arrows-fullscreen'" @click="showFullscreen = !showFullscreen"></IconVue><!-- TODO replace this custom solution with Fullscreenable.vue -->
 
         <div v-if="!myStreamToken">
             Loading ...
