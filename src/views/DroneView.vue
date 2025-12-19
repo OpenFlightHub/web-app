@@ -11,6 +11,7 @@ import SmartTable from '@/components/general/SmartTable.vue';
 import LoadApiArray from '@/components/functional/LoadApiArray.vue';
 import RemoteControllerSnippet from '@/components/remote_controller/RemoteControllerSnippet.vue';
 import { sortByProperty, uniqueByProperty } from '@/util/array';
+import WIP from '@/components/WIP.vue';
 
 </script>
 
@@ -43,7 +44,7 @@ import { sortByProperty, uniqueByProperty } from '@/util/array';
                   </tr>
                   <tr>
                      <td>Workspace</td>
-                     <td>TODO: implement workspace name</td>
+                     <td><WIP>implement workspace name</WIP></td>
                   </tr>
                </table>
             </Padding>
