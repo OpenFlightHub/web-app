@@ -1,8 +1,12 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onMounted, reactive, ref } from 'vue';
 import LiveVideo from './LiveVideo.vue';
 import api from '@/api';
 import IconVue from '../general/IconVue.vue';
+import { ApiResponse_ConnectionGet } from 'openflighthub-api-client-sdk';
+import { updateObject } from '@/util/vue';
+import IconsStacked from '../general/IconsStacked.vue';
+import Spacing from '../layout/Spacing.vue';
 
 const props = defineProps<{
     connectionId: number
@@ -10,9 +14,19 @@ const props = defineProps<{
 
 const myStreamToken = ref('')
 
+const connection = reactive({} as ApiResponse_ConnectionGet)
+
 onMounted(async()=>{
     myStreamToken.value = (await api.rest.auth.streamToken.get()).token
+
+    api.live.subscribeToDbRowUpdate('connections', props.connectionId, updateConnection)//TODO doesnt work with props.connectionId change
+
+    await updateConnection()
 })
+
+async function updateConnection(){
+    updateObject(connection, await api.rest.connection.get({connectionId: props.connectionId}))
+}
 
 const showFullscreen = ref(false)
 
@@ -26,7 +40,16 @@ const showFullscreen = ref(false)
             <span>Connection {{ props.connectionId }}</span>
         </div>
         <IconVue id="fullscreen-toggle" :name="showFullscreen ? 'x-lg' : 'arrows-fullscreen'" @click="showFullscreen = !showFullscreen"></IconVue>
-        <LiveVideo v-if="myStreamToken" class="live_video" :ws-url="'wss://stream.openflighthub.org:3334/ofh/' + props.connectionId + '?auth=' + myStreamToken" :hide-controls="true"></LiveVideo>
+
+        <div v-if="!myStreamToken">
+            Loading ...
+        </div>
+        <template v-else>
+            <LiveVideo v-if="connection.stream_is_alive === true" class="live_video" :ws-url="'wss://stream.openflighthub.org:3334/ofh/' + props.connectionId + '?auth=' + myStreamToken" :hide-controls="true"></LiveVideo>
+            <div v-else class="not_live">
+                <IconsStacked :names="['broadcast', 'slash-lg']" :colors="['red', undefined]"></IconsStacked><Spacing></Spacing>Stream Not Alive
+            </div>
+        </template>
     </div>
 
 </template>
@@ -73,6 +96,13 @@ const showFullscreen = ref(false)
         z-index: 10000;
         width: 100vw;
         height: 100vh;
+    }
+
+    .not_live {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-grow: 1;
     }
 }
 
