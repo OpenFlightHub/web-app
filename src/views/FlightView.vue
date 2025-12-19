@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import api from '@/api';
 
-import LoadApi from '@/components/functional/LoadApi.vue';
+import LoadApiArray from '@/components/functional/LoadApiArray.vue';
 import LoadApiWithIdParamInUrl from '@/components/functional/LoadApiWithIdParamInUrl.vue';
 import Padding from '@/components/layout/Padding.vue';
 import List from '@/components/layout/List.vue';
@@ -85,7 +85,7 @@ function getMaxHeightForFlight(flight: ApiResponse_DroneCurrentFlightGet){
             </div>
 
             <h1>Flight Media</h1>
-            <LoadApi :api-method="api.rest.flight.media.get" :params="{flightId: flight.data.id}" v-slot="flightMedia">
+            <LoadApiArray :api-method="api.rest.flight.media.get" :params="{flightId: flight.data.id}" v-slot="flightMedia">
                <List :horizontal="true">
                   <template v-for="media in flightMedia.data">
                      <RouterLink :to="'/drone-media/' + media.id">
@@ -93,7 +93,7 @@ function getMaxHeightForFlight(flight: ApiResponse_DroneCurrentFlightGet){
                      </RouterLink>
                   </template>
                </List>
-            </LoadApi>
+            </LoadApiArray>
          </div>
       </Padding>
    </LoadApiWithIdParamInUrl>
@@ -120,6 +120,11 @@ function getMaxHeightForFlight(flight: ApiResponse_DroneCurrentFlightGet){
          width: 50%;
       }
    }
+}
+
+.media_file_preview {
+   width: 300px;
+   height: 300px;
 }
 
 </style>

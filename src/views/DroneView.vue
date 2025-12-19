@@ -105,7 +105,8 @@ import Spacing from '@/components/layout/Spacing.vue';
    flex-direction: column;
 
    .media_file_preview {
-      height: 100%;
+      height: 300px;
+      width: 300px;
    }
 }
 
