@@ -29,25 +29,27 @@ import Spacing from '@/components/layout/Spacing.vue';
             <LoadApi v-if="typeof drone.data.last_connection_id === 'number'" :api-method="api.rest.connection.get" :params="{connectionId: drone.data.last_connection_id}" v-slot="connection">
                <Padding>
                   <table>
-                     <tr>
-                        <td>Name</td>
-                        <td>
-                           <RouterLink :to="'/connection/' + connection.data.id">
-                              {{ connection.data.name }}
-                           </RouterLink>
-                        </td>
-                     </tr>
-                     <tr>
-                        <td>Current Remote Controller</td>
-                        <td>
-                           <RemoteControllerSnippet v-if="typeof connection.data.remote_controller_id === 'number'" :id="connection.data.remote_controller_id"></RemoteControllerSnippet>
-                           <p v-else>-</p>
-                        </td>
-                     </tr>
-                     <tr>
-                        <td>Current Workspace</td>
-                        <td><RouterLink :to="'/workspace/' + connection.data.workspace_id"><LoadApi :api-method="api.rest.workspace.get" :params="{workspaceId: connection.data.workspace_id}" v-slot="workspace">{{ workspace.data.name }}</LoadApi></RouterLink></td>
-                     </tr>
+                     <tbody>
+                        <tr>
+                           <td>Name</td>
+                           <td>
+                              <RouterLink :to="'/connection/' + connection.data.id">
+                                 {{ connection.data.name }}
+                              </RouterLink>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td>Current Remote Controller</td>
+                           <td>
+                              <RemoteControllerSnippet v-if="typeof connection.data.remote_controller_id === 'number'" :id="connection.data.remote_controller_id"></RemoteControllerSnippet>
+                              <p v-else>-</p>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td>Current Workspace</td>
+                           <td><RouterLink :to="'/workspace/' + connection.data.workspace_id"><LoadApi :api-method="api.rest.workspace.get" :params="{workspaceId: connection.data.workspace_id}" v-slot="workspace">{{ workspace.data.name }}</LoadApi></RouterLink></td>
+                        </tr>
+                     </tbody>
                   </table>
                </Padding>
             </LoadApi>
