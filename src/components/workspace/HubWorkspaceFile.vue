@@ -67,8 +67,8 @@ function triggerImageSizeChange(){
 
     <div id="file" :class="{fullscreen: showFullscreen}">
         <div id="view" @click.stop="handleClick" @mousemove="mouseMove" ref="view">
-            <img v-show="showOriginal" :src="api.getFileDataUrl(props.file.id)" loading="lazy" fetchpriority="low">
-            <img v-show="!showOriginal" :src="api.getFileThumbnailUrl(props.file.id)" loading="lazy" fetchpriority="low">
+            <img v-show="showOriginal" :src="api.getFileDataUrl(props.file.id)" loading="lazy" fetchpriority="low" :alt="'File ' + props.file.id">
+            <img v-show="!showOriginal" :src="api.getFileThumbnailUrl(props.file.id)" loading="lazy" fetchpriority="low" :alt="'File ' + props.file.id + ' Thumbnail'">
 
             <slot/>
         </div>

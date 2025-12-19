@@ -16,7 +16,7 @@ const props = defineProps<{
 
         <div id="file" >
             <div id="view">
-                <img :src="api.getFileThumbnailUrl(props.id)" loading="lazy" fetchpriority="low">
+                <img :src="api.getFileThumbnailUrl(props.id)" loading="lazy" fetchpriority="low" :alt="'File ' + props.id + ' Thumbnail'">
             </div>
             <div id="info">
                 <Padding>
