@@ -13,9 +13,23 @@ import { getIdQueryFromRouteOrUseDefault } from '@/util/url';
 import ConnectionLiveStream from '@/components/video/ConnectionLiveStream.vue';
 import HubWorkspaceFiles from '@/components/workspace/HubWorkspaceFiles.vue';
 import DroneSnippet from '@/components/drone/DroneSnippet.vue';
+import { ApiResponse_WorkspaceConnectionsGet } from 'openflighthub-api-client-sdk';
 
 const router = useRouter()
 
+function uniqueDrones(connections: ApiResponse_WorkspaceConnectionsGet){
+   const droneIds: number[] = []
+
+   for(const connection of connections){
+      if(typeof connection.drone_id === 'number'){
+         if(!droneIds.includes(connection.drone_id)){
+            droneIds.push(connection.drone_id)
+         }
+      }
+   }
+
+   return droneIds
+}
 
 </script>
 
@@ -41,9 +55,7 @@ const router = useRouter()
                   </TabPanel>
                   <TabPanel :value="1">
                      <List>
-                        <template v-for="connection in connections.data">
-                           <DroneSnippet v-if="typeof connection.drone_id === 'number'" :id="connection.drone_id"></DroneSnippet>
-                        </template>
+                        <DroneSnippet v-for="droneId in uniqueDrones(connections.data)" :id="droneId"></DroneSnippet>
                      </List>
                   </TabPanel>
                   <TabPanel :value="2">
