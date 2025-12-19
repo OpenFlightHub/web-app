@@ -11,7 +11,6 @@ import SmartTable from '@/components/general/SmartTable.vue';
 import LoadApiArray from '@/components/functional/LoadApiArray.vue';
 import RemoteControllerSnippet from '@/components/remote_controller/RemoteControllerSnippet.vue';
 import { sortByProperty, uniqueByProperty } from '@/util/array';
-import WIP from '@/components/WIP.vue';
 import Spacing from '@/components/layout/Spacing.vue';
 
 </script>
@@ -39,15 +38,15 @@ import Spacing from '@/components/layout/Spacing.vue';
                         </td>
                      </tr>
                      <tr>
-                        <td>Remote Controller</td>
+                        <td>Current Remote Controller</td>
                         <td>
                            <RemoteControllerSnippet v-if="typeof connection.data.remote_controller_id === 'number'" :id="connection.data.remote_controller_id"></RemoteControllerSnippet>
                            <p v-else>-</p>
                         </td>
                      </tr>
                      <tr>
-                        <td>Workspace</td>
-                        <td><WIP>implement workspace name</WIP></td>
+                        <td>Current Workspace</td>
+                        <td><RouterLink :to="'/workspace/' + connection.data.workspace_id"><LoadApi :api-method="api.rest.workspace.get" :params="{workspaceId: connection.data.workspace_id}" v-slot="workspace">{{ workspace.data.name }}</LoadApi></RouterLink></td>
                      </tr>
                   </table>
                </Padding>
