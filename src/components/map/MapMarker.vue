@@ -202,8 +202,6 @@ function makeCanvas(){
             const targetWidth = targetSize * size
             const targetHeight = targetSize * size / imageAspectRatio
 
-            console.debug('drawing image onto canvas', image.width, image.height, image.complete, size, targetWidth, targetHeight)
-
             // if image width and height differ, keep aspect ratio
             ctx.drawImage(image, 0,0,image.width,image.height, (size - targetWidth)/2, (size - targetHeight)/2,targetWidth,targetHeight)
 
