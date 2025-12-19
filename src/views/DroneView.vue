@@ -10,6 +10,7 @@ import TimestampDisplay from '@/components/display/TimestampDisplay.vue';
 import SmartTable from '@/components/general/SmartTable.vue';
 import LoadApiArray from '@/components/functional/LoadApiArray.vue';
 import RemoteControllerSnippet from '@/components/remote_controller/RemoteControllerSnippet.vue';
+import { sortByProperty, uniqueByProperty } from '@/util/array';
 
 </script>
 
@@ -77,15 +78,15 @@ import RemoteControllerSnippet from '@/components/remote_controller/RemoteContro
 
 
          <h2>All Drone Media</h2>
-         <LoadApi :api-method="api.rest.drone.media.get" :params="{droneId: drone.data.id}" v-slot="droneMedia">
+         <LoadApiArray :api-method="api.rest.drone.media.get" :params="{droneId: drone.data.id}" v-slot="droneMedia">
             <List :horizontal="true">
-               <template v-for="media in droneMedia.data">
+               <template v-for="media in sortByProperty(uniqueByProperty(droneMedia.data, 'id'), 'id')">
                   <RouterLink :to="'/drone-media/' + media.id">
                      <HubWorkspaceFilePreview  class="media_file_preview" :id="media.file_id"></HubWorkspaceFilePreview>
                   </RouterLink>
                </template>
             </List>
-         </LoadApi>
+         </LoadApiArray>
 
       </Padding>
    </LoadApiWithIdParamInUrl>

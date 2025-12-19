@@ -30,6 +30,10 @@ async function load(){
 
     const response = await props.apiMethod(props.params)
 
+    if(response instanceof Array){
+        throw new Error('LoadApi being used with Array Api response! You should use LoadApiArray instead!')
+    }
+
     updateObject(obj, response)
 
     isLoading.value = false
