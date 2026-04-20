@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref, watch } from 'vue';
+import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { ApiResponse_DroneMediaGet } from 'openflighthub-api-client-sdk';
-import Map from '../map/Map.vue';
+import Map, { MapPosition3D } from '../map/Map.vue';
 import api from '@/api';
 import { updateArray } from '@/util/vue';
-import { Color, Viewer } from 'cesium';
+import { Cartesian2, Cartesian3, Cartesian4, Cartographic, Color, IntersectionTests, Math as CesiumMath, Matrix4, Ray as CesiumRay, Transforms, Viewer } from 'cesium';
 import MapPolygon from '../map/MapPolygon.vue';
 import MapLine from '../map/MapLine.vue';
 import MapPolyline from '../map/MapPolyline.vue';
@@ -20,6 +20,9 @@ import Padding from '../layout/Padding.vue';
 import RelativeContainer from '../layout/RelativeContainer.vue';
 import IconVue from '../general/IconVue.vue';
 import LinkVue from '../general/LinkVue.vue';
+import { defineStore } from 'pinia';
+import { getElevationAtPosition } from '@/util/terrain';
+import { Timer } from '@/util/timer';
 
 const props = defineProps<{
     media: ApiResponse_DroneMediaGet[0]
@@ -89,13 +92,13 @@ let coverage = reactive<{
     holes: Location[][]
 }>({all: [], outer: [], holes: []})
 
-onMounted(()=>{
-    setTimeout(()=>{
-        loadCoverage().catch(()=>{
-            setTimeout(loadCoverage, 1000 * 1)
-        })
-    }, 100)
-})
+// onMounted(()=>{
+//     setTimeout(()=>{
+//         loadCoverage().catch(()=>{
+//             setTimeout(loadCoverage, 1000 * 1)
+//         })
+//     }, 100)
+// })
 
 async function loadCoverage(){
 
@@ -182,6 +185,85 @@ const viewSize = reactive({
     height: 0
 })
 
+
+const rayDestinations = reactive<MapPosition3D[]>([])
+
+watch(()=>{
+    return props.media
+}, calculateRayDestinations, {deep: true})
+
+onMounted(()=>{
+    setTimeout(calculateRayDestinations, 1000 * 10)
+})
+
+function calculateRayDestinations(){
+    console.info('calculating ray destinations')
+    rayDestinations.splice(0, rayDestinations.length)
+
+    if(!viewerIsLoaded.value){
+        return
+    }
+
+    if(!hasValidHeightInformation.value || !hasValidLocationInformation.value){
+        return
+    }
+
+    const dest = getRayDestination({deltaV: 0, deltaH: 0})
+    if(dest){
+        rayDestinations.push(dest)
+    }
+
+}
+
+type Ray = {
+    deltaV: number,
+    deltaH: number
+}
+
+function getRayDestination(ray: Ray){
+    const timer = new Timer()
+    timer.start()
+
+    if(!hasValidLocationInformation.value || !hasValidHeightInformation.value || !hasValidCameraAngleInformation.value){
+        return null
+    }
+
+    const origin = Cartesian3.fromDegrees(cameraLongitude.value, cameraLatitude.value, cameraHeight.value)
+
+    // Convert heading/pitch (degrees) to a direction vector in the local ENU frame,
+    // then transform into ECEF so it works anywhere on the globe.
+    const headingRad = cameraHeading.value * (Math.PI / 180)
+    const pitchRad   = cameraPitch.value   * (Math.PI / 180)
+
+    const east  = Math.cos(pitchRad) * Math.sin(headingRad)
+    const north = Math.cos(pitchRad) * Math.cos(headingRad)
+    const up    = Math.sin(pitchRad)
+
+    const enuToEcef = Transforms.eastNorthUpToFixedFrame(origin)
+    const dirEnu    = new Cartesian4(east, north, up, 0)
+    const dirEcef   = Matrix4.multiplyByVector(enuToEcef, dirEnu, new Cartesian4())
+    const direction = Cartesian3.normalize(new Cartesian3(dirEcef.x, dirEcef.y, dirEcef.z), new Cartesian3())
+
+    const cesiumRay = new CesiumRay(origin, direction)
+    const destination = viewer.scene.globe.pick(cesiumRay, viewer.scene)
+
+    if(!destination){
+        return null
+    }
+
+    const destinationCarto = Cartographic.fromCartesian(destination)
+
+    console.log('Ray calculation time:', timer.stop(), 'ms')
+
+    return {
+        position: [
+            CesiumMath.toDegrees(destinationCarto.longitude),
+            CesiumMath.toDegrees(destinationCarto.latitude)
+        ] as [number, number],
+        elevation: destinationCarto.height
+    }
+}
+
 </script>
 
 <template>
@@ -245,7 +327,7 @@ const viewSize = reactive({
         <div class="media_map" ref="mapContainer">
             <template v-if="hasValidLocationInformation">
 
-                <Map :start-point="{longitude: cameraLongitude, latitude: cameraLatitude}" :start-height="hasValidHeightInformation ? cameraHeight : 5000" :start-camera-heading="hasValidCameraAngleInformation ? cameraHeading : undefined" :start-camera-pitch="hasValidCameraAngleInformation ? cameraPitch : -90" :disable-user-control="false" :camera-f-o-v="cameraFOV" @viewer-loaded="(v)=>{viewer = v; viewerIsLoaded = true}" v-slot="map">
+                <Map :start-point="{longitude: cameraLongitude, latitude: cameraLatitude}" :start-height="hasValidHeightInformation ? cameraHeight : 5000" :start-camera-heading="hasValidCameraAngleInformation ? cameraHeading : undefined" :start-camera-pitch="hasValidCameraAngleInformation ? cameraPitch : -90" :disable-user-control="false" :camera-f-o-v="cameraFOV" @viewer-loaded="(v)=>{viewer = v; viewerIsLoaded = true; calculateRayDestinations()}" v-slot="map">
 
                     <div id="reset-camera-view">
                         <Button @click="map.resetCamera()">Reset</Button>
@@ -255,6 +337,11 @@ const viewSize = reactive({
 
                 <MapMarker v-if="viewerIsLoaded" :viewer="viewer" :map-container="mapContainer" :position="[cameraLongitude, cameraLatitude]" :elevation="hasValidHeightInformation ? cameraHeight : undefined" :bearing="hasValidCameraAngleInformation ? cameraHeading : undefined" icon-url="/images/drone/icon.png" :icon-width="32" :icon-height="32" :color="Color.CYAN"></MapMarker>
 
+                <template v-if="viewerIsLoaded">
+                    <MapLine v-for="rayDestination of rayDestinations" :viewer="viewer" :from="{position: [cameraLongitude, cameraLatitude], elevation: cameraHeight}" :to="rayDestination" :color="Color.RED"></MapLine>
+                </template>
+
+                <!--
                 <template v-if="viewerIsLoaded && coverage.all.length > 0 && false">
                     <MapLine v-for="p in coverage.all" :viewer="viewer" :from="{position: [cameraLongitude, cameraLatitude], elevation: cameraHeight}" :to="{position: [p.position.longitude, p.position.latitude], elevation: p.elevation}" :color="(p.debug === 'failed' ? Color.RED : p.debug === 'hole-start' ? Color.YELLOW : p.debug == 'hole-end' ? Color.ORANGE : Color.WHITE).withAlpha(0.4)"></MapLine>
                 </template>
@@ -265,6 +352,7 @@ const viewSize = reactive({
                 </template>
 
                 <MapPolyline key="outer" v-if="viewerIsLoaded" :viewer="viewer" :points="coverage.outer.length === 0 ? [] : coverage.outer.concat(coverage.outer[0]).map(p => [p.position.longitude, p.position.latitude, p.elevation])" :clamp-to-ground="true" :color="Color.GREENYELLOW.withAlpha(0.5)"></MapPolyline>
+            -->
 
             </template>
             <div v-else>No valid location</div>
