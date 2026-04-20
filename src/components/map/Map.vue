@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 
-import { Cartesian3, Ion, Math as MathCesium, Terrain, Viewer, Cartographic, PerspectiveFrustum, IonImageryProvider } from "cesium";
+import { Cartesian3, Ion, Math as MathCesium, Terrain, Viewer, Cartographic, PerspectiveFrustum, IonImageryProvider, CesiumTerrainProvider, ImageryProvider } from "cesium";
 import "cesium/Build/Cesium/Widgets/widgets.css";
 import { getSetting } from '@/util/settings';
+import { WebMapServiceImageryProvider } from 'cesium';
 
 const props = defineProps<{
     startPoint: {
@@ -35,7 +36,7 @@ let viewerLoadCheckInterval
 onMounted(async()=>{
 
     viewer = new Viewer(mapContainer.value, {
-        terrain: Terrain.fromWorldTerrain(),
+        terrain: new Terrain(CesiumTerrainProvider.fromIonAssetId(4613429)),
         animation: false,
         timeline: false,
         homeButton: false,
@@ -51,8 +52,24 @@ onMounted(async()=>{
 
     const layers = viewer.scene.imageryLayers
     layers.removeAll(true)
+    // layers.addImageryProvider(
+    //     await IonImageryProvider.fromAssetId(4613429)//3954 Cesium Ion free
+    // )
+
     layers.addImageryProvider(
-        await IonImageryProvider.fromAssetId(3954)
+        new WebMapServiceImageryProvider({
+            url: 'https://geoservices.bayern.de/od/wms/dop/v1/dop20?',
+            layers: 'by_dop20c',
+            credit: 'Datenquellen: Bayerische Vermessungsverwaltung, © Europäische Union, enthält Copernicus Sentinel-2 Daten 2018, verarbeitet durch das Bundesamt für Kartographie und Geodäsie (BKG)'
+        })
+
+        // new TileLayer({
+        //     source: new TileWMS({
+        //         url: 'https://geoservices.bayern.de/od/wms/dop/v1/dop20?',
+        //         params: {LAYERS: ['by_dop20c']},
+        //         attributions: 'Datenquellen: Bayerische Vermessungsverwaltung, © Europäische Union, enthält Copernicus Sentinel-2 Daten 2018, verarbeitet durch das Bundesamt für Kartographie und Geodäsie (BKG)'
+        //     })
+        // })
     )
 
 
