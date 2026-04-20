@@ -208,6 +208,14 @@ function calculateRayDestinations(){
         return
     }
 
+    for(let deltaV = -cameraFOV.value/2; deltaV <= cameraFOV.value/2; deltaV += cameraFOV.value/20){
+        for(let deltaH = -cameraFOV.value/2; deltaH <= cameraFOV.value/2; deltaH += cameraFOV.value/20){
+            const dest = getRayDestination({deltaV, deltaH})
+            if(dest){
+                rayDestinations.push(dest)
+            }
+        }
+    }
     const dest = getRayDestination({deltaV: 0, deltaH: 0})
     if(dest){
         rayDestinations.push(dest)
@@ -232,8 +240,8 @@ function getRayDestination(ray: Ray){
 
     // Convert heading/pitch (degrees) to a direction vector in the local ENU frame,
     // then transform into ECEF so it works anywhere on the globe.
-    const headingRad = cameraHeading.value * (Math.PI / 180)
-    const pitchRad   = cameraPitch.value   * (Math.PI / 180)
+    const headingRad = (cameraHeading.value + ray.deltaH) * (Math.PI / 180)
+    const pitchRad   = (cameraPitch.value + ray.deltaV) * (Math.PI / 180)
 
     const east  = Math.cos(pitchRad) * Math.sin(headingRad)
     const north = Math.cos(pitchRad) * Math.cos(headingRad)
