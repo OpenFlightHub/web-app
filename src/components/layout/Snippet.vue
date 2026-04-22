@@ -7,6 +7,7 @@ const props = defineProps<{
     minHeight?: number
     centered?: boolean
     toUrl?: string
+    horizontal?: boolean
 }>()
 
 const style = computed(()=>{
@@ -14,7 +15,7 @@ const style = computed(()=>{
 })
 
 const clazz = computed(()=>{
-    return {centered: props.centered}
+    return {centered: props.centered, horizontal: props.horizontal}
 })
 
 </script>
@@ -39,15 +40,8 @@ const clazz = computed(()=>{
 
 #router_link, #snippet {
     display: inline-flex;
-    flex-direction: column;
     background: var(--neutral-darker);
     border-radius: 0.3em;
-    gap: 0.5em;
-
-    &.centered {
-        justify-content: center;
-        align-items: center;
-    }
 
 }
 
@@ -61,6 +55,27 @@ const clazz = computed(()=>{
 
     &:visited {
         color: var(--text-color);
+    }
+}
+
+</style>
+
+<style lang="scss">
+
+#router_link, #snippet {
+    & #padding {
+        display: inline-flex;
+        flex-direction: column;
+        gap: 0.5em;
+    }
+
+    &.centered #padding{
+        justify-content: center;
+        align-items: center;
+    }
+
+    &.horizontal #padding {
+        flex-direction: row;
     }
 }
 

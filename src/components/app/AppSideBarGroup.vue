@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref, useSlots } from 'vue';
-import IconVue from '../general/IconVue.vue';
+import IconVue, { IconName } from '../general/IconVue.vue';
 
 const props = defineProps<{
     name: string
-    icon?: string
+    icon?: IconName
     to?: string
 }>()
 

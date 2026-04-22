@@ -7,6 +7,7 @@ import type { Pinia } from 'pinia'
 import HomeView from '@/views/HomeView.vue'
 import MyWorkspacesView from '@/views/MyWorkspacesView.vue'
 import SettingsView from '@/views/SettingsView.vue'
+import StructureView from '@/views/StructureView.vue'
 
 //Auth
 import AuthView from '@/views/auth/AuthView.vue';
@@ -109,6 +110,13 @@ export function makeRouter(pinia: Pinia){
                 path: '/my-workspaces',
                 name: 'workspaces',
                 component: MyWorkspacesView
+            },
+
+
+            {
+                path: '/structure',
+                name: 'structure',
+                component: StructureView
             },
 
             {
