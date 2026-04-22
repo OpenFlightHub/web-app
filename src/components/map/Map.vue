@@ -26,6 +26,7 @@ let viewer: Viewer = null // if we make Viewer a reactive object, performance go
 
 const emit = defineEmits<{
     'viewer-loaded': [Viewer]
+    'viewer-tiles-loaded': []
 }>()
 
 //TODO dont hardcode this token
@@ -50,6 +51,12 @@ onMounted(async()=>{
         baseLayerPicker: getSetting('allow-bing-maps') === true,
         sceneModePicker: props.disableUserControl !== true,
         geocoder: props.disableUserControl !== true
+    })
+
+    viewer.scene.globe.tileLoadProgressEvent.addEventListener((event)=>{
+        if(viewer.scene.globe.tilesLoaded){
+            emit('viewer-tiles-loaded')
+        }
     })
 
     const layers = viewer.scene.imageryLayers

@@ -3,7 +3,7 @@ import { onMounted, reactive, ref, watch } from 'vue';
 import { ApiResponse_DroneMediaGet } from 'openflighthub-api-client-sdk';
 import Map from '../map/Map.vue';
 import api from '@/api';
-import { updateArray } from '@/util/vue';
+import { updateArray, updateObject } from '@/util/vue';
 import { Color, Viewer } from 'cesium';
 import MapPolygon from '../map/MapPolygon.vue';
 import MapLine from '../map/MapLine.vue';
@@ -20,6 +20,12 @@ import Padding from '../layout/Padding.vue';
 import RelativeContainer from '../layout/RelativeContainer.vue';
 import IconVue from '../general/IconVue.vue';
 import LinkVue from '../general/LinkVue.vue';
+import { calculateVisibleTerrainInDirection, TerrainVisibilityResult } from '@/util/terrain';
+import MapCircle from '../map/MapCircle.vue';
+import { radiansToDegrees } from '@turf/turf';
+import MapChessRect from '../map/MapChessRect.vue';
+
+const CLIENT_COVERAGE_ENABLED = false
 
 const props = defineProps<{
     media: ApiResponse_DroneMediaGet[0]
@@ -46,8 +52,8 @@ function parseData(){
 
     hasValidLocationInformation.value = !!props.media.camera_location?.position
     if(hasValidLocationInformation.value){
-        cameraLongitude.value = props.media.camera_location.position.longitude
-        cameraLatitude.value = props.media.camera_location.position.latitude
+        cameraLongitude.value = props.media.camera_location!.position!.longitude
+        cameraLatitude.value = props.media.camera_location!.position!.latitude
     } else {
         return
     }
@@ -55,7 +61,7 @@ function parseData(){
     hasValidHeightInformation.value = typeof props.media.camera_location?.height === 'number'
 
     if(hasValidHeightInformation.value){
-        cameraHeight.value = props.media.camera_location.height
+        cameraHeight.value = props.media.camera_location!.height!
     }
 
     if(typeof props.media.camera_angles?.heading === 'number'){
@@ -182,6 +188,24 @@ const viewSize = reactive({
     height: 0
 })
 
+const coverageClient = reactive<TerrainVisibilityResult>({})
+
+function refreshCoverageClientSoon(){
+    if(!CLIENT_COVERAGE_ENABLED){
+        return
+    }
+    setTimeout(refreshCoverageClient, 100)
+}
+
+async function refreshCoverageClient(){
+    updateObject(coverageClient, await calculateVisibleTerrainInDirection(viewer, {
+        headingDeg: cameraHeading.value,
+        maxDistanceMeters: 5000,
+        observerLonLat: [cameraLongitude.value, cameraLatitude.value],
+        observerHeightMsl: hasValidHeightInformation ? cameraHeight.value : undefined
+    }))
+}
+
 </script>
 
 <template>
@@ -245,7 +269,7 @@ const viewSize = reactive({
         <div class="media_map" ref="mapContainer">
             <template v-if="hasValidLocationInformation">
 
-                <Map :start-point="{longitude: cameraLongitude, latitude: cameraLatitude}" :start-height="hasValidHeightInformation ? cameraHeight : 5000" :start-camera-heading="hasValidCameraAngleInformation ? cameraHeading : undefined" :start-camera-pitch="hasValidCameraAngleInformation ? cameraPitch : -90" :disable-user-control="false" :camera-f-o-v="cameraFOV" @viewer-loaded="(v)=>{viewer = v; viewerIsLoaded = true}" v-slot="map">
+                <Map :start-point="{longitude: cameraLongitude, latitude: cameraLatitude}" :start-height="hasValidHeightInformation ? cameraHeight : 5000" :start-camera-heading="hasValidCameraAngleInformation ? cameraHeading : undefined" :start-camera-pitch="hasValidCameraAngleInformation ? cameraPitch : -90" :disable-user-control="false" :camera-f-o-v="cameraFOV" @viewer-loaded="(v)=>{viewer = v; viewerIsLoaded = true; refreshCoverageClientSoon()}" v-slot="map">
 
                     <div id="reset-camera-view">
                         <Button @click="map.resetCamera()">Reset</Button>
@@ -265,6 +289,10 @@ const viewSize = reactive({
                 </template>
 
                 <MapPolyline key="outer" v-if="viewerIsLoaded" :viewer="viewer" :points="coverage.outer.length === 0 ? [] : coverage.outer.concat(coverage.outer[0]).map(p => [p.position.longitude, p.position.latitude, p.elevation])" :clamp-to-ground="true" :color="Color.GREENYELLOW.withAlpha(0.5)"></MapPolyline>
+
+                <template v-if="viewerIsLoaded && coverageClient.all instanceof Array">
+                    <MapChessRect v-for="point of coverageClient.all" :viewer="viewer" :map-container="mapContainer" :center="[point.longitude, point.latitude]" :color="point.visible ? Color.GREEN.withAlpha(0.5) : Color.RED.withAlpha(0.5)" :rect-size-meters="coverageClient.radialStepMeters"></MapChessRect>
+                </template>
 
             </template>
             <div v-else>No valid location</div>
