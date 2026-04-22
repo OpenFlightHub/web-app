@@ -3,8 +3,7 @@ import api from '@/api';
 import Snippet from '../layout/Snippet.vue';
 import LoadApi from '../functional/LoadApi.vue';
 import LinkVue from '../general/LinkVue.vue';
-import ImageVue from '../general/ImageVue.vue';
-import IconVue from '../general/IconVue.vue';
+import FileImageOrIconVue from '../general/FileImageOrIconVue.vue';
 
 
 const props = defineProps<{
@@ -16,9 +15,8 @@ const props = defineProps<{
 <template>
 
     <LoadApi :api-method="api.rest.organisation.get" :params="{organisationId: props.id}" v-slot="scope">
-        <Snippet :min-height="100" :min-width="100" centered horizontal :to-url="'/organisation/' + props.id">
-            <ImageVue v-if="typeof scope.data.logo_file_id === 'number'" :url="api.getFileThumbnailUrl(scope.data.logo_file_id)" :size="{em: 3}"></ImageVue>
-            <IconVue v-else name="buildings-fill"></IconVue>
+        <Snippet :min-width="100" centered horizontal :to-url="'/organisation/' + props.id">
+            <FileImageOrIconVue :file-id="scope.data.logo_file_id" :icon-name="'buildings-fill'" :size="{em: 2}" :thumbnail="true"></FileImageOrIconVue>
 
             <LinkVue>{{ scope.data.name }}</LinkVue>
         </Snippet>

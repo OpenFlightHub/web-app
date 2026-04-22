@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { computed } from 'vue';
+
 
 /**
  * How to generate those names:
@@ -24,14 +26,24 @@ const props = defineProps<{
     name: IconName,
     color?: string //overwrite default color css
     buttonIconPos?: 'right' | 'left' | 'top' | 'bottom'
+    size?: {pixel: number} | {em: number}// by default size is 1em
 }>()
 
+const style = computed(()=>{
+    if(props.size){
+        if('pixel' in props.size){
+            return 'font-size: ' + props.size.pixel + 'px;'
+        } else if('em' in props.size){
+            return 'font-size: ' + props.size.em + 'em;'
+        }
+    }
+})
 </script>
 
 <template>
 
-    <span :class="['bi', 'bi-' + props.name, {
+    <span :style="[style, props.color ? 'color: ' + props.color : '']" :class="['bi', 'bi-' + props.name, {
         'p-button-icon': props.buttonIconPos
-    }, props.buttonIconPos ? ('p-button-icon-' + props.buttonIconPos) : '']" :style="props.color ? 'color: ' + props.color : ''"></span>
+    }, props.buttonIconPos ? ('p-button-icon-' + props.buttonIconPos) : '']"></span>
 
 </template>

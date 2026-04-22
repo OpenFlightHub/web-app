@@ -1,0 +1,56 @@
+<script setup lang="ts">
+import api from '@/api'
+import LoadApiArrayWithIdParamInUrl from '@/components/functional/LoadApiArrayWithIdParamInUrl.vue';
+import LoadApiWithIdParamInUrl from '@/components/functional/LoadApiWithIdParamInUrl.vue'
+import FileImageOrIconVue from '@/components/general/FileImageOrIconVue.vue';
+import List from '@/components/layout/List.vue';
+import Padding from '@/components/layout/Padding.vue';
+import Spacing from '@/components/layout/Spacing.vue';
+import TeamSnippet from '@/components/team/TeamSnippet.vue';
+import UserSnippet from '@/components/user/UserSnippet.vue';
+
+</script>
+
+<template>
+
+    <LoadApiWithIdParamInUrl :api-method="api.rest.organisation.get" :id-params="{organisationId: undefined}" v-slot="organisation">
+        <Padding>
+            <div id="top">
+                <h1>Organisation: {{ organisation.data.name }}</h1>
+                <FileImageOrIconVue :file-id="organisation.data.logo_file_id" :icon-name="'buildings-fill'" :size="{em: 2}" :thumbnail="true"></FileImageOrIconVue>
+            </div>
+
+            <Spacing></Spacing>
+
+            <h2>Owner</h2>
+            <UserSnippet :id="organisation.data.owner_user_id"></UserSnippet>
+
+            <Spacing></Spacing>
+
+            <h2>Teams</h2>
+
+            <LoadApiArrayWithIdParamInUrl :api-method="api.rest.organisation.teams.get" :id-params="{organisationId: undefined}" v-slot="teams">
+                <List>
+                    <TeamSnippet v-for="team of teams.data" :id="team.id" :key="team.id"></TeamSnippet>
+                </List>
+                <span v-if="teams.data.length === 0">None</span>
+            </LoadApiArrayWithIdParamInUrl>
+        </Padding>
+    </LoadApiWithIdParamInUrl>
+
+</template>
+
+<style lang="scss" scoped>
+
+#top {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1em;
+
+    h1 {
+        margin: 0;
+    }
+}
+
+</style>
