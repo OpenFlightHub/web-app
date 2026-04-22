@@ -9,7 +9,7 @@ import { useRoute } from 'vue-router';
 
 const props = defineProps<{
     apiMethod: (params: P) => Promise<T>
-    idParams: P
+    idParams: { [K in keyof P]: any }
 }>()
 
 const emit = defineEmits<{
@@ -46,7 +46,7 @@ async function init(){
 
     for(const paramName of Object.keys(props.idParams)){
         const id = getIdParamFromRoute(paramName, route)
-        if(id <= 0){
+        if(id < 0){
             paramsValid.value = false
             return
         }
