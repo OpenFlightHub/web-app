@@ -1,17 +1,17 @@
-<script setup lang="ts" generic="T extends Array<any>, P extends Record<string, any>">
-import { updateArray, updateObject } from '@/util/vue';
-import { ref, reactive, onMounted, watch, Reactive } from 'vue';
+<script setup lang="ts" generic="T extends Array<any>, C extends any, AM extends ((config: C) => Promise<T>), PROPS extends {apiMethod: AM, config: Parameters<AM>[0]}">
+import { updateArray } from '@/util/vue';
+import { ref, reactive, onMounted, watch } from 'vue';
 
 
 const props = defineProps<{
-    apiMethod: (params: P) => Promise<T>
-    params: P
+    apiMethod: PROPS['apiMethod'],
+    config: PROPS['config']
 }>()
 
 const initialLoadDone = ref(false)
 const isLoading = ref(true)
 
-const obj = reactive([] as T)
+const obj = reactive([] as unknown as T)
 
 onMounted(load)
 
@@ -20,7 +20,7 @@ watch(()=>{
 }, load)
 
 watch(()=>{
-    return props.params
+    return props.config
 }, load, {
     deep: true
 })
@@ -28,7 +28,7 @@ watch(()=>{
 async function load(){
     isLoading.value = true
 
-    const response = await props.apiMethod(props.params)
+    const response = await props.apiMethod(props.config)
 
     updateArray(obj, response)
 

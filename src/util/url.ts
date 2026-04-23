@@ -18,19 +18,33 @@ export function getIdParamFromRoute(paramName: string, route: RouteLocationNorma
 
     return id
 }
+
 export function getIdQueryFromRoute(queryParamName: string, route: RouteLocationNormalizedLoadedGeneric){
     const param = route.query[queryParamName]
     if(param instanceof Array === false && typeof param !== 'string'){
         throw new Error('could not parse id query param from route: ' + queryParamName)
     }
 
-    const id = parseInt(param instanceof Array ? param[0] : param)
+    const id = parseInt('' + (param instanceof Array ? param[0] : param))
 
     if(isNaN(id)){
         throw new Error('could not parse id query param from route: ' + queryParamName)
     }
 
     return id
+}
+
+export function getStringQueryFromRoute(queryParamName: string, route: RouteLocationNormalizedLoadedGeneric){
+    const param = route.query[queryParamName]
+    if(param instanceof Array === false && typeof param !== 'string'){
+        throw new Error('could not parse string query param from route: ' + queryParamName)
+    }
+
+    return '' + (param instanceof Array ? param[0] : param)
+}
+
+export function routeHasQueryParam(queryParamName: string, route: RouteLocationNormalizedLoadedGeneric){
+    return typeof route.query[queryParamName] !== 'undefined'
 }
 
 export function getIdQueryFromRouteOrUseDefault(queryParamName: string, route: RouteLocationNormalizedLoadedGeneric, defaultValue: number){

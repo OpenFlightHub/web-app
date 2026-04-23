@@ -1,19 +1,20 @@
-<script setup lang="ts" generic="T extends Array<any>, P extends Record<string, number | undefined>">
+<script setup lang="ts" generic="T extends Array<any>, C extends {[key: string]: any, params: Record<string, any>}, AM extends ((config: C) => Promise<T>), PROPS extends {apiMethod: AM, config: Parameters<AM>[0], idParams: string[]}">
 import LoadApiArray from '@/components/functional/LoadApiArray.vue';
 import { getIdParamFromRoute } from '@/util/url';
 import { updateObject } from '@/util/vue';
-import { onMounted, Reactive, reactive, ref, watch } from 'vue';
+import { computed, onMounted, reactive, ref, watch } from 'vue';
 
 import { useRoute } from 'vue-router';
 
 
 const props = defineProps<{
-    apiMethod: (params: P) => Promise<T>
-    idParams: { [K in keyof P]: any }
+    apiMethod: PROPS['apiMethod'],
+    config: PROPS['config'],
+    idParams: PROPS['idParams']
 }>()
 
 const emit = defineEmits<{
-    (e: 'change', v: P)
+    (e: 'change', v: Record<string, any>): void
 }>()
 
 const route = useRoute()
@@ -33,18 +34,18 @@ watch(()=>{
 
 onMounted(init)
 
-const params = reactive({} as Record<keyof P, number>)
+const params = reactive({} as Record<string, number>)
 
 const paramsValid = ref(false)
 
 async function init(){
-    if(props.idParams instanceof Object === false){
+    if(props.idParams instanceof Array === false){
         return
     }
 
-    const newParams = {}
+    const newParams: Record<string, any> = {}
 
-    for(const paramName of Object.keys(props.idParams)){
+    for(const paramName of props.idParams){
         const id = getIdParamFromRoute(paramName, route)
         if(id < 0){
             paramsValid.value = false
@@ -58,14 +59,23 @@ async function init(){
 
     updateObject(params, newParams)
 
-    emit('change', params as P)
+    emit('change', params)
 }
+
+const filledConfig = computed(()=>{
+    const baseConfig = JSON.parse(JSON.stringify(props.config)) as PROPS['config']
+
+    Object.assign(baseConfig.params, params)
+
+    return baseConfig
+})
 
 </script>
 
 <template>
 
-    <LoadApiArray v-if="paramsValid" :api-method="props.apiMethod" :params="(params as Record<keyof P, number>)" v-slot="scope">
+    <!-- @vue-ignore -->
+    <LoadApiArray v-if="paramsValid" :api-method="props.apiMethod" :config="filledConfig" v-slot="scope">
 
         <slot :data="scope.data"></slot>
 

@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import IconVue from '../general/IconVue.vue';
+import IconVue, { IconName } from '../general/IconVue.vue';
 
 const props = defineProps<{
-    icon?: string
+    icon?: IconName
     to: string
 }>()
 </script>

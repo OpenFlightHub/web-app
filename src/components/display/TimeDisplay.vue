@@ -5,7 +5,7 @@ export type Unit = 'ms' | 's' | 'm' | 'h' | 'd'
 
 const props = defineProps<{
     timeInMs: number
-    lowest: Unit
+    lowest?: Unit//TODO implement lowest
     showDecimals?: boolean
 }>()
 

@@ -34,6 +34,10 @@ import Error404View from '@/views/error/Error404View.vue'
 import DroneMediaView from '@/views/DroneMediaView.vue';
 import DroneView from '@/views/DroneView.vue';
 import FlightView from '@/views/FlightView.vue';
+import SystemView from '@/views/admin/system/SystemView.vue'
+import AdminView from '@/views/admin/AdminView.vue'
+import PerformanceView from '@/views/admin/system/PerformanceView.vue'
+import OsView from '@/views/admin/system/performance/OsView.vue'
 
 
 
@@ -208,6 +212,27 @@ export function makeRouter(pinia: Pinia){
             {
                 path: '/settings',
                 component: SettingsView
+            },
+
+            {
+                path: '/admin',
+                name: 'admin',
+                component: AdminView
+            },
+            {
+                path: '/admin/system',
+                name: 'admin-system',
+                component: SystemView,
+                children: [
+                    {
+                        path: 'os',
+                        component: OsView,
+                    },
+                    {
+                        path: 'performance',
+                        component: PerformanceView,
+                    }
+                ]
             },
 
             {

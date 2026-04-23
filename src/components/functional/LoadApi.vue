@@ -1,11 +1,11 @@
-<script setup lang="ts" generic="T extends Record<string, any>, P extends Record<string, any>">
+<script setup lang="ts" generic="T extends Record<string, any>, C extends any, AM extends ((config: C) => Promise<T>), PROPS extends {apiMethod: AM, config: Parameters<AM>[0]}">
 import { updateObject } from '@/util/vue';
-import { ref, reactive, onMounted, watch, Reactive } from 'vue';
+import { ref, reactive, onMounted, watch } from 'vue';
 
 
 const props = defineProps<{
-    apiMethod: (params: P) => Promise<T>
-    params: P
+    apiMethod: PROPS['apiMethod'],
+    config: PROPS['config']
 }>()
 
 const initialLoadDone = ref(false)
@@ -20,7 +20,7 @@ watch(()=>{
 }, load)
 
 watch(()=>{
-    return props.params
+    return props.config
 }, load, {
     deep: true
 })
@@ -28,7 +28,7 @@ watch(()=>{
 async function load(){
     isLoading.value = true
 
-    const response = await props.apiMethod(props.params)
+    const response = await props.apiMethod(props.config)
 
     if(response instanceof Array){
         throw new Error('LoadApi being used with Array Api response! You should use LoadApiArray instead!')

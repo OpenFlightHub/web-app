@@ -39,6 +39,7 @@ const isExtended = ref(false)
 
                 <div id="bottom">
                     <AppSideBarEntry v-if="store.isAdmin" to="/settings" icon="gear">Settings</AppSideBarEntry>
+                    <AppSideBarEntry v-if="store.isAdmin" to="/admin" icon="code-square">Admin</AppSideBarEntry>
 
                     <AppSideBarEntry v-if="store.isLoggedIn" to="/auth/password-change" icon="key">{{ $t('auth.change_password') }}</AppSideBarEntry>
                     <AppSideBarEntry v-else to="/auth/login" icon="key">{{ $t('login.sign_in') }}</AppSideBarEntry>
