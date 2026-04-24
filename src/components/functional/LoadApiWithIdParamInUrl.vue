@@ -11,10 +11,9 @@ const props = defineProps<CC extends undefined ? {
     apiMethod: PROPS['apiMethod']
 } : CC extends never ? {
     apiMethod: PROPS['apiMethod']
-}/* : CP extends undefined ? {
+} : keyof CC extends never ? {
     apiMethod: PROPS['apiMethod']
-    config: CC
-}*/ : {
+} : {
     apiMethod: PROPS['apiMethod']
     config: CC
     idParams: IP[]
