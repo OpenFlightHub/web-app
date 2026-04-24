@@ -35,31 +35,41 @@ const emit = defineEmits<{
 const route = useRoute()
 
 
-watch(()=>{
-    return route.params
-}, init, {
-    deep: true
+onMounted(()=>{
+
+    watch(()=>{
+        return route.params
+    }, init, {
+        deep: true
+    })
+
+    //@ts-ignore
+    if(typeof props.idParams !== 'undefined'){
+        watch(()=>{
+            //@ts-ignore
+            return props.idParams
+        }, init, {
+            deep: true
+        })
+    }
+
+    init()
 })
 
-watch(()=>{
-    return props.idParams
-}, init, {
-    deep: true
-})
-
-onMounted(init)
 
 const params = reactive({} as Record<string, number>)
 
 const paramsValid = ref(false)
 
 async function init(){
+    //@ts-expect-error
     if(props.idParams instanceof Object === false){
         return
     }
 
     const newParams: Record<string, any> = {}
 
+    //@ts-ignore
     for(const paramName of props.idParams){
         const id = getIdParamFromRoute(paramName as string, route)
         if(id < 0){
