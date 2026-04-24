@@ -25,7 +25,7 @@ onMounted(async()=>{
 })
 
 async function updateConnection(){
-    updateObject(connection, await api.rest.connection.get({connectionId: props.connectionId}))
+    updateObject(connection, await api.rest.connection.get({params: {connectionId: props.connectionId}}))
 }
 
 const showFullscreen = ref(false)

@@ -59,10 +59,10 @@ export class OpenFlightHubConnectLinkManager {
     }
 
     async linkToOpenFlightHub(connectionId: string, secret: string){
-        await api.rest.connectionLink.auth.login.post({
+        await api.rest.connectionLink.auth.login.post({data:{
             connection_id: connectionId,
             secret
-        })
+        }})
 
         return await this.initClient()
     }

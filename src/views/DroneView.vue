@@ -8,12 +8,10 @@ import List from '@/components/layout/List.vue';
 import HubWorkspaceFilePreview from '@/components/workspace/HubWorkspaceFilePreview.vue';
 import TimestampDisplay from '@/components/display/TimestampDisplay.vue';
 import SmartTable from '@/components/general/SmartTable.vue';
-import LoadApiArray from '@/components/functional/LoadApiArray.vue';
 import RemoteControllerSnippet from '@/components/remote_controller/RemoteControllerSnippet.vue';
 import { sortByProperty, uniqueByProperty } from '@/util/array';
 import Spacing from '@/components/layout/Spacing.vue';
-import LoadApi from '@/components/functional/LoadApi.vue';
-import LoadApi from '@/components/functional/LoadApi.vue';
+import LoadApiArray from '@/components/functional/LoadApiArray.vue';
 
 </script>
 
@@ -63,7 +61,7 @@ import LoadApi from '@/components/functional/LoadApi.vue';
 
             <h2>Flights</h2>
 
-            <LoadApi :api-method="api.rest.drone.flights.get" :config="{params: {droneId: drone.data.id}}" v-slot="flights">
+            <LoadApiArray :api-method="api.rest.drone.flights.get" :config="{params: {droneId: drone.data.id}}" v-slot="flights">
 
                <SmartTable :column-labels="{id: 'ID', started_at: 'Takeoff at', landed_at: 'Landed at', ended_at: 'Ended at'}" :data="flights.data" sort-by-id="desc">
 
@@ -83,18 +81,18 @@ import LoadApi from '@/components/functional/LoadApi.vue';
                      <span v-else>-</span>
                   </template>
                </SmartTable>
-            </LoadApi>
+            </LoadApiArray>
 
             <Spacing></Spacing>
 
             <h2>All Drone Media</h2>
-            <LoadApi :api-method="api.rest.drone.media.get" :config="{params: {droneId: drone.data.id}}" v-slot="droneMedia">
+            <LoadApiArray :api-method="api.rest.drone.media.get" :config="{params: {droneId: drone.data.id}}" v-slot="droneMedia">
                <List :horizontal="true" :fill="true">
                   <RouterLink v-for="media in sortByProperty(uniqueByProperty(droneMedia.data, 'id'), 'id')" :key="media.id" :to="'/drone-media/' + media.id">
                      <HubWorkspaceFilePreview  class="media_file_preview" :id="media.file_id"></HubWorkspaceFilePreview>
                   </RouterLink>
                </List>
-            </LoadApi>
+            </LoadApiArray >
 
          </Padding>
       </LoadApiWithIdParamInUrl>

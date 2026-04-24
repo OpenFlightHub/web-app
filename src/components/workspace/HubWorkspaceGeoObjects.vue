@@ -23,7 +23,7 @@ onMounted(setup)
 
 async function setup(){
 
-    updateArray(geoObjects, await api.rest.workspace.geoObjects.get({workspaceId: props.workspaceId}))
+    updateArray(geoObjects, await api.rest.workspace.geoObjects.get({params: {workspaceId: props.workspaceId}}))
 
     api.live.subscribeToGeoObjects(props.workspaceId, (event, filter, data)=>{
 

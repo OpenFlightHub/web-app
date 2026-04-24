@@ -44,19 +44,19 @@ export const useMainStore = defineStore('main', {
         },
 
         async login(username: string, password: string){
-            const user = await api.rest.auth.login.post({
+            const user = await api.rest.auth.login.post({data: {
                 username,
                 password
-            })
+            }})
             this.userSelf = await api.rest.user.self.get()
             this.user = user
             this.myWorkspaces = await api.rest.workspace.myWorkspaces.get()
         },
 
         async loginWithToken(token: string){
-            const user = await api.rest.auth.loginWithToken.post({
+            const user = await api.rest.auth.loginWithToken.post({data: {
                 token
-            })
+            }})
             this.userSelf = await api.rest.user.self.get()
             this.user = user
             this.myWorkspaces = await api.rest.workspace.myWorkspaces.get()

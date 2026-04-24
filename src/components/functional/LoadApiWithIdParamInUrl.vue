@@ -5,8 +5,7 @@
     PROPS extends {apiMethod: AM, config: Parameters<AM>[0], idParams: string[]},
     IP extends keyof PROPS['config']['params'],
     CP extends IP extends never ? undefined : Pick<PROPS['config']['params'], Exclude<string, IP>>,
-    CC extends CP extends undefined ? Omit<PROPS['config'], 'params'> : keyof CP extends never ? Omit<PROPS['config'], 'params'> : Omit<PROPS['config'], 'params'> & {params: CP}
-">
+    CC extends CP extends undefined ? Omit<PROPS['config'], 'params'> : keyof CP extends never ? Omit<PROPS['config'], 'params'> : Omit<PROPS['config'], 'params'> & {params: CP}">
 import LoadApi from '@/components/functional/LoadApi.vue';
 import { getIdParamFromRoute } from '@/util/url';
 import { updateObject } from '@/util/vue';
@@ -15,7 +14,7 @@ import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
 
-const props = defineProps<CC extends undefined ? {
+const props = defineProps</*CC extends undefined ? {
     apiMethod: PROPS['apiMethod']
 } : CC extends never ? {
     apiMethod: PROPS['apiMethod']
@@ -26,6 +25,10 @@ const props = defineProps<CC extends undefined ? {
     config: CC
     idParams: IP[]
     dev?: CP
+}*/{
+    apiMethod: PROPS['apiMethod']
+    config: CC
+    idParams: IP[]
 }>()
 
 const emit = defineEmits<{
@@ -62,7 +65,6 @@ const params = reactive({} as Record<string, number>)
 const paramsValid = ref(false)
 
 async function init(){
-    //@ts-expect-error
     if(props.idParams instanceof Object === false){
         return
     }

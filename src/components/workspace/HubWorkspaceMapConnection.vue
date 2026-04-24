@@ -36,9 +36,9 @@ async function setup(){
             updateObject(lastRemoteControllerPosition, data)
         })
 
-        updateObject(lastRemoteControllerPosition, await api.rest.remoteController.lastPosition.get({
+        updateObject(lastRemoteControllerPosition, await api.rest.remoteController.lastPosition.get({params: {
             remoteControllerId: props.connection.remote_controller_id
-        }))
+        }}))
     }
 }
 

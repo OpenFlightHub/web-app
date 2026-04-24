@@ -2,7 +2,6 @@
 import api from '@/api'
 import LoadApiArrayWithIdParamInUrl from '@/components/functional/LoadApiArrayWithIdParamInUrl.vue';
 import LoadApiWithIdParamInUrl from '@/components/functional/LoadApiWithIdParamInUrl.vue';
-import LoadApiWithIdParamInUrl from '@/components/functional/LoadApiWithIdParamInUrl.vue'
 import FileImageOrIconVue from '@/components/general/FileImageOrIconVue.vue';
 import List from '@/components/layout/List.vue';
 import Padding from '@/components/layout/Padding.vue';
@@ -30,12 +29,12 @@ import UserSnippet from '@/components/user/UserSnippet.vue';
 
             <h2>Teams</h2>
 
-            <LoadApiWithIdParamInUrl :api-method="api.rest.organisation.teams.get" :config="{params: {}}" :id-params="['organisationId']" v-slot="teams">
+            <LoadApiArrayWithIdParamInUrl :api-method="api.rest.organisation.teams.get" :config="{params: {}}" :id-params="['organisationId']" v-slot="teams">
                 <List>
                     <TeamSnippet v-for="team of teams.data" :id="team.id" :key="team.id"></TeamSnippet>
                 </List>
                 <span v-if="teams.data.length === 0">None</span>
-            </LoadApiWithIdParamInUrl>
+            </LoadApiArrayWithIdParamInUrl>
         </Padding>
     </LoadApiWithIdParamInUrl>
 

@@ -38,9 +38,9 @@ watch(()=>{
 async function setup(){
 
     api.live.subscribeToDbRowUpdate('drones', props.droneId, async(a)=>{
-        updateObject(drone, await api.rest.drone.get({droneId: props.droneId}))
+        updateObject(drone, await api.rest.drone.get({params: {droneId: props.droneId}}))
     })
-    updateObject(drone, await api.rest.drone.get({droneId: props.droneId}))
+    updateObject(drone, await api.rest.drone.get({params: {droneId: props.droneId}}))
 
     api.live.subscribeToDronePosition(props.droneId, (evt, filter, data)=>{
         updateObject(lastDronePosition, data.position)
@@ -53,15 +53,15 @@ async function setup(){
     })
 
     try {
-        updateObject(lastDronePosition, await api.rest.drone.lastPosition.get({
+        updateObject(lastDronePosition, await api.rest.drone.lastPosition.get({params: {
             droneId: props.droneId
-        }))
+        }}))
     } catch (_){}
 
     try {
-        updateObject(currentFlight, await api.rest.drone.currentFlight.get({
+        updateObject(currentFlight, await api.rest.drone.currentFlight.get({params: {
             droneId: props.droneId
-        }))
+        }}))
     } catch (_){}
 
 
@@ -70,9 +70,9 @@ async function setup(){
     })
 
     try {
-        updateObject(lastDroneBattery, await api.rest.drone.lastBattery.get({
+        updateObject(lastDroneBattery, await api.rest.drone.lastBattery.get({params: {
             droneId: props.droneId
-        }))
+        }}))
     } catch (_){}
 }
 

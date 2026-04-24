@@ -34,10 +34,10 @@ const newPassword2IsValid = computed(()=>{
 })
 
 async function setNewPassword(){
-    await api.rest.auth.passwordSetNew.post({
+    await api.rest.auth.passwordSetNew.post({data: {
         code: resetCode.value,
         new_password: newPassword2.value
-    })
+    }})
 }
 
 const resetCode = ref('')

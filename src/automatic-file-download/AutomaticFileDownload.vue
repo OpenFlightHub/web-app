@@ -60,8 +60,8 @@ async function makeFullSyncCheck(){
 
                 try {
 
-                    const drone = await api.rest.drone.get({droneId: data.drone_id})
-                    const connection = await api.rest.connection.get({connectionId: drone.last_connection_id})
+                    const drone = await api.rest.drone.get({params: {droneId: data.drone_id}})
+                    const connection = await api.rest.connection.get({params: {connectionId: drone.last_connection_id}})
 
                     await downloadMediaIfNotExists(data.id, workspace.id, workspace.name, data.drone_id, connection.name, data.flight_id, 'Flight ' + data.flight_id /* TODO implement flight name*/)
 
@@ -72,19 +72,19 @@ async function makeFullSyncCheck(){
         }
 
         const connections = await api.rest.workspace.connections.get({
-            workspaceId: workspace.id
+            params: { workspaceId: workspace.id }
         })
 
         for(const connection of connections){
             if(typeof connection.drone_id === 'number'){
                 api.rest.drone.media.get({
-                    droneId: connection.drone_id
+                    params: { droneId: connection.drone_id }
                 }).then(async(allMedia) => {
 
                     for(const media of allMedia){
                         if(mediaIdsThatAreBeingDownloaded.value.includes(media.id) === false){
 
-                            const flight = await api.rest.flight.get({flightId: media.flight_id})
+                            const flight = await api.rest.flight.get({params: {flightId: media.flight_id}})
 
                             downloadMediaIfNotExists(media.id, workspace.id, workspace.name, media.drone_id, connection.name, media.flight_id, 'Flight ' + flight.id /* TODO add name */).catch(err => {// this should not be the connection.name but drone name (not implemented yet in backend
                                 console.error('failed to download media (full sync)', media,  err)
@@ -104,7 +104,7 @@ async function makeFullSyncCheck(){
 
 async function downloadMediaIfNotExists(mediaId: number, workspaceId: number, workspaceName: string, droneId: number, droneName: string, flightId: number, flightName: string){
 
-    const media = await api.rest.media.get({mediaId})
+    const media = await api.rest.media.get({params: {mediaId}})
 
     let cleanFileName = media.file_name.replace(/[\/<>:\\\|\?\*]/g, '_')
 

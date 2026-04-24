@@ -13,6 +13,7 @@ import ConnectionLiveStream from '@/components/video/ConnectionLiveStream.vue';
 import HubWorkspaceFiles from '@/components/workspace/HubWorkspaceFiles.vue';
 import DroneSnippet from '@/components/drone/DroneSnippet.vue';
 import { uniqueProperty } from '@/util/array';
+import LoadApiArrayWithIdParamInUrl from '@/components/functional/LoadApiArrayWithIdParamInUrl.vue';
 
 const router = useRouter()
 
@@ -24,7 +25,7 @@ const router = useRouter()
       <Padding>
          <h1>Workspace {{ workspace.data.name }}</h1>
 
-         <LoadApiWithIdParamInUrl :api-method="api.rest.workspace.connections.get" :config="{params: {}}" :id-params="['workspaceId']" v-slot="connections">
+         <LoadApiArrayWithIdParamInUrl :api-method="api.rest.workspace.connections.get" :config="{params: {}}" :id-params="['workspaceId']" v-slot="connections">
 
             <Tabs :value="getIdQueryFromRouteOrUseDefault('tab', useRoute(), 0)" @update:value="evt=>{router.push({query: {tab:  '' + evt}})}">
                <TabList>
@@ -49,9 +50,9 @@ const router = useRouter()
                      </List>
                   </TabPanel>
                   <TabPanel :value="3">
-                     <LoadApiWithIdParamInUrl :api-method="api.rest.workspace.files.get" :config="{params: {}}" :id-params="['workspaceId']" v-slot="workspaceFiles">
+                     <LoadApiArrayWithIdParamInUrl :api-method="api.rest.workspace.files.get" :config="{params: {}}" :id-params="['workspaceId']" v-slot="workspaceFiles">
                         <HubWorkspaceFiles :files="workspaceFiles.data"></HubWorkspaceFiles>
-                     </LoadApiWithIdParamInUrl>
+                     </LoadApiArrayWithIdParamInUrl>
                   </TabPanel>
                   <TabPanel :value="4">
                      <List>
@@ -61,7 +62,7 @@ const router = useRouter()
                </TabPanels>
             </Tabs>
 
-         </LoadApiWithIdParamInUrl>
+         </LoadApiArrayWithIdParamInUrl>
 
       </Padding>
    </LoadApiWithIdParamInUrl>

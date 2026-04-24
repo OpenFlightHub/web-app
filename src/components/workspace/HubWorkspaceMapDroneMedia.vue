@@ -26,7 +26,7 @@ async function setup(){
 
     if(typeof props.connection.drone_id === 'number'){
 
-        updateArray(droneMedia, await api.rest.drone.media.get({droneId: props.connection.drone_id}))
+        updateArray(droneMedia, await api.rest.drone.media.get({params: {droneId: props.connection.drone_id}}))
     }
 }
 

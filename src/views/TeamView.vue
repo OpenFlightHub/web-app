@@ -6,6 +6,7 @@ import UserSnippet from '@/components/user/UserSnippet.vue';
 import List from '@/components/layout/List.vue';
 import Padding from '@/components/layout/Padding.vue';
 import LoadApiWithIdParamInUrl from '@/components/functional/LoadApiWithIdParamInUrl.vue';
+import LoadApiArrayWithIdParamInUrl from '@/components/functional/LoadApiArrayWithIdParamInUrl.vue';
 
 </script>
 
@@ -26,12 +27,12 @@ import LoadApiWithIdParamInUrl from '@/components/functional/LoadApiWithIdParamI
             <Spacing></Spacing>
 
             <h2>Members</h2>
-            <LoadApiWithIdParamInUrl :api-method="api.rest.team.members.get" :config="{params: {}}" :id-params="['teamId']" v-slot="members">
+            <LoadApiArrayWithIdParamInUrl :api-method="api.rest.team.members.get" :config="{params: {}}" :id-params="['teamId']" v-slot="members">
                 <List>
                     <UserSnippet v-for="member in members.data" :key="member.id":id="member.id"></UserSnippet>
                 </List>
                 <span v-if="members.data.length === 0">None</span>
-            </LoadApiWithIdParamInUrl>
+            </LoadApiArrayWithIdParamInUrl>
         </Padding>
     </LoadApiWithIdParamInUrl>
 

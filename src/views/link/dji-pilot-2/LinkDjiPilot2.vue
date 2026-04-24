@@ -57,11 +57,11 @@ async function linkToWorkspace(){
 
     try {
 
-        const ret = await api.rest.workspace.connections.post({
+        const ret = await api.rest.workspace.connections.post({params: {
             workspaceId: selectedWorkspaceToLinkTo.value
-        }, {
+        }, data: {
             name: connectionName.value
-        })
+        }})
 
         initConnectLinkClient(await connectLinkManager.linkToOpenFlightHub(ret.connection_id, ret.secret) as OpenFlightHubConnectLinkClient_DjiPilot2)
 
@@ -97,9 +97,9 @@ async function unlinkWorkspace(){
 
     connectLinkClient.unlink()
 
-    await api.rest.connection.delete({
+    await api.rest.connection.delete({params: {
         connectionId: parseInt(connectionId)
-    })
+    }})
 
     document.location.reload()
 }

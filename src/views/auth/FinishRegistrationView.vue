@@ -34,9 +34,9 @@ const newPassword2IsValid = computed(()=>{
 })
 
 async function setInitialPassword(){
-    await api.rest.auth.passwordSetInitial.post({
+    await api.rest.auth.passwordSetInitial.post({data: {
         new_password: newPassword2.value
-    })
+    }})
     store.userSelf.registration_incomplete = false
 }
 
