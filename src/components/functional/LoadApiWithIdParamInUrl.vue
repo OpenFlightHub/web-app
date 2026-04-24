@@ -1,4 +1,4 @@
-<script setup lang="ts" generic="T extends Record<string, any>, C extends {[key: string]: any, params: Record<string, any>}, AM extends ((config: C) => Promise<T>), PROPS extends {apiMethod: AM, config: Parameters<AM>[0], idParams: string[]}">
+<script setup lang="ts" generic="T extends Record<string, any>, C extends {[key: string]: any, params: Record<string, any>}, AM extends ((config: C) => Promise<T>), PROPS extends {apiMethod: AM, config: Parameters<AM>[0], idParams: string[]}, IP extends keyof PROPS['config']['params'], CP extends IP extends never ? undefined : Omit<PROPS['config']['params'], IP>, CC extends CP extends undefined ? (keyof CP extends never ? Omit<PROPS['config'], 'params'> : Omit<PROPS['config'], 'params'>) : Omit<PROPS['config'], 'params'> & {params: CP}">
 import LoadApi from '@/components/functional/LoadApi.vue';
 import { getIdParamFromRoute } from '@/util/url';
 import { updateObject } from '@/util/vue';
@@ -7,10 +7,17 @@ import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
 
-const props = defineProps<{
-    apiMethod: PROPS['apiMethod'],
-    config: PROPS['config'],
-    idParams: PROPS['idParams']
+const props = defineProps<CC extends undefined ? {
+    apiMethod: PROPS['apiMethod']
+} : CC extends never ? {
+    apiMethod: PROPS['apiMethod']
+}/* : CP extends undefined ? {
+    apiMethod: PROPS['apiMethod']
+    config: CC
+}*/ : {
+    apiMethod: PROPS['apiMethod']
+    config: CC
+    idParams: IP[]
 }>()
 
 const emit = defineEmits<{
@@ -46,13 +53,13 @@ async function init(){
     const newParams: Record<string, any> = {}
 
     for(const paramName of props.idParams){
-        const id = getIdParamFromRoute(paramName, route)
+        const id = getIdParamFromRoute(paramName as string, route)
         if(id < 0){
             paramsValid.value = false
             return
         }
 
-        newParams[paramName] = id
+        newParams[paramName as string] = id
     }
 
     paramsValid.value = true
@@ -63,6 +70,12 @@ async function init(){
 }
 
 const filledConfig = computed(()=>{
+    //@ts-ignore
+    if(typeof props.config === 'undefined'){
+        return undefined
+    }
+
+    //@ts-ignore
     const baseConfig = JSON.parse(JSON.stringify(props.config)) as PROPS['config']
 
     Object.assign(baseConfig.params, params)
@@ -78,7 +91,7 @@ const filledConfig = computed(()=>{
     <!-- @vue-ignore -->
     <LoadApi v-if="paramsValid" :api-method="props.apiMethod" :config="filledConfig" v-slot="scope">
 
-        <slot :data="scope.data"></slot>
+        <slot :data="(scope.data as T)"></slot>
 
     </LoadApi>
 

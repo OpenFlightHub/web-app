@@ -213,7 +213,7 @@ async function refreshCoverageClient(){
     <div id="drone-media-container">
         <div class="media_file">
             <div class="file">
-                <LoadApi class="load_api" :api-method="api.rest.file.get" :params="{fileId: props.media.file_id}" v-slot="file">
+                <LoadApi class="load_api" :api-method="api.rest.file.get" :config="{params: {fileId: props.media.file_id}}" v-slot="file">
                     <HubWorkspaceFile :file="file.data" always-load-original class="workspace_file" @focus-point-change="focusPointChange" @image-size-change="(width, height)=>{
                         viewSize.width = width
                         viewSize.height = height

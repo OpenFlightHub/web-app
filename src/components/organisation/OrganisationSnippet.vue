@@ -14,7 +14,7 @@ const props = defineProps<{
 
 <template>
 
-    <LoadApi :api-method="api.rest.organisation.get" :params="{organisationId: props.id}" v-slot="scope">
+    <LoadApi :api-method="api.rest.organisation.get" :config="{params: {organisationId: props.id}}" v-slot="scope">
         <Snippet :min-width="100" centered horizontal :to-url="'/organisation/' + props.id">
             <FileImageOrIconVue :file-id="scope.data.logo_file_id" :icon-name="'buildings-fill'" :size="{em: 2}" :thumbnail="true"></FileImageOrIconVue>
 

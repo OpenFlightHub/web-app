@@ -13,7 +13,7 @@ import TimeDisplay from '@/components/display/TimeDisplay.vue';
 
     <Spacing></Spacing>
 
-    <LoadApi :api-method="api.rest.admin.system.performance.os.get" :config="undefined" v-slot="scope">
+    <LoadApi :api-method="api.rest.admin.system.performance.os.get" v-slot="scope">
         <h2>OS</h2>
         <p>{{ scope.data.os }}</p>
 

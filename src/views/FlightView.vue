@@ -13,6 +13,7 @@ import { ApiResponse_DroneCurrentFlightGet } from 'openflighthub-api-client-sdk'
 import * as turf from '@turf/turf'
 import MapPolyline from '@/components/map/MapPolyline.vue';
 import TimestampDisplay from '@/components/display/TimestampDisplay.vue';
+import LoadApi from '@/components/functional/LoadApi.vue';
 
 const viewerIsLoaded = ref(false)
 let viewer: Viewer = null // if we make Viewer a reactive object, performance goes down the tube ...
@@ -49,7 +50,7 @@ function getMaxHeightForFlight(flight: ApiResponse_DroneCurrentFlightGet){
 
 <template>
 
-   <LoadApiWithIdParamInUrl :api-method="api.rest.flight.get" :id-params="{flightId: undefined}" v-slot="flight">
+   <LoadApiWithIdParamInUrl :api-method="api.rest.flight.get" :config="{params: {}}" :id-params="['flightId']" v-slot="flight">
       <Padding>
          <div id="outer">
 
@@ -85,7 +86,7 @@ function getMaxHeightForFlight(flight: ApiResponse_DroneCurrentFlightGet){
             </div>
 
             <h1>Flight Media</h1>
-            <LoadApiArray :api-method="api.rest.flight.media.get" :params="{flightId: flight.data.id}" v-slot="flightMedia">
+            <LoadApi :api-method="api.rest.flight.media.get" :config="{params: {flightId: flight.data.id}}" v-slot="flightMedia">
                <List :horizontal="true">
                   <template v-for="media in flightMedia.data">
                      <RouterLink :to="'/drone-media/' + media.id">
@@ -93,7 +94,7 @@ function getMaxHeightForFlight(flight: ApiResponse_DroneCurrentFlightGet){
                      </RouterLink>
                   </template>
                </List>
-            </LoadApiArray>
+            </LoadApi>
          </div>
       </Padding>
    </LoadApiWithIdParamInUrl>

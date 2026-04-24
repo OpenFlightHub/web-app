@@ -14,7 +14,7 @@ const props = defineProps<{
 
 <template>
 
-    <LoadApi :api-method="api.rest.team.get" :params="{teamId: props.id}" v-slot="scope">
+    <LoadApi :api-method="api.rest.team.get" :config="{params: {teamId: props.id}}" v-slot="scope">
         <Snippet :min-width="100" centered horizontal :to-url="'/team/' + props.id">
             <FileImageOrIconVue :file-id="scope.data.logo_file_id" icon-name="people-fill" :size="{em: 2}" :thumbnail="true"></FileImageOrIconVue>
 

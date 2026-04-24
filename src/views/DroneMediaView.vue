@@ -1,19 +1,15 @@
 <script setup lang="ts">
 import api from '@/api';
 
-import LoadApi from '@/components/functional/LoadApi.vue';
 import LoadApiWithIdParamInUrl from '@/components/functional/LoadApiWithIdParamInUrl.vue';
-import RemoteControllerSnippet from '@/components/remote_controller/RemoteControllerSnippet.vue';
-import DroneSnippet from '@/components/drone/DroneSnippet.vue';
 import Padding from '@/components/layout/Padding.vue';
-import List from '@/components/layout/List.vue';
 import DroneMedia from '@/components/drone/DroneMedia.vue';
 
 </script>
 
 <template>
 
-   <LoadApiWithIdParamInUrl :api-method="api.rest.media.get" :id-params="{mediaId: undefined}" v-slot="media">
+   <LoadApiWithIdParamInUrl :api-method="api.rest.media.get" :config="{params: {}}" :id-params="['mediaId']" v-slot="media">
       <Padding id="outer">
          <h1>Drone media {{ media.data.file_name }}</h1>
 

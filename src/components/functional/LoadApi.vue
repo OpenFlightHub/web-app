@@ -3,9 +3,11 @@ import { updateObject } from '@/util/vue';
 import { ref, reactive, onMounted, watch } from 'vue';
 
 
-const props = defineProps<{
+const props = defineProps<Parameters<AM>[0] extends Record<string, any> ?{
     apiMethod: PROPS['apiMethod'],
     config: PROPS['config']
+} : {
+     apiMethod: PROPS['apiMethod']
 }>()
 
 const initialLoadDone = ref(false)
@@ -13,21 +15,29 @@ const isLoading = ref(true)
 
 const obj = reactive({} as T)
 
-onMounted(load)
+onMounted(()=>{
+    watch(()=>{
+        return props.apiMethod
+    }, load)
 
-watch(()=>{
-    return props.apiMethod
-}, load)
+    //@ts-ignore
+    if(typeof props.config !== 'undefined'){
+        watch(()=>{
+            //@ts-ignore
+            return props.config
+        }, load, {
+            deep: true
+        })
+    }
 
-watch(()=>{
-    return props.config
-}, load, {
-    deep: true
+    load()
 })
+
 
 async function load(){
     isLoading.value = true
 
+    //@ts-ignore
     const response = await props.apiMethod(props.config)
 
     if(response instanceof Array){

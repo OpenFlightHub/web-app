@@ -3,7 +3,6 @@ import api from '@/api';
 import List from '@/components/layout/List.vue';
 
 import LoadApiWithIdParamInUrl from '@/components/functional/LoadApiWithIdParamInUrl.vue';
-import LoadApiArrayWithIdParamInUrl from '@/components/functional/LoadApiArrayWithIdParamInUrl.vue';
 import ConnectionSnippet from '@/components/connection/ConnectionSnippet.vue';
 import HubWorkspaceMap from '@/components/workspace/HubWorkspaceMap.vue';
 import { Tabs, TabList, Tab, TabPanels, TabPanel } from 'primevue';
@@ -21,11 +20,11 @@ const router = useRouter()
 
 <template>
 
-   <LoadApiWithIdParamInUrl :api-method="api.rest.workspace.get" :id-params="{workspaceId: undefined}" v-slot="workspace">
+   <LoadApiWithIdParamInUrl :api-method="api.rest.workspace.get" :config="{params: {}}" :id-params="['workspaceId']" v-slot="workspace">
       <Padding>
          <h1>Workspace {{ workspace.data.name }}</h1>
 
-         <LoadApiArrayWithIdParamInUrl :api-method="api.rest.workspace.connections.get" :id-params="{workspaceId: undefined}" v-slot="connections">
+         <LoadApiWithIdParamInUrl :api-method="api.rest.workspace.connections.get" :config="{params: {}}" :id-params="['workspaceId']" v-slot="connections">
 
             <Tabs :value="getIdQueryFromRouteOrUseDefault('tab', useRoute(), 0)" @update:value="evt=>{router.push({query: {tab:  '' + evt}})}">
                <TabList>
@@ -50,9 +49,9 @@ const router = useRouter()
                      </List>
                   </TabPanel>
                   <TabPanel :value="3">
-                     <LoadApiArrayWithIdParamInUrl :api-method="api.rest.workspace.files.get" :id-params="{workspaceId: undefined}" v-slot="workspaceFiles">
+                     <LoadApiWithIdParamInUrl :api-method="api.rest.workspace.files.get" :config="{params: {}}" :id-params="['workspaceId']" v-slot="workspaceFiles">
                         <HubWorkspaceFiles :files="workspaceFiles.data"></HubWorkspaceFiles>
-                     </LoadApiArrayWithIdParamInUrl>
+                     </LoadApiWithIdParamInUrl>
                   </TabPanel>
                   <TabPanel :value="4">
                      <List>
@@ -62,7 +61,7 @@ const router = useRouter()
                </TabPanels>
             </Tabs>
 
-         </LoadApiArrayWithIdParamInUrl>
+         </LoadApiWithIdParamInUrl>
 
       </Padding>
    </LoadApiWithIdParamInUrl>

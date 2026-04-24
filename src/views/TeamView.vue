@@ -1,18 +1,17 @@
 <script setup lang="ts">
 import api from '@/api'
-import LoadApiArrayWithIdParamInUrl from '@/components/functional/LoadApiArrayWithIdParamInUrl.vue';
-import LoadApiWithIdParamInUrl from '@/components/functional/LoadApiWithIdParamInUrl.vue'
 import FileImageOrIconVue from '@/components/general/FileImageOrIconVue.vue';
 import Spacing from '@/components/layout/Spacing.vue';
 import UserSnippet from '@/components/user/UserSnippet.vue';
 import List from '@/components/layout/List.vue';
 import Padding from '@/components/layout/Padding.vue';
+import LoadApiWithIdParamInUrl from '@/components/functional/LoadApiWithIdParamInUrl.vue';
 
 </script>
 
 <template>
 
-    <LoadApiWithIdParamInUrl :api-method="api.rest.team.get" :id-params="{teamId: undefined}" v-slot="team">
+    <LoadApiWithIdParamInUrl :api-method="api.rest.team.get" :config="{params: {}}" :id-params="['teamId']" v-slot="team">
         <Padding>
             <div id="top">
                 <h1>Team: {{ team.data.name }}</h1>
@@ -27,13 +26,14 @@ import Padding from '@/components/layout/Padding.vue';
             <Spacing></Spacing>
 
             <h2>Members</h2>
-            <LoadApiArrayWithIdParamInUrl :api-method="api.rest.team.members.get" :id-params="{teamId: undefined}" v-slot="members">
+            <LoadApiWithIdParamInUrl :api-method="api.rest.team.members.get" :config="{params: {}}" :id-params="['teamId']" v-slot="members">
                 <List>
                     <UserSnippet v-for="member in members.data" :key="member.id":id="member.id"></UserSnippet>
                 </List>
                 <span v-if="members.data.length === 0">None</span>
-            </LoadApiArrayWithIdParamInUrl>
-        </Padding>    </LoadApiWithIdParamInUrl>
+            </LoadApiWithIdParamInUrl>
+        </Padding>
+    </LoadApiWithIdParamInUrl>
 
 </template>
 

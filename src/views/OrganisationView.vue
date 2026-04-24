@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import api from '@/api'
 import LoadApiArrayWithIdParamInUrl from '@/components/functional/LoadApiArrayWithIdParamInUrl.vue';
+import LoadApiWithIdParamInUrl from '@/components/functional/LoadApiWithIdParamInUrl.vue';
 import LoadApiWithIdParamInUrl from '@/components/functional/LoadApiWithIdParamInUrl.vue'
 import FileImageOrIconVue from '@/components/general/FileImageOrIconVue.vue';
 import List from '@/components/layout/List.vue';
@@ -13,7 +14,7 @@ import UserSnippet from '@/components/user/UserSnippet.vue';
 
 <template>
 
-    <LoadApiWithIdParamInUrl :api-method="api.rest.organisation.get" :id-params="{organisationId: undefined}" v-slot="organisation">
+    <LoadApiWithIdParamInUrl :api-method="api.rest.organisation.get" :config="{params: {}}" :id-params="['organisationId']" v-slot="organisation">
         <Padding>
             <div id="top">
                 <h1>Organisation: {{ organisation.data.name }}</h1>
@@ -29,12 +30,12 @@ import UserSnippet from '@/components/user/UserSnippet.vue';
 
             <h2>Teams</h2>
 
-            <LoadApiArrayWithIdParamInUrl :api-method="api.rest.organisation.teams.get" :id-params="{organisationId: undefined}" v-slot="teams">
+            <LoadApiWithIdParamInUrl :api-method="api.rest.organisation.teams.get" :config="{params: {}}" :id-params="['organisationId']" v-slot="teams">
                 <List>
                     <TeamSnippet v-for="team of teams.data" :id="team.id" :key="team.id"></TeamSnippet>
                 </List>
                 <span v-if="teams.data.length === 0">None</span>
-            </LoadApiArrayWithIdParamInUrl>
+            </LoadApiWithIdParamInUrl>
         </Padding>
     </LoadApiWithIdParamInUrl>
 

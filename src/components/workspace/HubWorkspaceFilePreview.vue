@@ -12,7 +12,7 @@ const props = defineProps<{
 
 <template>
 
-    <LoadApi :api-method="api.rest.file.get" :params="{fileId: props.id}" v-slot="file">
+    <LoadApi :api-method="api.rest.file.get" :config="{params: {fileId: props.id}}" v-slot="file">
 
         <div id="file" >
             <div id="view">
