@@ -1,4 +1,4 @@
-<script setup lang="ts" generic="T extends Record<string, any>, C extends {[key: string]: any, params: Record<string, any>}, AM extends ((config: C) => Promise<T>), PROPS extends {apiMethod: AM, config: Parameters<AM>[0], idParams: string[]}, IP extends keyof PROPS['config']['params'], CP extends IP extends never ? undefined : Omit<PROPS['config']['params'], IP>, CC extends CP extends undefined ? (keyof CP extends never ? Omit<PROPS['config'], 'params'> : Omit<PROPS['config'], 'params'>) : Omit<PROPS['config'], 'params'> & {params: CP}">
+<script setup lang="ts" generic="T extends Record<string, any>, C extends {[key: string]: any, params: Record<string, any>}, AM extends ((config: C) => Promise<T>), PROPS extends {apiMethod: AM, config: Parameters<AM>[0], idParams: string[]}, IP extends keyof PROPS['config']['params'], CP extends IP extends never ? undefined : Omit<PROPS['config']['params'], IP>, CC extends CP extends undefined ? Omit<PROPS['config'], 'params'> : keyof CP extends never ? Omit<PROPS['config'], 'params'> : Omit<PROPS['config'], 'params'> & {params: CP}">
 import LoadApi from '@/components/functional/LoadApi.vue';
 import { getIdParamFromRoute } from '@/util/url';
 import { updateObject } from '@/util/vue';
@@ -18,6 +18,7 @@ const props = defineProps<CC extends undefined ? {
     apiMethod: PROPS['apiMethod']
     config: CC
     idParams: IP[]
+    dev?: keyof CP extends never ? false : CP
 }>()
 
 const emit = defineEmits<{
