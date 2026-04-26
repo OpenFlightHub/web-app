@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, inject, provide } from 'vue';
 
 import { Cartesian3, Ion, Math as MathCesium, Terrain, Viewer, Cartographic, PerspectiveFrustum, IonImageryProvider, CesiumTerrainProvider, ImageryProvider } from "cesium";
 import "cesium/Build/Cesium/Widgets/widgets.css";
@@ -122,6 +122,9 @@ onMounted(async()=>{
             emit('viewer-loaded', viewer)
         }
     }, 10)
+
+    provide('cesiumViewer', viewer)
+    provide('mapContainer', mapContainer)
 
 })
 

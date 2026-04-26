@@ -13,6 +13,7 @@ import * as turf from '@turf/turf'
 import MapPolyline from '@/components/map/MapPolyline.vue';
 import TimestampDisplay from '@/components/display/TimestampDisplay.vue';
 import LoadApiArray from '@/components/functional/LoadApiArray.vue';
+import FlightPlayback from '@/components/flight/FlightPlayback.vue';
 
 const viewerIsLoaded = ref(false)
 let viewer: Viewer = null // if we make Viewer a reactive object, performance goes down the tube ...
@@ -69,7 +70,11 @@ function getMaxHeightForFlight(flight: ApiResponse_DroneCurrentFlightGet){
                   </template>
                   <template v-else>
 
-                     <Map id="map" :start-point="getCenterPointForFlight(flight.data)" :start-height="getMaxHeightForFlight(flight.data) + 200" :start-camera-pitch="-90" @viewer-loaded="(v)=>{viewer = v; viewerIsLoaded = true}"></Map>
+                     <Map id="map" :start-point="getCenterPointForFlight(flight.data)" :start-height="getMaxHeightForFlight(flight.data) + 200" :start-camera-pitch="-90" @viewer-loaded="(v)=>{viewer = v; viewerIsLoaded = true}">
+
+                        <FlightPlayback v-if="viewerIsLoaded" :flight="flight.data"></FlightPlayback>
+
+                     </Map>
 
                      <template v-if="viewerIsLoaded">
 
