@@ -1,4 +1,4 @@
-FROM node:22 as build-web-app
+FROM node:24 as build-web-app
 
 
 # Create app directory
