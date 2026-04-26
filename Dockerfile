@@ -14,7 +14,7 @@ COPY . .
 RUN npm run build
 
 # fix cesium static
-RUN mkdir dist/cesiumStatic
+RUN mkdir -p dist/cesiumStatic
 
 RUN cp -r node_modules/@cesium/engine/Build/ThirdParty dist/cesiumStatic/ThirdParty
 RUN cp -r node_modules/@cesium/engine/Build/Workers dist/cesiumStatic/Workers
