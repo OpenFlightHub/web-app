@@ -34,7 +34,7 @@ function closeFullScreen(){
 }
 
 const showOriginal = computed(()=>{
-    return showFullscreen.value || !props.file.has_thumbnail || props.alwaysLoadOriginal === true
+    return showFullscreen.value || typeof props.file.thumbnail_format !== 'string' || props.alwaysLoadOriginal === true
 })
 
 const view = ref<HTMLElement>(null)
