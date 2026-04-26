@@ -188,7 +188,7 @@ const viewSize = reactive({
     height: 0
 })
 
-const coverageClient = reactive<TerrainVisibilityResult>({})
+const coverageClient = reactive({} as TerrainVisibilityResult)
 
 function refreshCoverageClientSoon(){
     if(!CLIENT_COVERAGE_ENABLED){
