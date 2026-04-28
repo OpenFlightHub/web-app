@@ -81,6 +81,19 @@ onMounted(async()=>{
         // })
     )
 
+    // DIPUL https://www.dipul.de/homepage/de/hilfe/anleitung-fuer-den-web-map-service-wms/#/wms-nutzungsbedingungen
+    layers.addImageryProvider(
+        new WebMapServiceImageryProvider({
+            url: 'https://uas-betrieb.de/geoservices/dipul/wms?',
+            layers: 'dipul:wohngrundstuecke,dipul:flugplaetze',
+            credit: 'Quelle Geodaten: DFS, BKG 2026',
+            parameters: {
+                transparent: true,
+                format: 'image/png'
+            }
+        })
+    )
+
 
     //TODO currently switching to 2D crashes cesium
     // const openstreetmap = new OpenStreetMapImageryProvider({
