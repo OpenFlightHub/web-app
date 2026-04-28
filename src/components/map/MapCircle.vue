@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, watch } from 'vue';
+import { getCurrentInstance, onBeforeUnmount, onMounted, watch } from 'vue';
 import { Cartesian3, CircleGeometry, CircleOutlineGeometry, Color, Entity, HeightReference, Viewer, Cartographic, LabelStyle, PolylineDashMaterialProperty } from 'cesium';
 import * as turf from '@turf/turf'
 import { getElevationAtPosition } from '@/util/terrain';
@@ -18,10 +18,10 @@ const props = defineProps<{
     outlineDashed?: boolean
 }>()
 
-let circle: Entity
-let outline: Entity
+let circle: Entity | undefined
+let outline: Entity | undefined
 
-const myId = crypto.randomUUID()
+const myId = '' + getCurrentInstance()?.uid
 
 watch(()=>props.position, update, {deep: true})
 watch(()=>props.radius, update, {deep: true})
@@ -36,6 +36,7 @@ watch(()=>props.outlineDashed, update, {deep: true})
 onMounted(update)
 onBeforeUnmount(()=>{
     removeCircle()
+    removeOutline()
 })
 
 async function update(){
@@ -125,10 +126,6 @@ function removeOutline(){
     outline = undefined
 }
 
-onBeforeUnmount(()=>{
-    removeCircle()
-    removeOutline()
-})
 
 </script>
 

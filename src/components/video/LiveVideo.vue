@@ -9,7 +9,7 @@ const props = defineProps<{
     hideControls?: boolean
 }>()
 
-const myId = crypto.randomUUID()
+const myId = '' + getCurrentInstance()?.uid
 const video = ref(null)
 
 const notSupported = ref(false)

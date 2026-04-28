@@ -13,6 +13,7 @@ import HubWorkspaceMapDroneMedia from './HubWorkspaceMapDroneMedia.vue';
 import Map from '../map/Map.vue';
 import HubWorkspaceGeoObjects from './HubWorkspaceGeoObjects.vue';
 import Fullscreenable from '../functional/Fullscreenable.vue';
+import MapCollisionObjects from '../info/collision-objects/MapCollisionObjects.vue';
 
 const props = defineProps<{
     connections: ApiResponse_ConnectionGet[]
@@ -35,7 +36,12 @@ const showMedia = ref(false)
 
     <Fullscreenable flex="row">
         <div id="map-container" ref="mapContainer">
-            <Map id="map" :start-point="{longitude: props.longitude, latitude: props.latitude}" :start-height="10000" :start-camera-pitch="-90" @viewer-loaded="(v)=>{viewer = v; viewerIsLoaded = true}"></Map>
+            <Map id="map" :start-point="{longitude: props.longitude, latitude: props.latitude}" :start-height="10000" :start-camera-pitch="-90" @viewer-loaded="(v)=>{viewer = v; viewerIsLoaded = true}">
+
+
+                <MapCollisionObjects v-if="viewerIsLoaded"></MapCollisionObjects>
+
+            </Map>
 
             <template v-if="viewerIsLoaded && geoidIsLoaded">
                 <HubWorkspaceMapConnection v-for="connection in props.connections" :key="connection.id" :map-container="mapContainer" :connection="connection" :viewer="viewer"></HubWorkspaceMapConnection>

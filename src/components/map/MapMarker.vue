@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, onUnmounted, ref, watch } from 'vue';
-import { Cartesian2, Cartesian3, Cartographic, Color, Ellipsoid, Entity, HeadingPitchRoll, HeightReference, JulianDate, LabelStyle, Math as MathCesium, Matrix3, PolylineArrowMaterialProperty, PolylineDashMaterialProperty, PositionProperty, Ray, SampledPositionProperty, sampleTerrainMostDetailed, Transforms, VerticalOrigin, Viewer } from 'cesium';
+import { getCurrentInstance, onBeforeUnmount, onMounted, onUnmounted, ref, watch } from 'vue';
+import { Cartesian2, Cartesian3, Color, Entity, HeightReference, LabelStyle, PolylineArrowMaterialProperty, PolylineDashMaterialProperty, VerticalOrigin, Viewer } from 'cesium';
 import { getElevationAtPosition } from '@/util/terrain';
 import { convertEllipsoidalHeightToOrthometricHeight } from '@/util/geoid';
 import { cleanupClickMyEntity, ClickMyEntityHandle, getPointFromOriginWithBearingAndDistance, setupClickMyEntity, toCssRGBA } from '@/util/cesium';
@@ -12,6 +12,7 @@ const props = defineProps<{
     mapContainer: HTMLElement
     viewer: Viewer
     position: [number, number, number?] // longitude, latitude, elevation (if not present, marker will sit on the ground)
+    heightIsRelative?: boolean // if true, the height in position is relative to the ground
     iconUrl: string
     iconWidth: number
     iconHeight: number
@@ -36,12 +37,12 @@ const emit = defineEmits<{
     click: [value:undefined]
 }>()
 
-let marker: Entity
+let marker: Entity | undefined
 let markerClickMyEntityHandle: ClickMyEntityHandle
-let heightIndicator: Entity
-let bearingIndicator: Entity
+let heightIndicator: Entity | undefined
+let bearingIndicator: Entity | undefined
 
-const myId = crypto.randomUUID()
+const myId = '' + getCurrentInstance()?.uid
 
 let canvas = document.createElement('canvas')
 //TODO check if we can use OffscreenCanvas for better performance: new Canvas.getContext('2d').putImageDate(offscreenCanvas.getImageData())
@@ -75,7 +76,7 @@ let autoBearing = 0
 
 let blinker = ref(false)
 
-let blinkTimeout
+let blinkTimeout: ReturnType<typeof setTimeout>
 async function blink(){
 
     const oldBlinkerValue = blinker.value
@@ -102,7 +103,7 @@ async function updatePosition(newValue: typeof props.position, oldValue: typeof 
     if(newValue && (newValue[0] !== oldValue[0] && newValue[1] !== oldValue[1])){
         lastPosition = oldValue
 
-        autoBearing = turf.bearing(lastPosition, newValue)
+        autoBearing = turf.bearing(lastPosition as [number, number], newValue as [number, number])
         if(autoBearing < 0){
             autoBearing += 360
         }
@@ -110,22 +111,28 @@ async function updatePosition(newValue: typeof props.position, oldValue: typeof 
 
     if(marker){
         const pos = Cartesian3.fromDegrees(props.position[0], props.position[1], props.position[2])
-        //@ts-ignore
-        marker.position = pos
+        if(marker){
+            //@ts-ignore
+            marker.position = pos
+        }
     }
 
 
     if(heightIndicator){
-        const pos = makeHeightIndicatorPositions(props.position)
-        //@ts-ignore
-        heightIndicator.polyline.positions = pos
+        const pos = await makeHeightIndicatorPositions(props.position)
+        if(heightIndicator){
+            //@ts-ignore
+            heightIndicator.polyline.positions = pos
+        }
     }
 
 
     if(bearingIndicator){
         const pos = await makeBearingIndicatorPositions(props.position, typeof props.bearing === 'number' ? props.bearing : autoBearing)
-        //@ts-ignore
-        bearingIndicator.polyline.positions = pos
+        if(bearingIndicator){
+            //@ts-ignore
+            bearingIndicator.polyline.positions = pos
+        }
     }
 
 }
@@ -143,7 +150,7 @@ async function update(){//TODO cesium fails to repaint polygons (height marker) 
         removeMarker()
     }
 
-    addMarker()
+    await addMarker()
 
 
     if(heightIndicator){
@@ -162,7 +169,7 @@ async function update(){//TODO cesium fails to repaint polygons (height marker) 
 
 
 function heightIsNotZero(){
-    return typeof props.position[2] === 'number' && props.position[2] > 0
+    return typeof props.position[2] === 'number' && props.position[2] > 0 || props.heightIsRelative === true
 }
 
 async function updateCanvasAndIcon(){
@@ -193,7 +200,7 @@ function makeCanvas(){
             newCanvas.height = size
 
             const ctx = newCanvas.getContext('2d')
-            ctx.clearRect(0, 0, newCanvas.width, newCanvas.height)
+            ctx!.clearRect(0, 0, newCanvas.width, newCanvas.height)
 
             const imageAspectRatio = image.width / image.height
 
@@ -203,7 +210,7 @@ function makeCanvas(){
             const targetHeight = targetSize * size / imageAspectRatio
 
             // if image width and height differ, keep aspect ratio
-            ctx.drawImage(image, 0,0,image.width,image.height, (size - targetWidth)/2, (size - targetHeight)/2,targetWidth,targetHeight)
+            ctx!.drawImage(image, 0,0,image.width,image.height, (size - targetWidth)/2, (size - targetHeight)/2,targetWidth,targetHeight)
 
             if(props.color){
                 const iconColor = blinker.value === true ? (props.backgroundCircle ? props.backgroundCircle : Color.TRANSPARENT) : props.color
@@ -221,15 +228,15 @@ function makeCanvas(){
 
                 const tempCtx = tempCanvas.getContext('2d')
 
-                tempCtx.beginPath()
-                tempCtx.arc(size/2, size/2, size/2, 0, Math.PI*2)
-                tempCtx.fillStyle = toCssRGBA(blinker.value ? props.color : props.backgroundCircle)
-                tempCtx.fill()
+                tempCtx!.beginPath()
+                tempCtx!.arc(size/2, size/2, size/2, 0, Math.PI*2)
+                tempCtx!.fillStyle = toCssRGBA(blinker.value ? props.color! : props.backgroundCircle!)
+                tempCtx!.fill()
 
 
-                tempCtx.drawImage(newCanvas, 0, 0, tempCanvas.width, tempCanvas.height)
+                tempCtx!.drawImage(newCanvas, 0, 0, tempCanvas.width, tempCanvas.height)
 
-                newCanvas.getContext('2d').drawImage(tempCanvas, 0, 0, newCanvas.width, newCanvas.height)
+                newCanvas.getContext('2d')!.drawImage(tempCanvas, 0, 0, newCanvas.width, newCanvas.height)
             }
 
             cleanup()
@@ -241,7 +248,7 @@ function makeCanvas(){
 
         image.addEventListener('load', onLoad)
 
-        const onError = (err)=>{
+        const onError = (err: any)=>{
 
             cleanup()
 
@@ -272,23 +279,27 @@ function makeCanvas(){
     })
 }
 
-function addMarker(){
+async function addMarker(){
+
+    const height = props.position[2]
+
     marker = props.viewer.entities.add({
         id: 'map-marker-' + myId,
-        position: Cartesian3.fromDegrees(props.position[0], props.position[1], props.position[2]),
+        position: Cartesian3.fromDegrees(props.position[0], props.position[1], height),
         billboard: {
             image: canvas,
             width: canvas.width,
             height: canvas.height,
-            heightReference: heightIsNotZero() ? HeightReference.NONE : HeightReference.CLAMP_TO_TERRAIN,
+            heightReference: heightIsNotZero() ? props.heightIsRelative ? HeightReference.RELATIVE_TO_TERRAIN :  HeightReference.NONE : HeightReference.CLAMP_TO_TERRAIN,
             disableDepthTestDistance: heightIsNotZero() ? 5000000 : Number.POSITIVE_INFINITY // show always above terrain https://community.cesium.com/t/points-labels-stuck-under-terrain/11141,
         },
         label: {
-            text: (props.label ? props.label + ' ' : '') + (props.showHeightMeanSeaLevelInLabel ? (typeof props.position[2] === 'number' ? Math.floor(convertEllipsoidalHeightToOrthometricHeight(props.position[0], props.position[1], props.position[2])) + 'm' : '') : ''),
+            text: (props.label ? props.label + ' ' : '') + (props.showHeightMeanSeaLevelInLabel ? (
+                typeof height === 'number' ? Math.floor(convertEllipsoidalHeightToOrthometricHeight(props.position[0], props.position[1], await getHeightValue() as number)) + 'm' : '') : ''),
             font: (typeof props.fontSize === 'number' ? props.fontSize : 14) + 'pt monospace',
             style: LabelStyle.FILL_AND_OUTLINE,
             outlineWidth: 2,
-            heightReference: heightIsNotZero() ? HeightReference.NONE : HeightReference.CLAMP_TO_TERRAIN,
+            heightReference: heightIsNotZero() ? props.heightIsRelative ? HeightReference.RELATIVE_TO_TERRAIN :HeightReference.NONE : HeightReference.CLAMP_TO_TERRAIN,
             disableDepthTestDistance: heightIsNotZero() ? 5000000 : Number.POSITIVE_INFINITY, // show always above terrain https://community.cesium.com/t/points-labels-stuck-under-terrain/11141
             verticalOrigin: VerticalOrigin.TOP,
             pixelOffset: new Cartesian2(0, props.iconHeight * 0.5)
@@ -313,6 +324,17 @@ function removeMarker(){
     }
 }
 
+async function getHeightValue(){
+    if(typeof props.position[2] === 'number'){
+        if(props.heightIsRelative){
+            const elev = await getElevationAtPosition(props.viewer, props.position[0], props.position[1])
+            return elev.height + props.position[2]
+        } else {
+            return props.position[2]
+        }
+    }
+}
+
 async function addHeightIndicator(){
 
     if(!props.showHeightIndicator === true){
@@ -331,7 +353,7 @@ async function addHeightIndicator(){
     heightIndicator = props.viewer.entities.add({
         id: 'map-marker-height-indicator-' + myId,
         polyline: {
-            positions: makeHeightIndicatorPositions(props.position),
+            positions: await makeHeightIndicatorPositions(props.position),
             width: 2,
             material: new PolylineDashMaterialProperty({
                 color: props.color || Color.WHITE
@@ -340,8 +362,8 @@ async function addHeightIndicator(){
     })
 }
 
-function makeHeightIndicatorPositions(position: [number, number, number?]){
-    return [Cartesian3.fromDegrees(position[0], position[1], position[2]), Cartesian3.fromDegrees(position[0], position[1], 0)]
+async function makeHeightIndicatorPositions(position: [number, number, number?]){
+    return [Cartesian3.fromDegrees(position[0], position[1], await getHeightValue()), Cartesian3.fromDegrees(position[0], position[1], (await getElevationAtPosition(props.viewer, position[0], position[1])).height)]
 }
 
 function removeHeightIndicator(){
@@ -378,7 +400,7 @@ async function makeBearingIndicatorPositions(position: [number, number, number?]
 
     const terrainElevation = (await getElevationAtPosition(props.viewer, position[0], position[1])).height
 
-    let elevation = position[2]
+    let elevation = await getHeightValue()
     if(typeof elevation === 'number'){
         if(elevation < (terrainElevation + 1)){
             elevation = terrainElevation + 1
@@ -402,12 +424,6 @@ function removeBearingIndicator(){
     props.viewer.entities.remove(bearingIndicator)
     bearingIndicator = undefined
 }
-
-onBeforeUnmount(()=>{
-    removeMarker()
-    removeHeightIndicator()
-    removeBearingIndicator
-})
 
 </script>
 

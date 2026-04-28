@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
-import { Cartesian2, Cartesian3, Cartographic, Color, Entity, HeightReference, JulianDate, LabelStyle, PolylineDashMaterialProperty, SampledPositionProperty, sampleTerrainMostDetailed, VerticalOrigin, Viewer, Ellipsoid } from 'cesium';
+import { getCurrentInstance, onBeforeUnmount, onMounted, watch } from 'vue';
+import { Cartographic, Color, Entity, PolylineDashMaterialProperty, Viewer } from 'cesium';
 import { getElevationAtPosition } from '@/util/terrain';
 
 
@@ -17,12 +17,13 @@ const props = defineProps<{
         position: [number, number],
         elevation?: number //if not present, marker will sit on the ground
     },
+    heightIsRelative?: boolean // relative to ground
     color: Color
 }>()
 
-let line: Entity
+let line: Entity | undefined
 
-const myId = crypto.randomUUID()
+const myId = '' + getCurrentInstance()?.uid
 
 watch(()=>props.from, update, {deep: true})
 watch(()=>props.to, update, {deep: true})
@@ -54,7 +55,16 @@ function toHeightIsNotZero(){
 async function addLine(){
 
     const fromPos = fromHeightIsNotZero() ? Cartographic.fromDegrees(props.from.position[0], props.from.position[1], props.from.elevation) : await getElevationAtPosition(props.viewer, props.from.position[0], props.from.position[1])
+
     const toPos = toHeightIsNotZero() ? Cartographic.fromDegrees(props.to.position[0], props.to.position[1], props.to.elevation) : await getElevationAtPosition(props.viewer, props.to.position[0], props.to.position[1])
+
+    if(props.heightIsRelative && typeof props.from.elevation === 'number'){
+        fromPos.height = (await getElevationAtPosition(props.viewer, props.from.position[0], props.from.position[1])).height + props.from.elevation
+    }
+
+    if(props.heightIsRelative && typeof props.to.elevation === 'number'){
+        toPos.height = (await getElevationAtPosition(props.viewer, props.to.position[0], props.to.position[1])).height + props.to.elevation
+    }
 
     line = props.viewer.entities.add({
         id: 'map-line-' + myId,
@@ -76,8 +86,6 @@ function removeLine(){
     props.viewer.entities.remove(line)
     line = undefined
 }
-
-onBeforeUnmount(removeLine)
 
 </script>
 

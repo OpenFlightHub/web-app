@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, watch } from 'vue';
-import { Cartesian3, Cartographic, Color, Entity, PolygonGeometry, PolylineDashMaterialProperty, Property, Viewer } from 'cesium';
+import { getCurrentInstance, onBeforeUnmount, onMounted, watch } from 'vue';
+import { Cartesian3, Cartographic, Color, Entity, Viewer } from 'cesium';
 import { getElevationAtPosition } from '@/util/terrain';
 
 
@@ -9,16 +9,17 @@ const props = defineProps<{
     viewer: Viewer
     points: [number, number, number?][],
     clampToGround?: boolean
+    heightIsRelative?: boolean // relative to ground
     color: Color
     filled?: boolean
     outlineColor?: Color
     outlineWidth?: number
 }>()
 
-let polygon: Entity
-let outline: Entity
+let polygon: Entity | undefined
+let outline: Entity | undefined
 
-const myId = crypto.randomUUID()
+const myId = '' + getCurrentInstance()?.uid
 
 watch(()=>props.clampToGround, update, {deep: true})
 watch(()=>props.color, update, {deep: true})
@@ -55,9 +56,14 @@ async function addAll(){
             cartographicPosition = Cartographic.fromDegrees(lng, lat)
         } else if(typeof elevation !== 'number' || elevation === 0){
             cartographicPosition = await getElevationAtPosition(props.viewer, lng, lat)
-            cartographicPosition.height += 10
+            cartographicPosition.height += 10//10 to always show above terrain
         } else {
-            cartographicPosition = Cartographic.fromDegrees(lng, lat, elevation)
+            if(props.heightIsRelative === true){
+                const terrainHeight = (await getElevationAtPosition(props.viewer, lng, lat)).height
+                cartographicPosition = Cartographic.fromDegrees(lng, lat, terrainHeight + elevation)
+            } else {
+                cartographicPosition = Cartographic.fromDegrees(lng, lat, elevation)
+            }
         }
 
         positions.push(Cartographic.toCartesian(cartographicPosition))
@@ -106,8 +112,6 @@ function removeAll(){
         outline = undefined
     }
 }
-
-onBeforeUnmount(removeAll)
 
 </script>
 

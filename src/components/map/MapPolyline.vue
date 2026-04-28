@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, watch } from 'vue';
+import { getCurrentInstance, onBeforeUnmount, onMounted, watch } from 'vue';
 import { Cartesian3, Cartographic, Color, Entity, Viewer } from 'cesium';
 import { getElevationAtPosition } from '@/util/terrain';
 
@@ -8,13 +8,14 @@ import { getElevationAtPosition } from '@/util/terrain';
 const props = defineProps<{
     viewer: Viewer
     points: [number, number, number][],//lng, lat, elevation
-    clampToGround?: boolean
+    clampToGround?: boolean,
+    heightIsRelative?: boolean // relative to ground
     color: Color
 }>()
 
-let polyline: Entity
+let polyline: Entity | undefined
 
-const myId = crypto.randomUUID()
+const myId = '' + getCurrentInstance()?.uid
 
 watch(()=>props.points, update, {deep: true})
 watch(()=>props.clampToGround, update, {deep: true})
@@ -50,9 +51,14 @@ async function addPolyline(){
             cartographicPosition = Cartographic.fromDegrees(lng, lat)
         } else if(typeof elevation !== 'number' || elevation === 0){
             cartographicPosition = await getElevationAtPosition(props.viewer, lng, lat)
-            cartographicPosition.height += 10
+            cartographicPosition.height += 10//10 to always show above terrain
         } else {
-            cartographicPosition = Cartographic.fromDegrees(lng, lat, elevation)
+            if(props.heightIsRelative === true){
+                const terrainHeight = (await getElevationAtPosition(props.viewer, lng, lat)).height
+                cartographicPosition = Cartographic.fromDegrees(lng, lat, terrainHeight + elevation)
+            } else {
+                cartographicPosition = Cartographic.fromDegrees(lng, lat, elevation)
+            }
         }
 
         positions.push(Cartographic.toCartesian(cartographicPosition))
@@ -76,8 +82,6 @@ function removePolyline(){
     props.viewer.entities.remove(polyline)
     polyline = undefined
 }
-
-onBeforeUnmount(removePolyline)
 
 </script>
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, watch } from 'vue';
+import { getCurrentInstance, onBeforeUnmount, onMounted, watch } from 'vue';
 import { Cartesian3, Color, Entity, Viewer } from 'cesium';
 import { lengthToDegrees } from '@turf/turf';
 
@@ -13,7 +13,7 @@ const props = defineProps<{
 
 let polygon: Entity | undefined
 
-const myId = crypto.randomUUID()
+const myId = '' + getCurrentInstance()?.uid
 
 watch(()=>props.color, update, {deep: true})
 watch(()=>props.center, update, {deep: true})

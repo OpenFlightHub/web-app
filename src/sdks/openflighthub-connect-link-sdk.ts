@@ -93,7 +93,7 @@ export class OpenFlightHubConnectLinkManager {
         await api.rest.connectionLink.resetWorkspaceUuid.post()
 
 
-        sdk.setWorkspaceUUID(crypto.randomUUID())
+        sdk.setWorkspaceUUID('' + getCurrentInstance()?.uid)
 
         sdk.setPlatformInformation(config.platform_name, 'RESET WORKSPACE', 'only temporary. Please visit the "manage connection" view to continue.')
 

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Cartesian3, PerspectiveFrustum, Viewer, Math as MathCesium } from 'cesium';
 import { inject } from 'vue';
+import MapCollisionObjects from '../info/collision-objects/MapCollisionObjects.vue';
 
 
 const viewer = inject<Viewer>('cesiumViewer')
@@ -47,6 +48,7 @@ defineExpose({
 
     <div>
         <slot v-bind="{setCameraPosition}"></slot>
+        <MapCollisionObjects></MapCollisionObjects>
     </div>
 
 </template>
