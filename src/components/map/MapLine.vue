@@ -21,8 +21,6 @@ const props = defineProps<{
     color: Color
 }>()
 
-let line: Entity | undefined
-
 const myId = '' + getCurrentInstance()?.uid
 
 watch(()=>props.from, update, {deep: true})
@@ -36,11 +34,6 @@ onBeforeUnmount(()=>{
 
 
 async function update(){
-
-    if(line){
-        removeLine()
-    }
-
     await addLine()
 }
 
@@ -66,6 +59,12 @@ async function addLine(){
         toPos.height = (await getElevationAtPosition(props.viewer, props.to.position[0], props.to.position[1])).height + props.to.elevation
     }
 
+    let line = props.viewer.entities.getById('map-line-' + myId)
+
+    if(line){
+        props.viewer.entities.remove(line)//TODO dont remove entity, instead update it
+    }
+
     line = props.viewer.entities.add({
         id: 'map-line-' + myId,
 
@@ -80,11 +79,7 @@ async function addLine(){
 }
 
 function removeLine(){
-    if(!line){
-        return
-    }
-    props.viewer.entities.remove(line)
-    line = undefined
+    props.viewer.entities.removeById('map-line-' + myId)
 }
 
 </script>

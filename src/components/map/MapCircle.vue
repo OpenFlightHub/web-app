@@ -18,9 +18,6 @@ const props = defineProps<{
     outlineDashed?: boolean
 }>()
 
-let circle: Entity | undefined
-let outline: Entity | undefined
-
 const myId = '' + getCurrentInstance()?.uid
 
 watch(()=>props.position, update, {deep: true})
@@ -40,23 +37,19 @@ onBeforeUnmount(()=>{
 })
 
 async function update(){
-
-    if(circle){
-        removeCircle()
-    }
-
     await addCircle()
-
-    if(outline){
-        removeOutline()
-    }
-
     await addOutline()
 }
 
 async function addCircle(){
 
     const height = props.clampToGround ? undefined : (typeof props.position[2] === 'number' ? props.position[2] : (await getElevationAtPosition(props.viewer, props.position[0], props.position[1])).height)
+
+    let circle = props.viewer.entities.getById('map-circle-' + myId)
+
+    if(circle){
+        props.viewer.entities.remove(circle)//TODO dont remove entity, instead update it
+    }
 
     circle = props.viewer.entities.add({
         id: 'map-circle-' + myId,
@@ -87,7 +80,7 @@ async function addOutline(){
 
     //extra polyline because outlineWidth is bugged in cesium and will never be fixed
 
-    const turfCircle = turf.circle(props.position, props.radius, {units: 'meters'})
+    const turfCircle = turf.circle([props.position[0], props.position[1]], props.radius, {units: 'meters'})
 
     const circleHeight = props.clampToGround ? 0 : ( typeof props.position[2] === 'number' ? props.position[2] : (await getElevationAtPosition(props.viewer, props.position[0], props.position[1])).height )
 
@@ -95,6 +88,12 @@ async function addOutline(){
         const cartographicPosition = Cartographic.fromDegrees(c[0], c[1], circleHeight)
         return Cartographic.toCartesian(cartographicPosition)
     })
+
+    let outline = props.viewer.entities.getById('map-circle_outline-' + myId)
+
+    if(outline){
+        props.viewer.entities.remove(outline)//TODO dont remove entity, instead update it
+    }
 
     outline = props.viewer.entities.add({
         id: 'map-circle_outline-' + myId,
@@ -111,19 +110,11 @@ async function addOutline(){
 }
 
 function removeCircle(){
-    if(!circle){
-        return
-    }
-    props.viewer.entities.remove(circle)
-    circle = undefined
+    props.viewer.entities.removeById('map-circle-' + myId)
 }
 
 function removeOutline(){
-    if(!outline){
-        return
-    }
-    props.viewer.entities.remove(outline)
-    outline = undefined
+    props.viewer.entities.removeById('map-circle_outline-' + myId)
 }
 
 

@@ -13,8 +13,6 @@ const props = defineProps<{
     color: Color
 }>()
 
-let polyline: Entity | undefined
-
 const myId = '' + getCurrentInstance()?.uid
 
 watch(()=>props.points, update, {deep: true})
@@ -27,10 +25,6 @@ onBeforeUnmount(()=>{
 })
 
 async function update(){
-
-    if(polyline){
-        removePolyline()
-    }
 
     await addPolyline()
 }
@@ -64,6 +58,12 @@ async function addPolyline(){
         positions.push(Cartographic.toCartesian(cartographicPosition))
     }
 
+    let polyline = props.viewer.entities.getById('map-polyline-' + myId)
+
+    if(polyline){
+        props.viewer.entities.remove(polyline)//TODO dont remove entity, instead update it
+    }
+
     polyline = props.viewer.entities.add({
         id: 'map-polyline-' + myId,
         polyline: {
@@ -76,11 +76,7 @@ async function addPolyline(){
 }
 
 function removePolyline(){
-    if(!polyline){
-        return
-    }
-    props.viewer.entities.remove(polyline)
-    polyline = undefined
+    props.viewer.entities.removeById('map-polyline-' + myId)
 }
 
 </script>

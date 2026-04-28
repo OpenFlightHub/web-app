@@ -88,7 +88,7 @@ console.log('adding camera move end listener to load collision objects')
         const newCameraHeading = radiansToDegrees(viewer.camera.heading)
         if(newCameraHeading !== currentCameraHeading.value){
             currentCameraHeading.value = newCameraHeading
-            updateFilteredObjects()
+            updateShownObjects()
             return
         }
 
@@ -123,46 +123,55 @@ async function loadCollisionObjects(){
 
     }
 
-    updateArray(objects.value, flattenObjects(await api.rest.info.collisionObjects.get({queryParams: currentQueryParams})))
+    updateArray(objects.value, await api.rest.info.collisionObjects.get({queryParams: currentQueryParams}))
 
     console.log('loaded collision objects', objects.value.length)
 
-    updateFilteredObjects()
+    updateShownObjects()
 }
 
-function flattenObjects(objects: ApiResponse_InfoCollisionObjectsGet): ApiResponse_InfoCollisionObjectsGet{
-    const flattened: ApiResponse_InfoCollisionObjectsGet = []
+const shownObjects = reactive<ApiResponse_InfoCollisionObjectsGet>([])
 
-    for(const object of objects){
-        if(object.marking.type === 1){
-            // line markings with multiple points, flatten to multiple objects with one point each for better visibility filtering
+function updateShownObjects(){
+    const visibleObjects = filterVisible(objects.value)
 
-            for(let pi = 0; pi < object.marking.points.length-1; pi++){
-                const point = object.marking.points[pi]
-                const nextPoint = object.marking.points[pi + 1]
+    let removedCount = 0
+    let addedCount = 0
+    let updatedCount = 0
 
-                flattened.push({
-                    name: object.name,
-                    type: object.type,
-                    marking: {
-                        type: 1,
-                        points: [point, nextPoint]
-                    }
-                })
-            }
-        } else {
-            flattened.push(object)
+    // remove objects that are not visible anymore
+    for(let i = 0; i < shownObjects.length; i++){
+        if(!visibleObjects.find(o => o.id === shownObjects[i].id)){
+            // remove
+            shownObjects.splice(i, 1)
+            removedCount++
+            i--
         }
     }
 
-    return flattened
-}
+    visibleObjects.forEach(vo => {
+        const foundIndex = shownObjects.findIndex(so => so.id === vo.id)
+        if(foundIndex >= 0){
+            //update existing object
 
-const filteredObjects = reactive<ApiResponse_InfoCollisionObjectsGet>([])
+            for(const key of Object.keys(vo)){
+                //@ts-ignore
+                if(vo[key] !== shownObjects[foundIndex][key]){
+                    // only update if something has changed, otherwise it can lead to performance issues because of too many updates
+                    updateObject(shownObjects[foundIndex], vo)
+                    updatedCount++
+                    break
+                }
+            }
+        }
+    })
 
-function updateFilteredObjects(){
-    updateArray(filteredObjects, filterVisible(objects.value))
-    console.log('updating filtered objects', filteredObjects.length)
+    // insert new
+    const objectsToAdd = visibleObjects.filter(vo => !shownObjects.find(so => so.id === vo.id))
+    shownObjects.push(...objectsToAdd)
+    addedCount += objectsToAdd.length
+
+    console.log('updating filtered objects', shownObjects.length, 'added:', addedCount, 'removed:', removedCount, 'updated:', updatedCount)
 }
 
 function filterVisible(objects: ApiResponse_InfoCollisionObjectsGet){
@@ -207,7 +216,7 @@ function filterVisible(objects: ApiResponse_InfoCollisionObjectsGet){
             {units: 'meters'}
         )
 
-        if(distanceToCamera > COLLISION_OBJECTS_RADIUS){
+        if(distanceToCamera > COLLISION_OBJECTS_RADIUS && object.marking.type !== 1){//ignore polyline objects, because they can be very long and should be visible even if their center point is far away
             continue
         }
 
@@ -222,7 +231,7 @@ function filterVisible(objects: ApiResponse_InfoCollisionObjectsGet){
 <template>
 
 
-    <CollisionObject v-for="(obj, index) of filteredObjects" :key="index" :object="obj"></CollisionObject>
+    <CollisionObject v-for="obj of shownObjects" :key="'' + obj.id" :object="obj"></CollisionObject>
 
 </template>
 

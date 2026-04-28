@@ -16,9 +16,6 @@ const props = defineProps<{
     outlineWidth?: number
 }>()
 
-let polygon: Entity | undefined
-let outline: Entity | undefined
-
 const myId = '' + getCurrentInstance()?.uid
 
 watch(()=>props.clampToGround, update, {deep: true})
@@ -32,11 +29,6 @@ onBeforeUnmount(()=>{
 })
 
 async function update(){
-
-    if(polygon || outline){
-        removeAll()
-    }
-
     await addAll()
 }
 
@@ -69,6 +61,12 @@ async function addAll(){
         positions.push(Cartographic.toCartesian(cartographicPosition))
     }
 
+    let polygon = props.viewer.entities.getById('map-polygon-' + myId)
+
+    if(polygon){
+        props.viewer.entities.remove(polygon)//TODO dont remove entity, instead update it
+    }
+
     polygon = props.viewer.entities.add({
         id: 'map-polygon-' + myId,
         polygon: {
@@ -88,6 +86,12 @@ async function addAll(){
 
     positions.push(positions[0])// polyline needs the first point again
 
+    let outline = props.viewer.entities.getById('map-polygon_outline-' + myId)
+
+    if(outline){
+        props.viewer.entities.remove(outline)//TODO dont remove entity, instead update it
+    }
+
     outline = props.viewer.entities.add({
         id: 'map-polygon_outline-' + myId,
         polyline: {
@@ -102,15 +106,8 @@ async function addAll(){
 
 
 function removeAll(){
-    if(polygon){
-        props.viewer.entities.remove(polygon)
-        polygon = undefined
-    }
-
-    if(outline){
-        props.viewer.entities.remove(outline)
-        outline = undefined
-    }
+    props.viewer.entities.removeById('map-polygon-' + myId)
+    props.viewer.entities.removeById('map-polygon_outline-' + myId)
 }
 
 </script>

@@ -2,8 +2,7 @@
 import MapLine from '@/components/map/MapLine.vue';
 import MapMarker from '@/components/map/MapMarker.vue';
 import MapPolygon from '@/components/map/MapPolygon.vue';
-import MapPolyline from '@/components/map/MapPolyline.vue';
-import { Cartesian3, PerspectiveFrustum, Viewer, Math as MathCesium, Color } from 'cesium';
+import { Viewer, Color } from 'cesium';
 import { ApiResponse_InfoCollisionObjectsGet } from 'openflighthub-api-client-sdk';
 import { inject } from 'vue';
 
