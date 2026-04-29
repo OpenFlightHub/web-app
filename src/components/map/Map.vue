@@ -53,6 +53,8 @@ onMounted(async()=>{
         geocoder: props.disableUserControl !== true
     })
 
+    viewer.scene.globe.depthTestAgainstTerrain = true
+
     viewer.scene.globe.tileLoadProgressEvent.addEventListener((event)=>{
         if(viewer.scene.globe.tilesLoaded){
             emit('viewer-tiles-loaded')
