@@ -81,16 +81,11 @@ let intervalId = setInterval(()=>{
 
     clearInterval(intervalId)
 
+    loadCollisionObjects(true)
+
 console.log('adding camera move end listener to load collision objects')
 
     viewer.scene.camera.moveEnd.addEventListener(()=>{
-
-        const newCameraHeading = radiansToDegrees(viewer.camera.heading)
-        if(newCameraHeading !== currentCameraHeading.value){
-            currentCameraHeading.value = newCameraHeading
-            updateShownObjects()
-            return
-        }
 
         const newQueryParams = calculcateQueryParams()
 
@@ -107,15 +102,26 @@ console.log('adding camera move end listener to load collision objects')
             updateObject(currentQueryParams, newQueryParams)
             loadCollisionObjects()
             return
+        } else {
+
+            const newCameraHeading = radiansToDegrees(viewer.camera.heading)
+            if(newCameraHeading !== currentCameraHeading.value){
+                currentCameraHeading.value = newCameraHeading
+                updateShownObjects()
+            }
         }
 
     })
 }, 50)
 
-async function loadCollisionObjects(){
+async function loadCollisionObjects(forceReload = false){
 
     if(!currentQueryParams){
         return
+    }
+
+    if(forceReload){
+        updateObject(currentQueryParams, calculcateQueryParams())
     }
 
     if(currentQueryParams.radius === 0){
