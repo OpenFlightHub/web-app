@@ -27,6 +27,22 @@ const props = defineProps<{
     blink?: number // switch between color and backgroundCircle (if both are set) or color and transparent. Time in ms
 }>()
 
+watch(()=>props.position, updatePosition, {deep: true})
+watch(()=>props.heightIsRelative, update)
+watch(()=>props.iconUrl, update)
+watch(()=>props.iconWidth, update)
+watch(()=>props.iconHeight, update)
+watch(()=>props.label, update)
+watch(()=>props.color, update, {deep: true})
+watch(()=>props.fontSize, update)
+watch(()=>props.showHeightIndicator, update)
+watch(()=>props.showHeightMeanSeaLevelInLabel, update)
+watch(()=>props.bearing, update)
+watch(()=>props.autoBearing, update)
+watch(()=>props.backgroundCircle, updateCanvasAndIcon, {deep: true})
+
+watch(()=>props.blink, update)
+
 
 const BACKGROUND_CIRCLE_OVERLAP = 0.3
 
@@ -44,18 +60,6 @@ const myId = '' + getCurrentInstance()?.uid
 let canvas = document.createElement('canvas')
 //TODO check if we can use OffscreenCanvas for better performance: new Canvas.getContext('2d').putImageDate(offscreenCanvas.getImageData())
 
-
-watch(()=>props.bearing, update, {deep: true})
-watch(()=>props.color, update, {deep: true})
-watch(()=>props.fontSize, update, {deep: true})
-watch(()=>props.iconHeight, update, {deep: true})
-watch(()=>props.iconUrl, update, {deep: true})
-watch(()=>props.iconWidth, update, {deep: true})
-watch(()=>props.label, update, {deep: true})
-watch(()=>props.position, updatePosition, {deep: true})
-watch(()=>props.showHeightIndicator, update, {deep: true})
-watch(()=>props.showHeightMeanSeaLevelInLabel, update, {deep: true})
-watch(()=>props.backgroundCircle, updateCanvasAndIcon, {deep: true})
 
 onMounted(async()=>{
     await update()
@@ -281,7 +285,7 @@ async function addMarker(){
             width: canvas.width,
             height: canvas.height,
             heightReference: heightIsNotZero() ? props.heightIsRelative ? HeightReference.RELATIVE_TO_TERRAIN :  HeightReference.NONE : HeightReference.CLAMP_TO_TERRAIN,
-            disableDepthTestDistance: heightIsNotZero() ? 5000000 : Number.POSITIVE_INFINITY // show always above terrain https://community.cesium.com/t/points-labels-stuck-under-terrain/11141,
+            disableDepthTestDistance: heightIsNotZero() ? 5000000 : Number.POSITIVE_INFINITY // show always above terrain https://community.cesium.com/t/points-labels-stuck-under-terrain/11141
         },
         label: {
             text: (props.label ? props.label + ' ' : '') + (props.showHeightMeanSeaLevelInLabel ? (

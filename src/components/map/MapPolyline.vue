@@ -17,6 +17,7 @@ const myId = '' + getCurrentInstance()?.uid
 
 watch(()=>props.points, update, {deep: true})
 watch(()=>props.clampToGround, update, {deep: true})
+watch(()=>props.heightIsRelative, update)
 watch(()=>props.color, update, {deep: true})
 
 onMounted(update)

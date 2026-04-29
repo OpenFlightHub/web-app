@@ -18,10 +18,13 @@ const props = defineProps<{
 
 const myId = '' + getCurrentInstance()?.uid
 
+watch(()=>props.points, update, {deep: true})
 watch(()=>props.clampToGround, update, {deep: true})
+watch(()=>props.heightIsRelative, update)
 watch(()=>props.color, update, {deep: true})
 watch(()=>props.filled, update, {deep: true})
-watch(()=>props.points, update, {deep: true})
+watch(()=>props.outlineColor, update, {deep: true})
+watch(()=>props.outlineWidth, update)
 
 onMounted(update)
 onBeforeUnmount(()=>{
