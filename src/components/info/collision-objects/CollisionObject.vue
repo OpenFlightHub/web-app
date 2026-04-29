@@ -3,6 +3,7 @@ import MapLine from '@/components/map/MapLine.vue';
 import MapMarker from '@/components/map/MapMarker.vue';
 import MapPolygon from '@/components/map/MapPolygon.vue';
 import MapPolyline from '@/components/map/MapPolyline.vue';
+import MapWall from '@/components/map/MapWall.vue';
 import { Viewer, Color } from 'cesium';
 import { ApiResponse_InfoCollisionObjectsGet } from 'openflighthub-api-client-sdk';
 import { inject } from 'vue';
@@ -27,7 +28,7 @@ const props = defineProps<{
                 <MapLine v-if="props.object.marking.points[index + 1]" :viewer="viewer" :map-container="mapContainer" :from="{ position: [point.longitude, point.latitude], elevation: point.height_above_ground }" :to="{ position: [props.object.marking.points[index + 1].longitude, props.object.marking.points[index + 1].latitude], elevation: props.object.marking.points[index + 1].height_above_ground }" :color="Color.RED" height-is-relative></MapLine>
             </template>
         </template>-->
-        <MapPolyline v-if="props.object.marking.type === 1" :viewer="viewer" :map-container="mapContainer" :points="props.object.marking.points.map(point => [point.longitude, point.latitude, point.height_above_ground])" :color="Color.RED" height-is-relative></MapPolyline><!-- TODO height above ground (problem: bad performance of ) -->
+        <MapWall v-if="props.object.marking.type === 1" :viewer="viewer" :map-container="mapContainer" :points="props.object.marking.points.map(point => [point.longitude, point.latitude, 0, point.height_above_ground])" :color="Color.RED.withAlpha(0.5)" height-is-relative></MapWall>
 
         <MapPolygon v-if="props.object.marking.type === 2" :viewer="viewer" :map-container="mapContainer" :points="props.object.marking.points.map(point => [point.longitude, point.latitude, point.height_above_ground])" :color="Color.RED" filled height-is-relative></MapPolygon>
 
