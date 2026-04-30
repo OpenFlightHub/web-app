@@ -23,6 +23,7 @@ import LoadApiArray from '@/components/functional/LoadApiArray.vue';
          <Padding id="outer">
             <h1>Drone {{ drone.data.name }}</h1>
 
+            <RouterLink :to="'/drone/' + drone.data.id + '/live'">View Live</RouterLink>
 
             <h2>Last Connection</h2>
 
