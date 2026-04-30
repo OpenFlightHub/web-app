@@ -30,8 +30,8 @@ const myId = '' + getCurrentInstance()?.uid
 watch(()=>props.from, update, {deep: true})
 watch(()=>props.to, update, {deep: true})
 watch(()=>props.color, update, {deep: true})
-watch(()=>props.label, update)
-watch(()=>props.fontSize, update)
+watch(()=>props.label, update)//TODO only update label
+watch(()=>props.fontSize, update)//TODO only update label
 
 onMounted(update)
 onBeforeUnmount(()=>{

@@ -22,6 +22,8 @@ watch(()=>props.points, update, {deep: true})
 watch(()=>props.clampToGround, update, {deep: true})
 watch(()=>props.heightIsRelative, update)
 watch(()=>props.color, update, {deep: true})
+watch(()=>props.label, update)//TODO only update label
+watch(()=>props.fontSize, update)//TODO only update label
 
 onMounted(update)
 onBeforeUnmount(()=>{
