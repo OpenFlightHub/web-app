@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { getCurrentInstance, onBeforeUnmount, onMounted, watch } from 'vue';
-import { Cartographic, Color, Entity, PolylineDashMaterialProperty, Viewer } from 'cesium';
+import { Cartesian2, Cartesian3, Cartographic, Color, Entity, HeightReference, LabelStyle, PolylineDashMaterialProperty, VerticalOrigin, Viewer } from 'cesium';
 import { getElevationAtPosition } from '@/util/terrain';
+import { convertEllipsoidalHeightToOrthometricHeight } from '@/util/geoid';
+import { midpoint } from '@turf/turf';
 
 
 //TODO merge this into MapPolygon
@@ -19,6 +21,8 @@ const props = defineProps<{
     },
     heightIsRelative?: boolean // relative to ground
     color: Color
+    label?: string
+    fontSize?: number
 }>()
 
 const myId = '' + getCurrentInstance()?.uid
@@ -26,10 +30,13 @@ const myId = '' + getCurrentInstance()?.uid
 watch(()=>props.from, update, {deep: true})
 watch(()=>props.to, update, {deep: true})
 watch(()=>props.color, update, {deep: true})
+watch(()=>props.label, update)
+watch(()=>props.fontSize, update)
 
 onMounted(update)
 onBeforeUnmount(()=>{
     removeLine()
+    removeLineLabel()
 })
 
 
@@ -76,10 +83,54 @@ async function addLine(){
             })
         }
     })
+
+
+    let label = props.viewer.entities.getById('map-line-label-' + myId)
+
+    if(label){
+        props.viewer.entities.remove(label)//TODO dont remove entity, instead update it
+    }
+
+    label = props.viewer.entities.add({
+        id: 'map-line-label-' + myId,
+        position: getCenterPosition(),
+        label: {
+            text: (props.label ? props.label + ' ' : ''),
+            font: (typeof props.fontSize === 'number' ? props.fontSize : 14) + 'pt monospace',
+            style: LabelStyle.FILL_AND_OUTLINE,
+            outlineWidth: 2,
+            heightReference: heightAtCenterIsNotZero() ? props.heightIsRelative ? HeightReference.RELATIVE_TO_TERRAIN : HeightReference.NONE : HeightReference.CLAMP_TO_TERRAIN,
+            disableDepthTestDistance: heightAtCenterIsNotZero() ? 5000000 : Number.POSITIVE_INFINITY, // show always above terrain https://community.cesium.com/t/points-labels-stuck-under-terrain/11141
+            verticalOrigin: VerticalOrigin.TOP
+        }
+    })
+}
+
+function heightAtCenterIsNotZero(){
+    return fromHeightIsNotZero() || toHeightIsNotZero()
+}
+
+function heightAtCenter(){
+    if(heightAtCenterIsNotZero()){
+        return (props.from.elevation! + props.to.elevation!)/2
+    } else {
+        return 0
+    }
+}
+
+function getCenterPosition(){
+    const center = midpoint(props.from.position, props.to.position)
+    const centerHeight = heightAtCenter()
+
+    return Cartesian3.fromDegrees(center.geometry.coordinates[0], center.geometry.coordinates[1], centerHeight + 1)//+1 so its above line
 }
 
 function removeLine(){
     props.viewer.entities.removeById('map-line-' + myId)
+}
+
+function removeLineLabel(){
+    props.viewer.entities.removeById('map-line-label-' + myId)
 }
 
 </script>
