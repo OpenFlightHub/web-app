@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, inject, provide, ref, reactive, onMounted, onBeforeUnmount } from 'vue';
+import { computed, inject, provide, ref, reactive, onMounted, onBeforeUnmount, getCurrentInstance } from 'vue';
 import * as ovenplayer from 'ovenplayer'
 import IconVue from '../general/IconVue.vue';
 
