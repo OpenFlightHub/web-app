@@ -46,7 +46,12 @@ async function setup(){
         updateObject(lastDronePosition, data.position)
 
         if(currentFlight.track){//TODO check this can lead to a missing point on the track
-            currentFlight.track.push(data.position)
+            currentFlight.track.push({
+                longitude: data.position.longitude,
+                latitude: data.position.latitude,
+                height: data.position.height,
+                time: data.position.reported_at
+            })
         }
 
         emit('drone-position', data.position)
