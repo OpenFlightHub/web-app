@@ -300,7 +300,7 @@ async function addMarker(){
             disableDepthTestDistance: heightIsNotZero() ? 5000000 : Number.POSITIVE_INFINITY, // show always above terrain https://community.cesium.com/t/points-labels-stuck-under-terrain/11141
             verticalOrigin: VerticalOrigin.TOP,
             pixelOffset: new Cartesian2(0, props.iconHeight * 0.5),
-            distanceDisplayCondition: typeof props.maxVisibleDistance === 'number' ? new DistanceDisplayCondition(0, props.maxVisibleDistance) : undefined
+            distanceDisplayCondition: typeof props.maxVisibleDistance === 'number' ? new DistanceDisplayCondition(0, props.maxVisibleDistance) : undefined,
         }
     })
 
