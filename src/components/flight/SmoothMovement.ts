@@ -13,7 +13,7 @@ type PositionWithTime = {
 }
 
 export default class SmoothMovement extends EventManager<{
-    'position-update': Position
+    'position-update': { position: Position, time: number }
 }>{
 
     private positionsPerSecond: number
@@ -46,7 +46,7 @@ export default class SmoothMovement extends EventManager<{
 
             const expectedNextAddTime = this.tracks[this.tracks.length - 1].to.timeMs + timeBetweenLastAdds
 
-            console.log('time until next add', (expectedNextAddTime - Date.now()) / 1000, 's', 'time between last adds', timeBetweenLastAdds / 1000, 's')
+            //console.log('time until next add', (expectedNextAddTime - Date.now()) / 1000, 's', 'time between last adds', timeBetweenLastAdds / 1000, 's')
 
             const totalDistanceOfTracks = this.tracks.reduce((sum, track) => sum + track.length3D, 0) - this.currentTrackDistance
 
@@ -54,13 +54,13 @@ export default class SmoothMovement extends EventManager<{
 
             const metersPerMs = Math.max(0, totalDistanceOfTracks / ((expectedNextAddTime + timeBuffer) - Date.now()))
 
-            console.log('meters per s', metersPerMs * 1000)
+            //console.log('meters per s', metersPerMs * 1000)
 
             this.currentTrackDistance += metersPerMs * timeUntilNextStep
 
-            this.dispatch('position-update', this.calculatePosition())
+            this.dispatch('position-update', this.calculatePositionAndTime())
         } else {
-            console.log('no tracks')
+            //console.log('no tracks')
         }
 
         this.timeoutHandle = setTimeout(()=>{
@@ -68,7 +68,7 @@ export default class SmoothMovement extends EventManager<{
         }, timeUntilNextStep)
     }
 
-    private calculatePosition(): Position {
+    private calculatePositionAndTime(): {position: Position, time: number} {
         if(this.tracks.length === 0){
             throw new Error('no position available')
         }
@@ -80,12 +80,16 @@ export default class SmoothMovement extends EventManager<{
                 this.tracks.shift()
             } else {
                 const ret = this.tracks[0].to.position
+                const time = this.tracks[0].to.timeMs
 
                 this.currentTrackDistance = 0
                 this.tracks.shift()
 
                 this.lastCalculatedPosition = ret
-                return ret
+                return {
+                    position: ret,
+                    time
+                }
             }
         }
 
@@ -99,18 +103,43 @@ export default class SmoothMovement extends EventManager<{
             this.currentTrackDistance = 0
         }
         //TODO implement 3d length
-        const position = along(lineString([this.tracks[0].from.position, this.tracks[0].to.position].map(p => [p.longitude, p.latitude])), this.currentTrackDistance, {units: 'meters'})
-
-        const relativeProgress = this.currentTrackDistance / this.tracks[0].length3D
-
-        const ret = {
-            longitude: position.geometry.coordinates[0],
-            latitude: position.geometry.coordinates[1],
-            height: this.tracks[0].from.position.height + (this.tracks[0].to.position.height - this.tracks[0].from.position.height) * relativeProgress
-        }
+        const ret = this.along3D(this.tracks, this.currentTrackDistance)
 
         this.lastCalculatedPosition = ret
-        return ret
+        return {
+            position: ret,
+            time: this.tracks[0].from.timeMs + (this.tracks[0].to.timeMs - this.tracks[0].from.timeMs) * (this.currentTrackDistance / this.tracks[0].length3D)
+        }
+    }
+
+    private along3D(tracks: typeof this.tracks, distanceMeters: number){
+
+        let distanceToGoLeft = distanceMeters
+
+        for(const track of tracks){
+            if(distanceToGoLeft <= track.length3D){
+
+                const lengthHorizontal = distance([track.from.position.longitude, track.from.position.latitude], [track.to.position.longitude, track.to.position.latitude], {units: 'meters'})
+
+                const relativeProgress = distanceToGoLeft / track.length3D
+                const position = along(lineString([track.from.position, track.to.position].map(p => [p.longitude, p.latitude])), lengthHorizontal * relativeProgress, {units: 'meters'})
+
+
+                const heightDiff = track.to.position.height - track.from.position.height
+                const height = track.from.position.height + heightDiff * relativeProgress
+
+                return {
+                    longitude: position.geometry.coordinates[0],
+                    latitude: position.geometry.coordinates[1],
+                    height
+                }
+
+            } else {
+                distanceToGoLeft -= track.length3D
+            }
+        }
+
+        throw new Error('something went wrong')
     }
 
     addPosition(position: Position, timeMs: number) {

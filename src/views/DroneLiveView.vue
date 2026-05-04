@@ -13,6 +13,7 @@ import Map from '@/components/map/Map.vue';
 import LoadApi from '@/components/functional/LoadApi.vue';
 import SmoothMovement, { Position } from '@/components/flight/SmoothMovement';
 import { p } from 'vue-router/dist/router-CWoNjPRp.mjs';
+import TimeDisplay from '@/components/display/TimeDisplay.vue';
 
 const flightSimulation = ref<InstanceType<typeof FlightSimulation> | null>(null)
 
@@ -21,7 +22,9 @@ let lastHeading: number | undefined = undefined
 
 const smoothMovement = new SmoothMovement(10)
 
-smoothMovement.addListener('position-update', position => {
+smoothMovement.addListener('position-update', ({ position, time }) => {
+
+   viewDelayMs.value = Date.now() - time
 
    flightSimulation.value?.setCameraPosition({
       position: {
@@ -72,6 +75,8 @@ function calculateHeadingBetweenPoints(pointA: Point, pointB: Point): number {
 
 const viewerIsLoaded = ref(false)
 
+
+const viewDelayMs = ref(0)
 </script>
 
 <template>
@@ -87,6 +92,7 @@ const viewerIsLoaded = ref(false)
                   <LoadApi :api-method="api.rest.workspace.get" :config="{params: {workspaceId: drone.data.last_connection_id}}" v-slot="workspace">
                      <Map :start-point="{longitude: workspace.data.longitude, latitude: workspace.data.latitude}" :start-height="0" @viewer-loaded="viewerIsLoaded = true">
                         <FlightSimulation v-if="viewerIsLoaded" ref="flightSimulation"></FlightSimulation>
+                        <span>Delay: <TimeDisplay :time-in-ms="viewDelayMs"></TimeDisplay></span>
                      </Map>
                   </LoadApi>
                </LoadApi>
