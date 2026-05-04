@@ -7,6 +7,7 @@ import CollisionObject from './CollisionObject.vue';
 import { bearing, distance, radiansToDegrees } from '@turf/turf';
 import { ApiResponse_InfoCollisionObjectsGet } from 'openflighthub-api-client-sdk';
 import { updateArray, updateObject } from '@/util/vue';
+import { getMapCenter } from '@/util/cesium';
 
 const viewer = inject<Viewer>('cesiumViewer')
 
@@ -28,7 +29,7 @@ function calculcateQueryParams(){
         return DEFAULT
     } else {
 
-        let mapCenter = getMapCenter()
+        let mapCenter = getMapCenter(viewer)
 
         if(mapCenter.latitude === 0 && mapCenter.longitude === 0){
             return DEFAULT
@@ -39,38 +40,6 @@ function calculcateQueryParams(){
             longitude: mapCenter.longitude,
             radius: COLLISION_OBJECTS_RADIUS
         }
-    }
-}
-
-function getMapCenter(){
-    const DEFAULT = {
-        latitude: 0,
-        longitude: 0
-    }
-
-    if(!viewer){
-        return DEFAULT
-    }
-
-    let windowPosition = new Cartesian2(viewer.container.clientWidth / 2, viewer.container.clientHeight / 2);
-
-    let pickRay = viewer.scene.camera.getPickRay(windowPosition)
-
-    if(!pickRay){
-        return DEFAULT
-    }
-
-    let pickPosition = viewer.scene.globe.pick(pickRay, viewer.scene)
-
-    if(!pickPosition){
-        return DEFAULT
-    }
-
-    let pickPositionCartographic = viewer.scene.globe.ellipsoid.cartesianToCartographic(pickPosition)
-
-    return {
-        latitude: radiansToDegrees(pickPositionCartographic.latitude),
-        longitude: radiansToDegrees(pickPositionCartographic.longitude)
     }
 }
 
@@ -200,7 +169,7 @@ function filterVisible(objects: ApiResponse_InfoCollisionObjectsGet){
                 latitude: object.marking.points.reduce((sum, point) => sum + point.latitude, 0) / object.marking.points.length,
             }
 
-        const mapCenterPos = getMapCenter()
+        const mapCenterPos = getMapCenter(viewer)
 
         if(mapCenterPos.latitude === 0 && mapCenterPos.longitude === 0){
             console.error('mapcenter is invalid')

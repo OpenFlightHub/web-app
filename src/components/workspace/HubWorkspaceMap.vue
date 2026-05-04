@@ -29,6 +29,7 @@ let viewer: Viewer = null // if we make Viewer a reactive object, performance go
 
 const sidebarIsOpen = ref(false)
 const showMedia = ref(false)
+const showCollisionObjects = ref(false)
 
 </script>
 
@@ -39,17 +40,14 @@ const showMedia = ref(false)
             <Map id="map" :start-point="{longitude: props.longitude, latitude: props.latitude}" :start-height="10000" :start-camera-pitch="-90" @viewer-loaded="(v)=>{viewer = v; viewerIsLoaded = true}">
 
 
-                <MapCollisionObjects v-if="viewerIsLoaded"></MapCollisionObjects>
+                <MapCollisionObjects v-if="viewerIsLoaded && showCollisionObjects"></MapCollisionObjects>
 
             </Map>
 
             <template v-if="viewerIsLoaded && geoidIsLoaded">
                 <HubWorkspaceMapConnection v-for="connection in props.connections" :key="connection.id" :map-container="mapContainer" :connection="connection" :viewer="viewer"></HubWorkspaceMapConnection>
 
-                <!-- TODO implement center of map (but lazy load, so a small change in distance does not actually trigger a reset) -->
-                <!--<HubWorkspaceMapTraffic :viewer="viewer" :map-container="mapContainer" :latitude="props.latitude" :longitude="props.longitude" :radius="100 * 1000" :show-coverage="true"></HubWorkspaceMapTraffic>-->
-
-                <HubWorkspaceGeoObjects :viewer="viewer" :map-container="mapContainer" :workspace-id="props.workspaceId"></HubWorkspaceGeoObjects>
+                <HubWorkspaceGeoObjects :viewer="viewer" :map-container="mapContainer" :workspace-id="props.workspaceId" :initial-longitude="props.longitude" :initial-latitude="props.latitude"></HubWorkspaceGeoObjects>
             </template>
 
             <template v-if="viewerIsLoaded && showMedia">
@@ -66,6 +64,10 @@ const showMedia = ref(false)
                 <label for="show-media">
                     <Checkbox v-model="showMedia" binary input-id="show-media"></Checkbox>
                     Show Media
+                </label>
+                <label for="show-collision-objects">
+                    <Checkbox v-model="showCollisionObjects" binary input-id="show-collision-objects"></Checkbox>
+                    Show Collision Objects
                 </label>
             </div>
         </div>
@@ -100,6 +102,10 @@ const showMedia = ref(false)
     }
 
     #sidebar-inner {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5em;
+
         padding: 0.5em;
 
         label {

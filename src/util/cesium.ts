@@ -1,3 +1,4 @@
+import { radiansToDegrees } from "@turf/turf";
 import { Cartesian2, Cartesian3, Cartographic, defined, Entity, HeadingPitchRoll, Viewer, Math as MathCesium, Transforms, Matrix3, Ray, Color } from "cesium";
 import { toRaw } from "vue";
 
@@ -129,4 +130,36 @@ function defaultValue(a, b){
 
 export function toCssRGBA(color: Color){
     return `rgba(${color.red * 255},${color.green * 255},${color.blue * 255},${color.alpha})`
+}
+
+export function getMapCenter(viewer: Viewer){
+    const DEFAULT = {
+        latitude: 0,
+        longitude: 0
+    }
+
+    if(!viewer){
+        return DEFAULT
+    }
+
+    let windowPosition = new Cartesian2(viewer.container.clientWidth / 2, viewer.container.clientHeight / 2);
+
+    let pickRay = viewer.scene.camera.getPickRay(windowPosition)
+
+    if(!pickRay){
+        return DEFAULT
+    }
+
+    let pickPosition = viewer.scene.globe.pick(pickRay, viewer.scene)
+
+    if(!pickPosition){
+        return DEFAULT
+    }
+
+    let pickPositionCartographic = viewer.scene.globe.ellipsoid.cartesianToCartographic(pickPosition)
+
+    return {
+        latitude: radiansToDegrees(pickPositionCartographic.latitude),
+        longitude: radiansToDegrees(pickPositionCartographic.longitude)
+    }
 }
