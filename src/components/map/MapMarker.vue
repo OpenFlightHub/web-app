@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { getCurrentInstance, onBeforeUnmount, onMounted, onUnmounted, ref, watch } from 'vue';
-import { Cartesian2, Cartesian3, Color, Entity, HeightReference, LabelStyle, PolylineArrowMaterialProperty, PolylineDashMaterialProperty, VerticalOrigin, Viewer } from 'cesium';
+import { Cartesian2, Cartesian3, Color, DistanceDisplayCondition, Entity, HeightReference, LabelStyle, PolylineArrowMaterialProperty, PolylineDashMaterialProperty, VerticalOrigin, Viewer } from 'cesium';
 import { getElevationAtPosition } from '@/util/terrain';
 import { convertEllipsoidalHeightToOrthometricHeight } from '@/util/geoid';
 import { cleanupClickMyEntity, ClickMyEntityHandle, getPointFromOriginWithBearingAndDistance, setupClickMyEntity, toCssRGBA } from '@/util/cesium';
@@ -25,6 +25,7 @@ const props = defineProps<{
     autoBearing?: boolean //calculate bearing from last to current position
     backgroundCircle?: Color
     blink?: number // switch between color and backgroundCircle (if both are set) or color and transparent. Time in ms
+    maxVisibleDistance?: number
 }>()
 
 watch(()=>props.position, updatePosition, {deep: true})
@@ -42,6 +43,7 @@ watch(()=>props.autoBearing, update)
 watch(()=>props.backgroundCircle, updateCanvasAndIcon, {deep: true})
 
 watch(()=>props.blink, update)
+watch(()=>props.maxVisibleDistance, update)
 
 
 const BACKGROUND_CIRCLE_OVERLAP = 0.3
@@ -285,7 +287,8 @@ async function addMarker(){
             width: canvas.width,
             height: canvas.height,
             heightReference: heightIsNotZero() ? props.heightIsRelative ? HeightReference.RELATIVE_TO_TERRAIN :  HeightReference.NONE : HeightReference.CLAMP_TO_TERRAIN,
-            disableDepthTestDistance: heightIsNotZero() ? 5000000 : Number.POSITIVE_INFINITY // show always above terrain https://community.cesium.com/t/points-labels-stuck-under-terrain/11141
+            disableDepthTestDistance: heightIsNotZero() ? 5000000 : Number.POSITIVE_INFINITY, // show always above terrain https://community.cesium.com/t/points-labels-stuck-under-terrain/11141
+            distanceDisplayCondition: typeof props.maxVisibleDistance === 'number' ? new DistanceDisplayCondition(0, props.maxVisibleDistance) : undefined
         },
         label: {
             text: (props.label ? props.label + ' ' : '') + (props.showHeightMeanSeaLevelInLabel ? (
@@ -296,7 +299,8 @@ async function addMarker(){
             heightReference: heightIsNotZero() ? props.heightIsRelative ? HeightReference.RELATIVE_TO_TERRAIN :HeightReference.NONE : HeightReference.CLAMP_TO_TERRAIN,
             disableDepthTestDistance: heightIsNotZero() ? 5000000 : Number.POSITIVE_INFINITY, // show always above terrain https://community.cesium.com/t/points-labels-stuck-under-terrain/11141
             verticalOrigin: VerticalOrigin.TOP,
-            pixelOffset: new Cartesian2(0, props.iconHeight * 0.5)
+            pixelOffset: new Cartesian2(0, props.iconHeight * 0.5),
+            distanceDisplayCondition: typeof props.maxVisibleDistance === 'number' ? new DistanceDisplayCondition(0, props.maxVisibleDistance) : undefined
         }
     })
 

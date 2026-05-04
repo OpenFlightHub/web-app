@@ -21,7 +21,7 @@ const props = defineProps<{
 <template>
 
     <template v-if="viewer && mapContainer">
-        <MapMarker v-if="props.object.marking.type === 0" :viewer="viewer" :map-container="mapContainer" :position="[props.object.marking.longitude, props.object.marking.latitude]" :icon-url="'/images/collision-objects/' + props.object.type + '.png'" :label="props.object.name" :icon-width="32" :icon-height="32"></MapMarker>
+        <MapMarker v-if="props.object.marking.type === 0" :viewer="viewer" :map-container="mapContainer" :position="[props.object.marking.longitude, props.object.marking.latitude]" :icon-url="'/images/collision-objects/' + props.object.type + '.png'" :label="props.object.name" :icon-width="32" :icon-height="32" :max-visible-distance="3000"></MapMarker>
 
         <!--<template v-if="props.object.marking.type === 1">
             <template v-for="(point, index) of props.object.marking.points" :key="index">
