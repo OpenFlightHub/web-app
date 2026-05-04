@@ -4,39 +4,50 @@ import api from '@/api';
 import LoadApiWithIdParamInUrl from '@/components/functional/LoadApiWithIdParamInUrl.vue';
 import Padding from '@/components/layout/Padding.vue';
 import FlightSimulation from '@/components/flight/FlightSimulation.vue';
-import { onMounted, ref } from 'vue';
+import { onBeforeUnmount, onMounted, onUnmounted, ref } from 'vue';
 import { getIdParamFromRoute } from '@/util/url';
 import { useRoute } from 'vue-router';
 import { bearing } from '@turf/turf';
-import List from '@/components/layout/List.vue';
-import LiveVideo from '@/components/video/LiveVideo.vue';
 import ConnectionLiveStream from '@/components/video/ConnectionLiveStream.vue';
 import Map from '@/components/map/Map.vue';
 import LoadApi from '@/components/functional/LoadApi.vue';
+import SmoothMovement, { Position } from '@/components/flight/SmoothMovement';
+import { p } from 'vue-router/dist/router-CWoNjPRp.mjs';
 
 const flightSimulation = ref<InstanceType<typeof FlightSimulation> | null>(null)
 
-let lastPosition: {longitude: number, latitude: number, height: number} | null = null
+let lastPosition: Position | undefined = undefined
+let lastHeading: number | undefined = undefined
+
+const smoothMovement = new SmoothMovement(10)
+
+smoothMovement.addListener('position-update', position => {
+
+   flightSimulation.value?.setCameraPosition({
+      position: {
+         longitude: position.longitude,
+         latitude: position.latitude,
+         height: position.height
+      },
+      cameraOrientation: {
+         heading: lastPosition ? calculateHeadingBetweenPoints(lastPosition, position) : 0,
+         pitch: -10,
+         roll: 0
+      },
+      flyToDuration: 0.1
+   })
+
+   lastPosition = position
+})
 
 onMounted(()=>{
    api.live.subscribeToDronePosition(getIdParamFromRoute('droneId', useRoute()), (event, filter, data) => {
-
-      if(flightSimulation.value){
-         console.log('updating position', data.position)
-      }
-
-      flightSimulation.value?.setCameraPosition({
-         longitude: data.position.longitude,
-         latitude: data.position.latitude,
-         height: data.position.height
-      }, {
-         heading: lastPosition ? calculateHeadingBetweenPoints(lastPosition, data.position) : 0,
-         pitch: -10,
-         roll: 0
-      })
-
-      lastPosition = data.position
+      smoothMovement.addPosition(data.position, new Date(data.position.reported_at).getTime())
    })
+})
+
+onBeforeUnmount(()=>{
+   smoothMovement.destroy()
 })
 
 type Point = {
@@ -49,7 +60,14 @@ type Point = {
  * @returns return deegrees, 0 = north, 90 = east
  */
 function calculateHeadingBetweenPoints(pointA: Point, pointB: Point): number {
-   return bearing([pointA.longitude, pointA.latitude], [pointB.longitude, pointB.latitude])
+   const ret = bearing([pointA.longitude, pointA.latitude], [pointB.longitude, pointB.latitude])
+
+   if(pointA.latitude === pointB.latitude && pointA.longitude === pointB.longitude){
+      return lastHeading ?? 0
+   } else {
+      lastHeading = ret
+      return ret
+   }
 }
 
 const viewerIsLoaded = ref(false)

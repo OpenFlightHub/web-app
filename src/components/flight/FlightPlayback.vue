@@ -28,13 +28,16 @@ async function init(){
 
     playableTrack.value.addListener('positionUpdate', ({position, meta, progress}) => {
         flightSimulation.value!.setCameraPosition({
-            longitude: position.longitude,
-            latitude: position.latitude,
-            height: position.height
-        }, {
-            heading: meta.calculatedHeading,
-            pitch: 0,
-            roll: 0
+            position: {
+                longitude: position.longitude,
+                latitude: position.latitude,
+                height: position.height
+            },
+            cameraOrientation:{
+                heading: meta.calculatedHeading,
+                pitch: 0,
+                roll: 0
+            }
         })
     })
 }
