@@ -46,7 +46,7 @@ const isExtended = ref(false)
 
                     <LogoutButton v-if="store.isLoggedIn"></LogoutButton>
 
-                    <span>© OpenFlightHub 2025</span>
+                    <span>© OpenFlightHub 2026</span>
                 </div>
 
             </div>
