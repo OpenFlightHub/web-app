@@ -48,6 +48,7 @@ onMounted(async()=>{
         navigationInstructionsInitiallyVisible: props.disableUserControl !== true,
         //projectionPicker: props.disableUserControl !== true,
         selectionIndicator: props.disableUserControl !== true,
+        infoBox: false,
         baseLayerPicker: getSetting('allow-bing-maps') === true,
         sceneModePicker: props.disableUserControl !== true,
         geocoder: props.disableUserControl !== true
