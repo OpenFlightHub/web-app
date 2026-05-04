@@ -61,7 +61,7 @@ function parseData(){
     hasValidHeightInformation.value = typeof props.media.camera_location?.height === 'number'
 
     if(hasValidHeightInformation.value){
-        cameraHeight.value = props.media.camera_location!.height!
+        cameraHeight.value = props.media.camera_location!.height! - 50//TODO fix this hack, looks like dji msl is 50m off german geoid
     }
 
     if(typeof props.media.camera_angles?.heading === 'number'){
@@ -76,7 +76,7 @@ function parseData(){
 
     // cameraHeading.value = parsedMeta.metadata.gimbal_yaw_degree - 14 //TODO fix heading, looks like gimbal yaw degree is not correct
 
-    cameraFOV.value = 48.5 //is Thermal Image of Mavic3 TODO make it work for visual images too
+    cameraFOV.value = 48.5 * 0.8 //is Thermal Image of Mavic3 TODO make it work for visual images too
 }
 
 type Location = {
@@ -222,7 +222,7 @@ async function refreshCoverageClient(){
                         <RelativeContainer v-if="currentFocusPoint.location" :x="currentFocusPoint.location.ray.imagePosition.x" :y="currentFocusPoint.location.ray.imagePosition.y">
                             <Padding class="ray_info" @mousemove.stop @click.stop>
                                 <div class="list">
-                                    <div>Distance:&nbsp;{{ currentFocusPoint.location.directDistance }}</div>
+                                    <div>Distance:&nbsp;{{ currentFocusPoint.location.directDistance }}m</div>
                                     <div>Elevation:&nbsp;{{ Math.round(currentFocusPoint.location.elevation) }}m</div>
                                     <div>Long:&nbsp;{{ currentFocusPoint.location.position.longitude.toFixed(6) }}</div>
                                     <div>Lat:&nbsp;{{ currentFocusPoint.location.position.latitude.toFixed(6) }}</div>
@@ -231,12 +231,12 @@ async function refreshCoverageClient(){
                                 </div>
 
                                 <div class="icon_inner">
-                                    <IconVue name="person-arms-up" :style="{'color':'#0f0', 'font-size': '' + (1.8 /* average human size */ * currentFocusPoint.location.meterSize.vertical * viewSize.height) + 'px'}"></IconVue>
+                                    <IconVue name="person-arms-up" :style="{'color':'#0f0', 'font-size': '' + (1.5/*TODO fix this x1.5 hack, the original data should be returning twice */ * 1.8 /* average human size */ * currentFocusPoint.location.meterSize.vertical * viewSize.height) + 'px'}"></IconVue>
                                 </div>
                             </Padding>
 
                             <template v-slot:marker>
-                                <IconVue name="person-arms-up" :style="{'color':'#0f0', 'font-size': '' + (1.8 /* average human size */ * currentFocusPoint.location.meterSize.vertical * viewSize.height) + 'px'}"></IconVue>
+                                <IconVue name="person-arms-up" :style="{'color':'#0f0', 'font-size': '' + (1.5/*TODO fix this x1.5 hack, the original data should be returning twice */ * 1.8 /* average human size */ * currentFocusPoint.location.meterSize.vertical * viewSize.height) + 'px'}"></IconVue>
                             </template>
 
                         </RelativeContainer>
