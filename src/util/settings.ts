@@ -1,7 +1,8 @@
 const LOCAL_STORAGE_ITEM_NAME = 'ofh_settings'
 
 const SETTINGS = {
-    'allow-bing-maps': false
+    'allow-bing-maps': false,
+    'use-dev-terrain': false
 }
 
 
@@ -65,4 +66,8 @@ function loadStoredSettings(): Record<string, any>{
 
 function saveStoredSettings(settings: Partial<typeof SETTINGS>){
     localStorage.setItem(LOCAL_STORAGE_ITEM_NAME, JSON.stringify(settings))
+}
+
+export function resetSettings(){
+    localStorage.removeItem(LOCAL_STORAGE_ITEM_NAME)
 }
