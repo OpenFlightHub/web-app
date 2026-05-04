@@ -28,13 +28,10 @@ function reset(){
         <h3>Settings:</h3>
 
         <List>
-            <div v-if="store.isAdmin">
-                <label>Allow Bing Maps Terrain</label>&nbsp;<Button @click="setSetting('allow-bing-maps', true)">Allow</Button>
-                <label>Use dev Terrain</label>&nbsp;<Button @click="setSetting('use-dev-terrain', true)">Allow</Button>
-
-                <br>
-
-                <label>Reset Settings</label>&nbsp;<Button @click="reset">Reset All Settings</Button>
+            <div v-if="store.isAdmin" class="settings">
+                <label>Allow Bing Maps Terrain&nbsp;<Button @click="setSetting('allow-bing-maps', true)">Allow</Button></label>
+                <label>Use dev Terrain&nbsp;<Button @click="setSetting('use-dev-terrain', true)">Allow</Button></label>
+                <label>Reset Settings&nbsp;<Button @click="reset">Reset All Settings</Button></label>
             </div>
         </List>
 
@@ -44,5 +41,10 @@ function reset(){
 
 <style lang="scss" scoped>
 
+.settings {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+}
 
 </style>
