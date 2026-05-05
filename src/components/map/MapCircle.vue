@@ -61,7 +61,7 @@ async function addCircle(){
             font: '14pt monospace',
             style: LabelStyle.FILL_AND_OUTLINE,
             outlineWidth: 2,
-            heightReference: props.clampToGround ? HeightReference.CLAMP_TO_TERRAIN: HeightReference.NONE,
+            heightReference: props.clampToGround ? HeightReference.CLAMP_TO_TERRAIN: heightIsNotZero() ? HeightReference.NONE : HeightReference.CLAMP_TO_TERRAIN,
             disableDepthTestDistance: typeof height === 'number' ? 5000000 : Number.POSITIVE_INFINITY, // show always above terrain https://community.cesium.com/t/points-labels-stuck-under-terrain/11141
         } : undefined,
 
@@ -74,6 +74,10 @@ async function addCircle(){
             heightReference: props.clampToGround ? HeightReference.CLAMP_TO_GROUND : undefined
         }
     })
+}
+
+function heightIsNotZero(){
+    return typeof props.position[2] === 'number' && props.position[2] > 0
 }
 
 async function addOutline(){
