@@ -38,7 +38,7 @@ onMounted(async()=>{
 
     viewer = new Viewer(mapContainer.value, {
         //terrain: new Terrain(CesiumTerrainProvider.fromIonAssetId(4613429)),
-        terrain: getSetting('use-dev-terrain') ? new Terrain(CesiumTerrainProvider.fromUrl('https://dev.openflighthub.org/ctb/terrain')) : Terrain.fromWorldTerrain(),
+        terrain: getSetting('use-dev-terrain') ? new Terrain(CesiumTerrainProvider.fromUrl('https://dev.openflighthub.org/ctb/terrain_sued_oa_1m')) : Terrain.fromWorldTerrain(),
         // terrain: new Terrain(CesiumTerrainProvider.fromUrl('https://dev.openflighthub.org/terrain2/tiles/dynamic/?minZoom=1&maxZoom=18&cog=/config/tiles.vrt')),
         animation: false,
         timeline: false,
