@@ -8,6 +8,31 @@ import Padding from '@/components/layout/Padding.vue';
 import LoadApiWithIdParamInUrl from '@/components/functional/LoadApiWithIdParamInUrl.vue';
 import LoadApiArrayWithIdParamInUrl from '@/components/functional/LoadApiArrayWithIdParamInUrl.vue';
 import LoadApi from '@/components/functional/LoadApi.vue';
+import ModalVue from '@/components/display/ModalVue.vue';
+import CreateForm from '@/components/functional/form/CreateForm.vue';
+import { ref } from 'vue';
+import IconVue from '@/components/general/IconVue.vue';
+import { Button, useConfirm, useToast } from 'primevue';
+
+const showInviteMemberModal = ref(false)
+
+const confirm = useConfirm()
+const toast = useToast()
+
+function removeMember(teamId: number, userId: number) {
+    confirm.require({
+        message: 'Are you sure you want to remove this member from the team?',
+        header: 'Confirm Removal',
+        icon: 'pi pi-exclamation-triangle',
+        accept: () => {
+            api.rest.team.member.delete({params: {teamId, userId}}).then(() => {
+                toast.add({severity: 'success', summary: 'Member Removed', detail: 'The member has been removed from the team.'})
+            }).catch(err => {
+                toast.add({severity: 'error', summary: 'Error', detail: '' + err})
+            })
+        }
+    })
+}
 
 </script>
 
@@ -30,15 +55,30 @@ import LoadApi from '@/components/functional/LoadApi.vue';
             <Spacing></Spacing>
 
             <h2>Members</h2>
+
+            <Spacing></Spacing>
+
+            <Button @click="showInviteMemberModal = true"><IconVue name="plus"></IconVue> Invite Member</Button>
+
             <LoadApiArrayWithIdParamInUrl :api-method="api.rest.team.members.get" :config="{params: {}}" :id-params="['teamId']" v-slot="members">
                 <List>
                     <LoadApi v-for="member in members.data" :key="member.id" :api-method="api.rest.user.get" :config="{params: {userId: member.id}}" v-slot="user">
-                        <UserSnippet :user="user.data"></UserSnippet>
+                        <UserSnippet :user="user.data">
+                            <IconVue name="trash" @click.stop.prevent="removeMember(team.data.id, user.data.id)"></IconVue>
+                        </UserSnippet>
                     </LoadApi>
                 </List>
                 <span v-if="members.data.length === 0">None</span>
             </LoadApiArrayWithIdParamInUrl>
         </Padding>
+
+
+        <ModalVue :visible="showInviteMemberModal" @close="showInviteMemberModal = false">
+            <CreateForm title="Invite Member" :create-api-method="api.rest.team.inviteMember.post" :params="{teamId: team.data.id}" :fields="{
+                email: {type: 'email', required: true}
+            }" :editable-fields="['email']" :initial-values="{}" @created="ref => {showInviteMemberModal = false}"></CreateForm>
+        </ModalVue>
+
     </LoadApiWithIdParamInUrl>
 
 </template>

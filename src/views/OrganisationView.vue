@@ -9,6 +9,14 @@ import Padding from '@/components/layout/Padding.vue';
 import Spacing from '@/components/layout/Spacing.vue';
 import TeamSnippet from '@/components/team/TeamSnippet.vue';
 import UserSnippet from '@/components/user/UserSnippet.vue';
+import { ref } from 'vue';
+import ModalVue from '@/components/display/ModalVue.vue';
+import CreateForm from '@/components/functional/form/CreateForm.vue';
+import LoadApiArray from '@/components/functional/LoadApiArray.vue';
+import IconVue from '@/components/general/IconVue.vue';
+import { Button } from 'primevue';
+
+const showCreateTeamModal = ref(false)
 
 </script>
 
@@ -32,6 +40,12 @@ import UserSnippet from '@/components/user/UserSnippet.vue';
 
             <h2>Teams</h2>
 
+            <Spacing></Spacing>
+
+            <Button @click="showCreateTeamModal = true"><IconVue name="plus"></IconVue> Add Team</Button>
+
+            <Spacing></Spacing>
+
             <LoadApiArrayWithIdParamInUrl :api-method="api.rest.organisation.teams.get" :config="{params: {}}" :id-params="['organisationId']" v-slot="teams">
                 <List>
                     <TeamSnippet v-for="team of teams.data" :id="team.id" :key="team.id"></TeamSnippet>
@@ -39,7 +53,22 @@ import UserSnippet from '@/components/user/UserSnippet.vue';
                 <span v-if="teams.data.length === 0">None</span>
             </LoadApiArrayWithIdParamInUrl>
         </Padding>
+
+
+        <LoadApiArray :api-method="api.rest.organisation.users.get" :config="{params: {organisationId: organisation.data.id}}" v-slot="users">
+            <ModalVue :visible="showCreateTeamModal" @close="showCreateTeamModal = false">
+                <CreateForm title="Create Team" :create-api-method="api.rest.team.post" :params="{}" :fields="{
+                    name: {type: 'text', required: true},
+                    logo_file_id: {type: 'number'},
+                    organisation_id: {type: 'number', required: true},
+                    owner_user_id: {type: 'select', required: true, options: users.data.map(user => ({value: user.id, label: user.name}))}
+                }" :editable-fields="['name', 'owner_user_id']" :initial-values="{organisation_id: organisation.data.id}" @created="ref => {showCreateTeamModal = false}"></CreateForm>
+            </ModalVue>
+        </LoadApiArray>
+
     </LoadApiWithIdParamInUrl>
+
+
 
 </template>
 

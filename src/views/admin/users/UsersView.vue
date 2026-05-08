@@ -35,7 +35,7 @@ const showCreateModal = ref(false)
 
 
     <ModalVue :visible="showCreateModal" @close="showCreateModal = false">
-        <CreateForm title="Create User" :create-api-method="api.rest.admin.users.post" :params="{}" :fieldTypes="{
+        <CreateForm title="Create User" :create-api-method="api.rest.admin.users.post" :params="{}" :fields="{
             name: {type: 'text'},
             email: {type: 'email', required: true}
         }" :editable-fields="['name', 'email']" :initial-values="{}" @created="ref => {showCreateModal = false}"></CreateForm>

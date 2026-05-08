@@ -2,6 +2,7 @@
 import api from '@/api';
 import ModalVue from '@/components/display/ModalVue.vue';
 import CreateForm from '@/components/functional/form/CreateForm.vue';
+import LoadApi from '@/components/functional/LoadApi.vue';
 import LoadApiArray from '@/components/functional/LoadApiArray.vue';
 import IconVue from '@/components/general/IconVue.vue';
 import List from '@/components/layout/List.vue';
@@ -33,12 +34,14 @@ const showCreateModal = ref(false)
 
     </Padding>
 
-    <ModalVue :visible="showCreateModal" @close="showCreateModal = false">
-        <CreateForm title="Create Organisation" :create-api-method="api.rest.admin.organisations.post" :params="{}" :fieldTypes="{
-            name: {type: 'text', required: true},
-            logo_file_id: {type: 'number'},
-            owner_user_id: {type: 'number', required: true}
-        }" :editable-fields="['name', 'owner_user_id']" :initial-values="{}" @created="ref => {showCreateModal = false}"></CreateForm>
-    </ModalVue>
+    <LoadApiArray :api-method="api.rest.admin.users.get" :config="{}" v-slot="users">
+        <ModalVue :visible="showCreateModal" @close="showCreateModal = false">
+            <CreateForm title="Create Organisation" :create-api-method="api.rest.admin.organisations.post" :params="{}" :fields="{
+                name: {type: 'text', required: true},
+                logo_file_id: {type: 'number'},
+                owner_user_id: {type: 'select', required: true, options: users.data.map(user => ({value: user.id, label: user.name}))}
+            }" :editable-fields="['name', 'owner_user_id']" :initial-values="{}" @created="ref => {showCreateModal = false}"></CreateForm>
+        </ModalVue>
+    </LoadApiArray>
 
 </template>

@@ -17,6 +17,8 @@ const props = defineProps<{
         <FileImageOrIconVue :file-id="undefined/*TODO props.user.logo_file_id*/" :icon-name="'person-square'" :size="{em: 2}" :thumbnail="true"></FileImageOrIconVue>
 
         <LinkVue>{{ props.user.name }}</LinkVue>
+
+        <slot></slot>
     </Snippet>
 
 </template>

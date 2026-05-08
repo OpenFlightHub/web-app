@@ -2,34 +2,22 @@ import { createRouter, createWebHistory, type LocationQuery, type RouteLocationN
 import { useMainStore } from '@/stores/main'
 import type { Pinia } from 'pinia'
 
-
-
 import HomeView from '@/views/HomeView.vue'
 import MyWorkspacesView from '@/views/MyWorkspacesView.vue'
 import SettingsView from '@/views/SettingsView.vue'
-
-// Structure
 import StructureView from '@/views/StructureView.vue'
 import TeamView from '@/views/TeamView.vue'
 import OrganisationView from '@/views/OrganisationView.vue'
-
-//Auth
 import AuthView from '@/views/auth/AuthView.vue';
 import LoginView from '@/views/auth/LoginView.vue'
 import ChangePasswordView from '@/views/auth/ChangePasswordView.vue';
 import ResetPasswordView from '@/views/auth/ResetPasswordView.vue';
 import SetNewPasswordView from '@/views/auth/SetNewPasswordView.vue';
 import FinishRegistrationView from '@/views/auth/FinishRegistrationView.vue'
-
-// Hub
 import WorkspaceView from '@/views/WorkspaceView.vue'
 import ConnectionView from '@/views/ConnectionView.vue';
 import LinkView from '@/views/link/LinkView.vue'
 import LinkDjiPilot2 from '@/views/link/dji-pilot-2/LinkDjiPilot2.vue';
-
-
-//Error
-
 import Error404View from '@/views/error/Error404View.vue'
 import DroneMediaView from '@/views/DroneMediaView.vue';
 import DroneView from '@/views/DroneView.vue';
@@ -41,7 +29,7 @@ import OrganisationsView from '@/views/admin/organisations/OrganisationsView.vue
 import UsersView from '@/views/admin/users/UsersView.vue'
 import PerformanceView from '@/views/admin/system/PerformanceView.vue'
 import OsView from '@/views/admin/system/performance/OsView.vue'
-
+import UserView from '@/views/UserView.vue'
 
 
 
@@ -215,6 +203,10 @@ export function makeRouter(pinia: Pinia){
             {
                 path: '/drone-media/:mediaId',
                 component: DroneMediaView
+            },
+            {
+                path: '/user/:userId',
+                component: UserView
             },
 
             {

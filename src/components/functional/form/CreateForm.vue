@@ -1,5 +1,5 @@
 <script setup lang="ts" generic="
-    T extends Record<string, any>,
+    T extends void | Record<string, any>,
     C extends {data: Record<string, any>, params?: Record<string, any>}, AM extends ((config: C) => Promise<T>),
     PROPS extends {apiMethod: AM, config: Parameters<AM>[0]},
     EF extends (keyof PROPS['config']['data'])[]">
@@ -30,7 +30,7 @@ export interface FieldTypeCheckbox extends FieldBase<'checkbox'> {
 }
 
 export interface FieldTypeSelect extends FieldBase<'select'> {
-    options: {value: string, label: string}[]
+    options: {value: any, label: string}[]
 }
 
 const toast = useToast()
@@ -40,10 +40,11 @@ const props = defineProps<{
     showCancelButton?: boolean
     createApiMethod: PROPS['apiMethod']
     params: PROPS['config'] extends Record<string, any> ? PROPS['config']['params'] : never
-    fieldTypes: Record<keyof PROPS['config']['data'], Field<FieldType>>
+    fields: Record<keyof PROPS['config']['data'], Field<FieldType>>
     editableFields: EF
     initialValues: Omit<PROPS['config']['data'], EF[number]> & Partial<PROPS['config']['data']>
-}>()//TODO implement nice readable labels for field names
+    readableLabels?: Partial<Record<keyof PROPS['config']['data'], string>>
+}>()
 
 const emit = defineEmits<{
     created: [createdObject: T]
@@ -53,11 +54,25 @@ const emit = defineEmits<{
 const isSending = ref(false)
 const errorMessage = ref('')
 
+function cleanupData(data: FormSubmitEvent['values']): PROPS['config']['data']{
+    const cleanData: Record<string, any> = {}
+
+    for (const fieldName of Object.keys(props.fields)){
+        if(typeof data[fieldName] === 'undefined' || data[fieldName] === null){
+            continue
+        }
+
+        cleanData[fieldName] = data[fieldName]
+    }
+
+    return cleanData
+}
+
 async function save(evt: FormSubmitEvent){
     isSending.value = true
     errorMessage.value = ''
 
-    const cleanData = evt.values as PROPS['config']['data']
+    const cleanData = cleanupData(evt.values)
 
     try {
         const response = await props.createApiMethod({params: props.params, data: cleanData} as PROPS['config'])
@@ -80,48 +95,50 @@ async function save(evt: FormSubmitEvent){
 
     <Form v-slot="$form" :initial-values="props.initialValues" @submit="save" :validate-on-mount="true" :validate-on-value-update="true" :validate-on-blur="true">
 
-        <template v-if="props.fieldTypes">
+        <template v-if="props.fields">
             <div id="fields">
 
-                <template v-for="fieldName of Object.keys(props.fieldTypes)">
+                <template v-for="fieldName of Object.keys(props.fields)">
 
-                    <template v-if="props.fieldTypes[fieldName].type === 'text'">
-                        <IftaLabel>
-                            <InputText :id="fieldName" :name="fieldName" :required="props.fieldTypes[fieldName].required" :minlength="props.fieldTypes[fieldName].required ? 1 : undefined"></InputText>
-                            <label :for="fieldName">{{ fieldName }}</label>
-                        </IftaLabel>
-                    </template>
+                    <template v-if="props.editableFields.includes(fieldName)">
+                        <template v-if="props.fields[fieldName].type === 'text'">
+                            <IftaLabel>
+                                <InputText :id="fieldName" :name="fieldName" :required="props.fields[fieldName].required" :minlength="props.fields[fieldName].required ? 1 : undefined"></InputText>
+                                <label :for="fieldName">{{ props.readableLabels?.[fieldName] ?? fieldName }}</label>
+                            </IftaLabel>
+                        </template>
 
-                    <template v-else-if="props.fieldTypes[fieldName].type === 'email'">
-                        <IftaLabel>
-                            <InputText :id="fieldName" :name="fieldName" :required="props.fieldTypes[fieldName].required" :minlength="props.fieldTypes[fieldName].required ? 1 : undefined" type="email"></InputText>
-                            <label :for="fieldName">{{ fieldName }}</label>
-                        </IftaLabel>
-                    </template>
+                        <template v-else-if="props.fields[fieldName].type === 'email'">
+                            <IftaLabel>
+                                <InputText :id="fieldName" :name="fieldName" :required="props.fields[fieldName].required" :minlength="props.fields[fieldName].required ? 1 : undefined" type="email"></InputText>
+                                <label :for="fieldName">{{ props.readableLabels?.[fieldName] ?? fieldName }}</label>
+                            </IftaLabel>
+                        </template>
 
-                    <template v-else-if="props.fieldTypes[fieldName].type === 'number'">
-                        <IftaLabel>
-                            <InputNumber :id="fieldName" :name="fieldName" :required="props.fieldTypes[fieldName].required"></InputNumber>
-                            <label :for="fieldName">{{ fieldName }}</label>
-                        </IftaLabel>
-                    </template>
+                        <template v-else-if="props.fields[fieldName].type === 'number'">
+                            <IftaLabel>
+                                <InputNumber :id="fieldName" :name="fieldName" :required="props.fields[fieldName].required"></InputNumber>
+                                <label :for="fieldName">{{ props.readableLabels?.[fieldName] ?? fieldName }}</label>
+                            </IftaLabel>
+                        </template>
 
-                    <template v-else-if="props.fieldTypes[fieldName].type === 'checkbox'">
-                        <IftaLabel>
-                            <Checkbox :id="fieldName" :name="fieldName" :required="props.fieldTypes[fieldName].required"></Checkbox>
-                            <label :for="fieldName">{{ fieldName }}</label>
-                        </IftaLabel>
-                    </template>
+                        <template v-else-if="props.fields[fieldName].type === 'checkbox'">
+                            <IftaLabel>
+                                <Checkbox :id="fieldName" :name="fieldName" :required="props.fields[fieldName].required"></Checkbox>
+                                <label :for="fieldName">{{ props.readableLabels?.[fieldName] ?? fieldName }}</label>
+                            </IftaLabel>
+                        </template>
 
-                    <template v-else-if="props.fieldTypes[fieldName].type === 'select'">
-                        <IftaLabel>
-                            <Select :id="fieldName" :name="fieldName" :options="props.fieldTypes[fieldName].options" option-value="value" option-label="label" :required="props.fieldTypes[fieldName].required"></Select>
-                            <label :for="fieldName">{{ fieldName }}</label>
-                        </IftaLabel>
-                    </template>
+                        <template v-else-if="props.fields[fieldName].type === 'select'">
+                            <IftaLabel>
+                                <Select :id="fieldName" :name="fieldName" :options="props.fields[fieldName].options" option-value="value" option-label="label" :required="props.fields[fieldName].required" filter fluid></Select>
+                                <label :for="fieldName">{{ props.readableLabels?.[fieldName] ?? fieldName }}</label>
+                            </IftaLabel>
+                        </template>
 
-                    <template v-else>
-                        Unsupported field type "{{ props.fieldTypes[fieldName].type }}" for field {{ fieldName }}.
+                        <template v-else>
+                            Unsupported field type "{{ (props.fields[fieldName] as Field<FieldType>).type }}" for field {{ fieldName }}.
+                        </template>
                     </template>
 
                 </template>
