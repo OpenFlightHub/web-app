@@ -1,7 +1,5 @@
 <script lang="ts">
 
-
-
 // fix cesium static url
 //@ts-ignore
 window.CESIUM_BASE_URL = '/cesiumStatic'

@@ -44,6 +44,8 @@ app.use(PrimeVue, {
     }
 })
 
+app.use(ToastService)
+
 
 const router = makeRouter(pinia)
 app.use(router)
@@ -94,6 +96,7 @@ app.config.globalProperties.AbortSignal = AbortSignal
 import * as en from './i18n/en.json'
 import * as de from './i18n/de.json'
 import { definePreset } from '@primevue/themes'
+import { ToastService } from 'primevue'
 
 const FALLBACK_LOCALE = 'en'
 

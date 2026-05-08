@@ -13,6 +13,7 @@ import AppSideBar from '@/components/app/AppSideBar.vue';
 import AppContent from '@/components/app/AppContent.vue';
 import BackgroundVue from '../branding/BackgroundVue.vue';
 import AutomaticFileDownload from '@/automatic-file-download/AutomaticFileDownload.vue';
+import { Toast } from 'primevue';
 
 const animateBackground = computed(()=>{
     return route.name === 'login'
@@ -40,6 +41,8 @@ const animateBackground = computed(()=>{
         </AppContent>
 
         <AutomaticFileDownload></AutomaticFileDownload>
+
+        <Toast id="toast"></Toast>
     </div>
 
 </template>
@@ -63,6 +66,19 @@ const animateBackground = computed(()=>{
         width: 100vw;
         height: 100vh;
     }
+
+    #toast {
+        font: 12 px'Open Sans', Helvetica, sans-serif;
+    }
+}
+
+</style>
+
+
+<style lang="scss">
+
+#toast {
+    font-family: 'Open Sans', Helvetica, sans-serif;
 }
 
 </style>
