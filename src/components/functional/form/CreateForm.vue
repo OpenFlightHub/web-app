@@ -10,7 +10,7 @@ import { ref } from 'vue';
 
 export type Field<FieldType> = FieldType extends 'select' ? FieldTypeSelect : FieldBase<FieldType>
 
-export type FieldType = 'text' | 'number' | 'select' | 'checkbox'
+export type FieldType = 'text' | 'email' | 'number' | 'select' | 'checkbox'
 
 export type FieldBase<FieldType> = {
     type: FieldType
@@ -18,6 +18,9 @@ export type FieldBase<FieldType> = {
 }
 
 export interface FieldTypeText extends FieldBase<'text'> {
+}
+
+export interface FieldTypeEmail extends FieldBase<'email'> {
 }
 
 export interface FieldTypeNumber extends FieldBase<'number'> {
@@ -88,26 +91,37 @@ async function save(evt: FormSubmitEvent){
                             <label :for="fieldName">{{ fieldName }}</label>
                         </IftaLabel>
                     </template>
+
+                    <template v-else-if="props.fieldTypes[fieldName].type === 'email'">
+                        <IftaLabel>
+                            <InputText :id="fieldName" :name="fieldName" :required="props.fieldTypes[fieldName].required" :minlength="props.fieldTypes[fieldName].required ? 1 : undefined" type="email"></InputText>
+                            <label :for="fieldName">{{ fieldName }}</label>
+                        </IftaLabel>
+                    </template>
+
                     <template v-else-if="props.fieldTypes[fieldName].type === 'number'">
                         <IftaLabel>
                             <InputNumber :id="fieldName" :name="fieldName" :required="props.fieldTypes[fieldName].required"></InputNumber>
                             <label :for="fieldName">{{ fieldName }}</label>
                         </IftaLabel>
                     </template>
+
                     <template v-else-if="props.fieldTypes[fieldName].type === 'checkbox'">
                         <IftaLabel>
                             <Checkbox :id="fieldName" :name="fieldName" :required="props.fieldTypes[fieldName].required"></Checkbox>
                             <label :for="fieldName">{{ fieldName }}</label>
                         </IftaLabel>
                     </template>
+
                     <template v-else-if="props.fieldTypes[fieldName].type === 'select'">
                         <IftaLabel>
                             <Select :id="fieldName" :name="fieldName" :options="props.fieldTypes[fieldName].options" option-value="value" option-label="label" :required="props.fieldTypes[fieldName].required"></Select>
                             <label :for="fieldName">{{ fieldName }}</label>
                         </IftaLabel>
                     </template>
+
                     <template v-else>
-                        Unsupported field type {{ props.fieldTypes[fieldName] }} for field {{ fieldName }}.
+                        Unsupported field type "{{ props.fieldTypes[fieldName].type }}" for field {{ fieldName }}.
                     </template>
 
                 </template>

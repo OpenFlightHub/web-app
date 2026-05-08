@@ -11,9 +11,14 @@ import Spacing from '@/components/layout/Spacing.vue';
 
         <Spacing></Spacing>
 
-        <RouterLink to="/admin/organisations" class="link"><IconVue name="buildings-fill"></IconVue> Organisations</RouterLink>
+        <div style="display: flex; flex-direction: column; gap: 1em">
 
-        <RouterLink to="/admin/system" class="link"><IconVue name="server"></IconVue> System Dashboard</RouterLink>
+            <RouterLink to="/admin/users" class="link"><IconVue name="person-square"></IconVue> Users</RouterLink>
+
+            <RouterLink to="/admin/organisations" class="link"><IconVue name="buildings-fill"></IconVue> Organisations</RouterLink>
+
+            <RouterLink to="/admin/system" class="link"><IconVue name="server"></IconVue> System Dashboard</RouterLink>
+        </div>
 
         <RouterView/>
     </Padding>

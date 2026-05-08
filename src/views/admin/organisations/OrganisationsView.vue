@@ -21,13 +21,15 @@ const showCreateModal = ref(false)
 
         <Spacing></Spacing>
 
-        <Button @click="showCreateModal = true"><IconVue name="plus"></IconVue>Organisation</Button>
+        <Button @click="showCreateModal = true"><IconVue name="plus"></IconVue> Add Organisation</Button>
 
-        <List horizontal>
-            <LoadApiArray :api-method="api.rest.admin.organisations.get" :config="{}" v-slot="organisations">
+        <Spacing></Spacing>
+
+        <LoadApiArray :api-method="api.rest.admin.organisations.get" :config="{}" v-slot="organisations">
+            <List horizontal>
                 <OrganisationSnippet v-for="organisation of organisations.data" :key="organisation.id" :organisation="organisation"></OrganisationSnippet>
-            </LoadApiArray>
-        </List>
+            </List>
+        </LoadApiArray>
 
     </Padding>
 
