@@ -6,6 +6,7 @@ import api from '@/api';
 import OrganisationSnippet from '@/components/organisation/OrganisationSnippet.vue';
 import TeamSnippet from '@/components/team/TeamSnippet.vue';
 import LoadApiArray from '@/components/functional/LoadApiArray.vue';
+import LoadApi from '@/components/functional/LoadApi.vue';
 
 </script>
 
@@ -17,7 +18,11 @@ import LoadApiArray from '@/components/functional/LoadApiArray.vue';
 
         <LoadApiArray :api-method="api.rest.user.myOrganisations.get" :config="{}" v-slot="myOrganisations">
             <List>
-                <OrganisationSnippet v-for="organisation in myOrganisations.data" :key="organisation.id" :id="organisation.id"></OrganisationSnippet>
+                <template v-for="organisation in myOrganisations.data" :key="organisation.id">
+                    <LoadApi :api-method="api.rest.organisation.get" :config="{params: {organisationId: organisation.id}}" v-slot="organisation_full">
+                        <OrganisationSnippet :organisation="organisation_full.data"></OrganisationSnippet>
+                    </LoadApi>
+                </template>
                 <i v-if="myOrganisations.data.length === 0">None</i>
             </List>
         </LoadApiArray>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import api from '@/api'
+import LoadApi from '@/components/functional/LoadApi.vue';
 import LoadApiArrayWithIdParamInUrl from '@/components/functional/LoadApiArrayWithIdParamInUrl.vue';
 import LoadApiWithIdParamInUrl from '@/components/functional/LoadApiWithIdParamInUrl.vue';
 import FileImageOrIconVue from '@/components/general/FileImageOrIconVue.vue';
@@ -23,7 +24,9 @@ import UserSnippet from '@/components/user/UserSnippet.vue';
             <Spacing></Spacing>
 
             <h2>Owner</h2>
-            <UserSnippet :id="organisation.data.owner_user_id"></UserSnippet>
+            <LoadApi :api-method="api.rest.user.get" :config="{params: {userId: organisation.data.owner_user_id}}" v-slot="owner">
+                <UserSnippet :user="owner.data"></UserSnippet>
+            </LoadApi>
 
             <Spacing></Spacing>
 

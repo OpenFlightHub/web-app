@@ -1,25 +1,22 @@
 <script setup lang="ts">
-import api from '@/api';
 import Snippet from '../layout/Snippet.vue';
-import LoadApi from '../functional/LoadApi.vue';
 import LinkVue from '../general/LinkVue.vue';
 import FileImageOrIconVue from '../general/FileImageOrIconVue.vue';
+import { ApiResponse_UserGet } from 'openflighthub-api-client-sdk';
 
 
 const props = defineProps<{
-    id: number
+    user: ApiResponse_UserGet
 }>()
 
 </script>
 
 <template>
 
-    <LoadApi :api-method="api.rest.user.get" :config="{params: {userId: props.id}}" v-slot="scope">
-        <Snippet :min-width="100" centered horizontal :to-url="'/user/' + props.id">
-            <FileImageOrIconVue :file-id="undefined/*TODO scope.data.logo_file_id*/" :icon-name="'person-square'" :size="{em: 2}" :thumbnail="true"></FileImageOrIconVue>
+    <Snippet :min-width="100" centered horizontal :to-url="'/user/' + props.user.id">
+        <FileImageOrIconVue :file-id="undefined/*TODO props.user.logo_file_id*/" :icon-name="'person-square'" :size="{em: 2}" :thumbnail="true"></FileImageOrIconVue>
 
-            <LinkVue>{{ scope.data.name }}</LinkVue>
-        </Snippet>
-    </LoadApi>
+        <LinkVue>{{ props.user.name }}</LinkVue>
+    </Snippet>
 
 </template>

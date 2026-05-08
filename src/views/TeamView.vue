@@ -7,6 +7,7 @@ import List from '@/components/layout/List.vue';
 import Padding from '@/components/layout/Padding.vue';
 import LoadApiWithIdParamInUrl from '@/components/functional/LoadApiWithIdParamInUrl.vue';
 import LoadApiArrayWithIdParamInUrl from '@/components/functional/LoadApiArrayWithIdParamInUrl.vue';
+import LoadApi from '@/components/functional/LoadApi.vue';
 
 </script>
 
@@ -22,14 +23,18 @@ import LoadApiArrayWithIdParamInUrl from '@/components/functional/LoadApiArrayWi
             <Spacing></Spacing>
 
             <h2>Owner</h2>
-            <UserSnippet :id="team.data.owner_user_id"></UserSnippet>
+            <LoadApi :api-method="api.rest.user.get" :config="{params: {userId: team.data.owner_user_id}}" v-slot="owner">
+                <UserSnippet :user="owner.data"></UserSnippet>
+            </LoadApi>
 
             <Spacing></Spacing>
 
             <h2>Members</h2>
             <LoadApiArrayWithIdParamInUrl :api-method="api.rest.team.members.get" :config="{params: {}}" :id-params="['teamId']" v-slot="members">
                 <List>
-                    <UserSnippet v-for="member in members.data" :key="member.id":id="member.id"></UserSnippet>
+                    <LoadApi v-for="member in members.data" :key="member.id" :api-method="api.rest.user.get" :config="{params: {userId: member.id}}" v-slot="user">
+                        <UserSnippet :user="user.data"></UserSnippet>
+                    </LoadApi>
                 </List>
                 <span v-if="members.data.length === 0">None</span>
             </LoadApiArrayWithIdParamInUrl>

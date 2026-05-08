@@ -1,25 +1,22 @@
 <script setup lang="ts">
-import api from '@/api';
 import Snippet from '../layout/Snippet.vue';
-import LoadApi from '../functional/LoadApi.vue';
 import LinkVue from '../general/LinkVue.vue';
 import FileImageOrIconVue from '../general/FileImageOrIconVue.vue';
+import { ApiResponse_OrganisationGet } from 'openflighthub-api-client-sdk';
 
 
 const props = defineProps<{
-    id: number
+    organisation: ApiResponse_OrganisationGet
 }>()
 
 </script>
 
 <template>
 
-    <LoadApi :api-method="api.rest.organisation.get" :config="{params: {organisationId: props.id}}" v-slot="scope">
-        <Snippet :min-width="100" centered horizontal :to-url="'/organisation/' + props.id">
-            <FileImageOrIconVue :file-id="scope.data.logo_file_id" :icon-name="'buildings-fill'" :size="{em: 2}" :thumbnail="true"></FileImageOrIconVue>
+    <Snippet :min-width="100" centered horizontal :to-url="'/organisation/' + props.organisation.id">
+        <FileImageOrIconVue :file-id="props.organisation.logo_file_id" :icon-name="'buildings-fill'" :size="{em: 2}" :thumbnail="true"></FileImageOrIconVue>
 
-            <LinkVue>{{ scope.data.name }}</LinkVue>
-        </Snippet>
-    </LoadApi>
+        <LinkVue>{{ props.organisation.name }}</LinkVue>
+    </Snippet>
 
 </template>

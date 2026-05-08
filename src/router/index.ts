@@ -37,6 +37,8 @@ import DroneLiveView from '@/views/DroneLiveView.vue'
 import FlightView from '@/views/FlightView.vue';
 import SystemView from '@/views/admin/system/SystemView.vue'
 import AdminView from '@/views/admin/AdminView.vue'
+import OrganisationsView from '@/views/admin/organisations/OrganisationsView.vue'
+import UsersView from '@/views/admin/users/UsersView.vue'
 import PerformanceView from '@/views/admin/system/PerformanceView.vue'
 import OsView from '@/views/admin/system/performance/OsView.vue'
 
@@ -225,6 +227,19 @@ export function makeRouter(pinia: Pinia){
                 name: 'admin',
                 component: AdminView
             },
+
+            {
+                path: '/admin/users',
+                name: 'admin-users',
+                component: UsersView
+            },
+
+            {
+                path: '/admin/organisations',
+                name: 'admin-organisations',
+                component: OrganisationsView
+            },
+
             {
                 path: '/admin/system',
                 name: 'admin-system',
@@ -337,7 +352,7 @@ export function makeRouter(pinia: Pinia){
                     y += currentElement.offsetTop
                 }
 
-                document.getElementById('app').scrollTo({top: y, behavior: 'smooth'})
+                document.getElementById('app')!.scrollTo({top: y, behavior: 'smooth'})
             }
         }, 100)
     })

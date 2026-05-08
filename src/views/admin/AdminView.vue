@@ -11,6 +11,8 @@ import Spacing from '@/components/layout/Spacing.vue';
 
         <Spacing></Spacing>
 
+        <RouterLink to="/admin/organisations" class="link"><IconVue name="buildings-fill"></IconVue> Organisations</RouterLink>
+
         <RouterLink to="/admin/system" class="link"><IconVue name="server"></IconVue> System Dashboard</RouterLink>
 
         <RouterView/>
