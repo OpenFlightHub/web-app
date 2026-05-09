@@ -1,23 +1,20 @@
 <script setup lang="ts">
-import api from '@/api';
 import Snippet from '../layout/Snippet.vue';
-import LoadApi from '../functional/LoadApi.vue';
 import LinkVue from '../general/LinkVue.vue';
+import { ApiResponse_WorkspaceGet } from 'openflighthub-api-client-sdk';
 
 
 const props = defineProps<{
-    id: number
+    workspace: ApiResponse_WorkspaceGet
 }>()
 
 </script>
 
 <template>
 
-    <LoadApi :api-method="api.rest.workspace.get" :config="{params: {workspaceId: props.id}}" v-slot="scope">
-        <Snippet :min-height="100" :min-width="100" centered :to-url="'/workspace/' + props.id">
-            <LinkVue>{{ scope.data.name }}</LinkVue>
-        </Snippet>
-    </LoadApi>
+    <Snippet :min-height="100" :min-width="100" centered :to-url="'/workspace/' + props.workspace.id">
+        <LinkVue>{{ props.workspace.name }}</LinkVue>
+    </Snippet>
 
 </template>
 

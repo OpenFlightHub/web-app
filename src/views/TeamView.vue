@@ -12,12 +12,16 @@ import ModalVue from '@/components/display/ModalVue.vue';
 import CreateForm from '@/components/functional/form/CreateForm.vue';
 import { ref } from 'vue';
 import IconVue from '@/components/general/IconVue.vue';
-import { Button, useConfirm, useToast } from 'primevue';
+import { Button, useConfirm, useToast, TabPanel, TabList, Tab, Tabs } from 'primevue';
+import { getIdQueryFromRouteOrUseDefault } from '@/util/url';
+import { useRoute, useRouter } from 'vue-router';
+import WorkspaceSnippet from '@/components/workspace/WorkspaceSnippet.vue';
 
 const showInviteMemberModal = ref(false)
 
 const confirm = useConfirm()
 const toast = useToast()
+const router = useRouter()
 
 function removeMember(teamId: number, userId: number) {
     confirm.require({
@@ -52,24 +56,58 @@ function removeMember(teamId: number, userId: number) {
                 <UserSnippet :user="owner.data"></UserSnippet>
             </LoadApi>
 
-            <Spacing></Spacing>
+            <Tabs :value="getIdQueryFromRouteOrUseDefault('tab', useRoute(), 0)" @update:value="evt=>{router.push({query: {tab:  '' + evt}})}">
+                <TabList>
+                  <Tab :value="0">Workspaces</Tab>
+                  <Tab :value="1">Members</Tab>
+                  <Tab :value="2">Settings</Tab>
+                </TabList>
+                <TabPanels>
+                    <TabPanel :value="0">
+                        <h2>Workspaces</h2>
 
-            <h2>Members</h2>
+                        <Spacing></Spacing>
 
-            <Spacing></Spacing>
+                        <LoadApiArrayWithIdParamInUrl :api-method="api.rest.team.workspaces.get" :config="{params: {}}" :id-params="['teamId']" v-slot="workspaces">
+                            <List>
+                                <WorkspaceSnippet v-for="workspace of workspaces.data" :key="workspace.id" :workspace="workspace">
 
-            <Button @click="showInviteMemberModal = true"><IconVue name="plus"></IconVue> Invite Member</Button>
+                                </WorkspaceSnippet>
+                            </List>
+                            <span v-if="workspaces.data.length === 0">None</span>
+                        </LoadApiArrayWithIdParamInUrl>
+                    </TabPanel>
+                    <TabPanel :value="1">
 
-            <LoadApiArrayWithIdParamInUrl :api-method="api.rest.team.members.get" :config="{params: {}}" :id-params="['teamId']" v-slot="members">
-                <List>
-                    <LoadApi v-for="member in members.data" :key="member.id" :api-method="api.rest.user.get" :config="{params: {userId: member.id}}" v-slot="user">
-                        <UserSnippet :user="user.data">
-                            <IconVue name="trash" @click.stop.prevent="removeMember(team.data.id, user.data.id)"></IconVue>
-                        </UserSnippet>
-                    </LoadApi>
-                </List>
-                <span v-if="members.data.length === 0">None</span>
-            </LoadApiArrayWithIdParamInUrl>
+                        <h2>Members</h2>
+
+                        <Spacing></Spacing>
+
+                        <Button @click="showInviteMemberModal = true"><IconVue name="plus"></IconVue> Invite Member</Button>
+
+                        <LoadApiArrayWithIdParamInUrl :api-method="api.rest.team.members.get" :config="{params: {}}" :id-params="['teamId']" v-slot="members">
+                            <List>
+                                <LoadApi v-for="member in members.data" :key="member.id" :api-method="api.rest.user.get" :config="{params: {userId: member.id}}" v-slot="user">
+                                    <UserSnippet :user="user.data">
+                                        <IconVue name="trash" @click.stop.prevent="removeMember(team.data.id, user.data.id)"></IconVue>
+                                    </UserSnippet>
+                                </LoadApi>
+                            </List>
+                            <span v-if="members.data.length === 0">None</span>
+                        </LoadApiArrayWithIdParamInUrl>
+
+                    </TabPanel>
+                    <TabPanel :value="2">
+
+                        <h2>Settings</h2>
+
+                        <Spacing></Spacing>
+
+                        TODO
+                    </TabPanel>
+                </TabPanels>
+            </Tabs>
+
         </Padding>
 
 

@@ -19,7 +19,7 @@ const store = useMainStore()
         <h3>Your Workspaces:</h3>
 
         <List horizontal>
-            <WorkspaceSnippet v-for="workspace, index in store.myWorkspaces" :key="index" :id="workspace.id"></WorkspaceSnippet>
+            <WorkspaceSnippet v-for="workspace, index in store.myWorkspaces" :key="index" :workspace="workspace"></WorkspaceSnippet>
         </List>
 
     </Padding>
