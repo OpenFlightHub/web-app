@@ -90,7 +90,7 @@ const router = useRouter()
 
                             <LoadApiArray :api-method="api.rest.drone.flights.get" :config="{params: {droneId: drone.data.id}}" v-slot="flights">
 
-                                <DataTable :value="flights.data" show-gridlines striped-rows sort-field="url" paginator :rows="20" :rows-per-page-options="[20, 50, 100]" data-key="id">
+                                <DataTable :value="flights.data" show-gridlines striped-rows sort-field="started_at" paginator :rows="20" :rows-per-page-options="[20, 50, 100]" data-key="id">
                                     <Column field="started_at" header="Started At" sortable>
                                         <template #body="slotProps">
                                             <TimestampDisplayOr :timestamp="slotProps.data.started_at"></TimestampDisplayOr>
