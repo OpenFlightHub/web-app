@@ -12,7 +12,7 @@ import ModalVue from '@/components/display/ModalVue.vue';
 import CreateForm from '@/components/functional/form/CreateForm.vue';
 import { ref } from 'vue';
 import IconVue from '@/components/general/IconVue.vue';
-import { Button, useConfirm, useToast, TabPanel, TabList, Tab, Tabs } from 'primevue';
+import { Button, useConfirm, useToast, TabPanel, TabList, Tab, Tabs, TabPanels } from 'primevue';
 import { getIdQueryFromRouteOrUseDefault } from '@/util/url';
 import { useRoute, useRouter } from 'vue-router';
 import WorkspaceSnippet from '@/components/workspace/WorkspaceSnippet.vue';
