@@ -16,6 +16,7 @@ const props = defineProps<{
     startCameraPitch?: number // degree
     disableUserControl?: boolean,
     cameraFOV?: number
+    force2D?: boolean
 }>()
 //TODO watch props and respond to changes
 
@@ -27,6 +28,7 @@ let viewer: Viewer = null // if we make Viewer a reactive object, performance go
 const emit = defineEmits<{
     'viewer-loaded': [Viewer]
     'viewer-tiles-loaded': []
+    'location-changed': [position: {latitude: number, longitude: number, elevation: number}, zoom: number, camera: {heading: number, pitch: number, roll: number, fov: number}]
 }>()
 
 //TODO dont hardcode this token
@@ -34,7 +36,7 @@ Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI5Y2NlM
 
 let viewerLoadCheckInterval
 
-onMounted(async()=>{
+onMounted(async()=>{//TODO we can probably move all this code out of the onMounded function since we are in "setup". This means we can get rid of all the on viewer loaded bullshit code
 
     viewer = new Viewer(mapContainer.value, {
         //terrain: new Terrain(CesiumTerrainProvider.fromIonAssetId(4613429)),
@@ -114,12 +116,40 @@ onMounted(async()=>{
     */
 
     viewer.camera.moveEnd.addEventListener(evt=>{
-        const carto = Cartographic.fromCartesian(viewer.camera.position)
-        console.log('camera.moveEnd', MathCesium.toDegrees(carto.longitude), MathCesium.toDegrees(carto.latitude), carto.height)
+        const carto = viewer.camera.positionCartographic
+
+        const longitude = MathCesium.toDegrees(carto.longitude)
+        const latitude = MathCesium.toDegrees(carto.latitude)
+        console.log('camera.moveEnd', longitude, latitude, carto.height)
         //TODO append to url
+
+        let fov = viewer.camera.frustum instanceof PerspectiveFrustum ? MathCesium.toDegrees((viewer.camera.frustum as PerspectiveFrustum).fov!) : undefined
+        if(typeof fov !== 'number'){
+            console.error('fov is not valid', viewer.camera.frustum, fov)
+            fov = 42
+        }
+
+        emit('location-changed', {
+            latitude,
+            longitude,
+            elevation: carto.height
+        }, viewer.camera.positionCartographic.height, {
+            heading: MathCesium.toDegrees(viewer.camera.heading),
+            pitch: MathCesium.toDegrees(viewer.camera.pitch),
+            roll: MathCesium.toDegrees(viewer.camera.roll),
+            fov
+        })
     })
 
     viewer.scene.screenSpaceCameraController.enableInputs = !props.disableUserControl
+
+    if(props.force2D){//TODO watch prop and respond to changes
+        viewer.scene.morphTo2D(0)
+
+        viewer.scene.screenSpaceCameraController.enableRotate = false;
+        viewer.scene.screenSpaceCameraController.enableTilt = false;
+        viewer.scene.screenSpaceCameraController.enableLook = false;
+    }
 
     // viewer.scene.screenSpaceCameraController.enableRotate = false;
     // viewer.scene.screenSpaceCameraController.enableTranslate = false;
