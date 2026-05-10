@@ -12,7 +12,6 @@ import ConnectionLiveStream from '@/components/video/ConnectionLiveStream.vue';
 import Map from '@/components/map/Map.vue';
 import LoadApi from '@/components/functional/LoadApi.vue';
 import SmoothMovement, { Position } from '@/components/flight/SmoothMovement';
-import { p } from 'vue-router/dist/router-CWoNjPRp.mjs';
 import TimeDisplay from '@/components/display/TimeDisplay.vue';
 
 const flightSimulation = ref<InstanceType<typeof FlightSimulation> | null>(null)
