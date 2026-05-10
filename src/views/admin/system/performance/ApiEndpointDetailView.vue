@@ -14,7 +14,7 @@ const props = defineProps<{
 <template>
 
     <LoadApiArray :api-method="api.rest.admin.system.performance.apiEndpoint.details.get" :config="{queryParams: {endpoint: props.endpoint}}" v-slot="scope"><!--TODO method is called twice (something is broken) -->
-        <DataTable :value="scope.data" show-gridlines striped-rows sort-field="url" filter-display="row" paginator :rows="20" :rows-per-page-options="[20, 50, 100]">
+        <DataTable :value="scope.data" show-gridlines striped-rows sort-field="url" paginator :rows="20" :rows-per-page-options="[20, 50, 100]">
             <Column field="url" header="URL" sortable></Column>
             <Column field="http_method" header="Method" sortable></Column>
             <Column field="total_calls" header="Call Count" sortable></Column>
