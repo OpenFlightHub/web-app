@@ -94,7 +94,10 @@ async function saveWorkspace(id: number, event: FormSubmitEvent){
                            </IftaLabel>
                         </div>-->
 
-                        <InputMapLocation :model-value="{longitude: workspace.data.longitude, latitude: workspace.data.latitude}"  id-longitude="longitude" id-latitude="latitude" name-longitude="longitude" name-latitude="latitude" :default-location="{longitude: 11.6, latitude: 48.1}" :start-height="100000" @change="location => {workspace.data.longitude = location.longitude; workspace.data.latitude = location.latitude}"></InputMapLocation>
+                        <IftaLabel>
+                           <InputMapLocation :model-value="{longitude: workspace.data.longitude, latitude: workspace.data.latitude}"  id-longitude="longitude" id-latitude="latitude" name-longitude="longitude" name-latitude="latitude" :default-location="{longitude: 11.6, latitude: 48.1}" :start-height="100000" @change="location => {workspace.data.longitude = location.longitude; workspace.data.latitude = location.latitude}"></InputMapLocation>
+                           <label for="longitude_latitude">Longitude / Latitude</label>
+                        </IftaLabel>
 
                         <Button type="submit" label="Save"></Button>
                      </Form>

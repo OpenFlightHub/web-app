@@ -2,8 +2,10 @@
 import ModalVue from '@/components/display/ModalVue.vue';
 import { computed, ref } from 'vue';
 import Map from '@/components/map/Map.vue';
-import { InputText, InputNumber } from 'primevue';
+import { InputText, InputNumber, InputGroup, InputGroupAddon } from 'primevue';
 import IconVue from '@/components/general/IconVue.vue';
+
+const DEFAULT_MAX_FRACTION_DIGITS = 6
 
 const model = defineModel<{
     longitude: number
@@ -24,12 +26,21 @@ const props = defineProps<{
         longitude: number
         latitude: number
     }
+    maxFractionDigits?: number
 }>()
+
+const maxFractionDigits = computed(() => {
+    if(typeof props.maxFractionDigits === 'number'){
+        return props.maxFractionDigits
+    }
+
+    return DEFAULT_MAX_FRACTION_DIGITS
+})
 
 const valueAsString = computed(() => {
     if(model.value){
         if(typeof model.value.latitude === 'number' && !isNaN(model.value.latitude) && typeof model.value.longitude === 'number' && !isNaN(model.value.longitude)) {
-            return '' + model.value.latitude + ', ' + model.value.longitude
+            return '' + model.value.latitude.toFixed(maxFractionDigits.value) + ', ' + model.value.longitude.toFixed(maxFractionDigits.value)
         }
     }
 
@@ -70,10 +81,15 @@ function changeLocation(latitude: number, longitude: number){
 
 <template>
 
-    <InputNumber :id="props.idLongitude" :name="props.nameLongitude" style="display: none;"></InputNumber>
-    <InputNumber :id="props.idLatitude" :name="props.nameLatitude" style="display: none;"></InputNumber>
+    <InputNumber :id="props.idLongitude" :name="props.nameLongitude" style="display: none;" :max-fraction-digits="props.maxFractionDigits ?? DEFAULT_MAX_FRACTION_DIGITS"></InputNumber>
+    <InputNumber :id="props.idLatitude" :name="props.nameLatitude" style="display: none;" :max-fraction-digits="props.maxFractionDigits ?? DEFAULT_MAX_FRACTION_DIGITS"></InputNumber>
 
-    <InputText v-model="valueAsString" :id="props.idLongitude + '_' + props.idLatitude" :name="props.nameLongitude + '_' + props.nameLatitude" @input="updateModelFromText" @click.stop.prevent="modalVisible = true"></InputText>
+    <InputGroup @click.stop.prevent="modalVisible = true">
+        <InputText v-model="valueAsString" :id="props.idLongitude + '_' + props.idLatitude" :name="props.nameLongitude + '_' + props.nameLatitude" @input="updateModelFromText"></InputText>
+        <InputGroupAddon>
+            <IconVue name="map" style="cursor: pointer;"></IconVue>
+        </InputGroupAddon>
+    </InputGroup>
 
     <ModalVue :visible="modalVisible" @close="modalVisible = false">
         <div id="map-container">
