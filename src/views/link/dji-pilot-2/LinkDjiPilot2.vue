@@ -57,9 +57,8 @@ async function linkToWorkspace(){
 
     try {
 
-        const ret = await api.rest.workspace.connections.post({params: {
-            workspaceId: selectedWorkspaceToLinkTo.value
-        }, data: {
+        const ret = await api.rest.connection.post({data: {
+            workspace_id: selectedWorkspaceToLinkTo.value,
             name: connectionName.value
         }})
 
@@ -69,7 +68,7 @@ async function linkToWorkspace(){
         mustLinkFirst.value = false
 
     } catch (err){
-        linkingError.value = err
+        linkingError.value = '' + err
     } finally {
         linkingIsInProgress.value = false
     }
