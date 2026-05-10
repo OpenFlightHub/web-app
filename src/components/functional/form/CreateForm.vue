@@ -34,8 +34,9 @@ export interface FieldTypeCheckbox extends FieldBase<'checkbox'> {
 }
 
 export interface FieldTypeDateWithTime extends FieldBase<'date-with-time'> {
-    only_date?: boolean // if true, time will be ignored and set to 00:00:00
+    onlyDate?: boolean // if true, time will be ignored and set to 00:00:00
     max?: Date // maximum date that can be selected
+    noSeconds?: boolean // if true, seconds will be ignored and set to 00
 }
 
 export interface FieldTypeRaw extends FieldBase<'raw'> {
@@ -67,11 +68,26 @@ function cleanupData(data: FormSubmitEvent['values']): PROPS['config']['data']{
     const cleanData: Record<string, any> = {}
 
     for (const fieldName of Object.keys(props.fields)){
+
+        cleanData[fieldName] = props.initialValues[fieldName]
+
         if(typeof data[fieldName] === 'undefined' || data[fieldName] === null){
             continue
         }
 
         cleanData[fieldName] = data[fieldName]
+
+        if(props.fields[fieldName].type === 'date-with-time'){
+            if(props.fields[fieldName].onlyDate){
+                const date = new Date(data[fieldName])
+                cleanData[fieldName] = new Date(date.setHours(0, 0, 0, 0)).toISOString()
+            } else if (props.fields[fieldName].noSeconds){
+                const date = new Date(data[fieldName])
+                cleanData[fieldName] = new Date(date.setSeconds(0, 0)).toISOString()
+            } else {
+                cleanData[fieldName] = new Date(data[fieldName]).toISOString()
+            }
+        }
     }
 
     return cleanData
@@ -147,7 +163,7 @@ async function save(evt: FormSubmitEvent){
 
                         <template v-else-if="props.fields[fieldName].type === 'date-with-time'">
                             <IftaLabel>
-                                <DatePicker :id="fieldName" :name="fieldName" :required="props.fields[fieldName].required" show-time hour-format="24" :max-date="props.fields[fieldName].max" fluid></DatePicker>
+                                <DatePicker :id="fieldName" :name="fieldName" :required="props.fields[fieldName].required" :show-time="props.fields[fieldName].onlyDate !== true" hour-format="24" :max-date="props.fields[fieldName].max" fluid></DatePicker>
                                 <label :for="fieldName">{{ props.readableLabels?.[fieldName] ?? fieldName }}</label>
                             </IftaLabel>
                         </template>

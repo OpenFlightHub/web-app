@@ -140,13 +140,13 @@ const showAddFlightModal = ref(false)
             <ModalVue :visible="showAddFlightModal" @close="showAddFlightModal = false">
                 <CreateForm title="Add Flight" :create-api-method="api.rest.flight.post" :params="{}" :fields="{
                     drone_id: {type: 'number', required: true},
-                    started_at: {type: 'date-with-time', required: true, max: new Date()},
-                    landed_at: {type: 'date-with-time', max: new Date()},
-                    ended_at: {type: 'date-with-time', max: new Date()},
+                    started_at: {type: 'date-with-time', required: true, noSeconds: true, max: new Date()},
+                    landed_at: {type: 'date-with-time', noSeconds: true, max: new Date()},
+                    ended_at: {type: 'date-with-time', noSeconds: true, max: new Date()},
                     track: {type: 'raw'}
                 }" :editable-fields="['started_at', 'ended_at', 'landed_at']" :initial-values="{
                     drone_id: drone.data.id
-                }" @created="ref => {showAddFlightModal = false}"></CreateForm>
+                }" @created="() => {showAddFlightModal = false}"></CreateForm>
             </ModalVue>
 
         </LoadApiWithIdParamInUrl>
