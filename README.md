@@ -143,3 +143,8 @@ see /src/config/colors.ts
 # Internationalisation / Translation via Vue I18n
 see INTERNATIONALISATION.md
 
+# Vue
+
+Usefull plugins you can use:
+* PrimeVue (for UI) https://primevue.org/
+* https://github.com/vuejs/language-tools/tree/master/packages/component-type-helpers
