@@ -1,0 +1,108 @@
+<script setup lang="ts">
+import ModalVue from '@/components/display/ModalVue.vue';
+import { computed, ref } from 'vue';
+import Map from '@/components/map/Map.vue';
+import { InputText, InputNumber } from 'primevue';
+import IconVue from '@/components/general/IconVue.vue';
+
+const model = defineModel<{
+    longitude: number
+    latitude: number
+}>()
+
+const emit = defineEmits<{
+    (e: 'change', value: {longitude: number, latitude: number}): void
+}>()
+
+const props = defineProps<{
+    idLongitude: string
+    idLatitude: string
+    nameLongitude:  string
+    nameLatitude:  string
+    startHeight?: number // default 1000
+    defaultLocation: {
+        longitude: number
+        latitude: number
+    }
+}>()
+
+const valueAsString = computed(() => {
+    if(model.value){
+        if(typeof model.value.latitude === 'number' && !isNaN(model.value.latitude) && typeof model.value.longitude === 'number' && !isNaN(model.value.longitude)) {
+            return '' + model.value.latitude + ', ' + model.value.longitude
+        }
+    }
+
+    return ''
+})
+
+function updateModelFromText() {
+    const parts = valueAsString.value.split(',')
+    if (parts.length === 2) {
+        const lat = parseFloat(parts[0])
+        const lng = parseFloat(parts[1])
+        if (!isNaN(lat) && !isNaN(lng)) {
+            model.value = {
+                latitude: lat,
+                longitude: lng
+            }
+        }
+    }
+}
+
+const modalVisible = ref(false)
+
+function changeLocation(latitude: number, longitude: number){
+    model.value = {latitude, longitude}
+
+    const inputElementLongitude = document.querySelector(`input[name="${props.nameLongitude}"]`)! as HTMLInputElement
+    inputElementLongitude.value = '' + longitude
+    inputElementLongitude.dispatchEvent(new Event('change'))
+
+    const inputElementLatitude = document.querySelector(`input[name="${props.nameLatitude}"]`)! as HTMLInputElement
+    inputElementLatitude.value = '' + latitude
+    inputElementLatitude.dispatchEvent(new Event('change'))
+
+    emit('change', {latitude, longitude})
+}
+
+</script>
+
+<template>
+
+    <InputNumber :id="props.idLongitude" :name="props.nameLongitude" style="display: none;"></InputNumber>
+    <InputNumber :id="props.idLatitude" :name="props.nameLatitude" style="display: none;"></InputNumber>
+
+    <InputText v-model="valueAsString" :id="props.idLongitude + '_' + props.idLatitude" :name="props.nameLongitude + '_' + props.nameLatitude" @input="updateModelFromText" @click.stop.prevent="modalVisible = true"></InputText>
+
+    <ModalVue :visible="modalVisible" @close="modalVisible = false">
+        <div id="map-container">
+            <Map :start-point="{longitude: model?.longitude ?? props.defaultLocation.longitude, latitude: model?.latitude ?? props.defaultLocation.latitude}" :start-height="props.startHeight ?? 1000" style="height: 100%; width: 100%;" :forceTopDown="true" @location-changed="loc => changeLocation(loc.latitude, loc.longitude)">
+                <IconVue name="plus-lg" id="crosshair"></IconVue>
+            </Map>
+        </div>
+    </ModalVue>
+
+</template>
+
+<style scoped lang="scss">
+
+#map-container {
+    position: relative;
+    width: 400px;
+    height: 400px;
+
+    #crosshair {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+        font-size: 2em;
+        color: red;
+        z-index: 2;
+    }
+
+}
+
+</style>

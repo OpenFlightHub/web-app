@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted, inject, provide } from 'vue';
+import { ref, onMounted, provide } from 'vue';
 
-import { Cartesian3, Ion, Math as MathCesium, Terrain, Viewer, Cartographic, PerspectiveFrustum, IonImageryProvider, CesiumTerrainProvider, ImageryProvider } from "cesium";
+import { Cartesian3, Ion, Math as MathCesium, Terrain, Viewer, PerspectiveFrustum, CesiumTerrainProvider, SceneMode } from "cesium";
 import "cesium/Build/Cesium/Widgets/widgets.css";
 import { getSetting } from '@/util/settings';
 import { WebMapServiceImageryProvider } from 'cesium';
@@ -16,7 +16,7 @@ const props = defineProps<{
     startCameraPitch?: number // degree
     disableUserControl?: boolean,
     cameraFOV?: number
-    force2D?: boolean
+    forceTopDown?: boolean
 }>()
 //TODO watch props and respond to changes
 
@@ -28,7 +28,7 @@ let viewer: Viewer = null // if we make Viewer a reactive object, performance go
 const emit = defineEmits<{
     'viewer-loaded': [Viewer]
     'viewer-tiles-loaded': []
-    'location-changed': [position: {latitude: number, longitude: number, elevation: number}, zoom: number, camera: {heading: number, pitch: number, roll: number, fov: number}]
+    'location-changed': [position: {latitude: number, longitude: number, elevation: number}, zoom: number, camera: undefined | {heading: number, pitch: number, roll: number, fov: number}]// camera is undefined in force2d mode
 }>()
 
 //TODO dont hardcode this token
@@ -106,6 +106,13 @@ onMounted(async()=>{//TODO we can probably move all this code out of the onMound
     // })
     //viewer.imageryLayers.addImageryProvider(openstreetmap) //TODO add attribution see https://operations.osmfoundation.org/policies/tiles/
 
+
+
+    if(props.forceTopDown){//TODO watch prop and respond to changes
+        viewer.scene.mode = SceneMode.SCENE2D
+    }
+
+
     resetCamera()
 
     /*
@@ -114,6 +121,15 @@ onMounted(async()=>{//TODO we can probably move all this code out of the onMound
         viewer.scene.primitives.add(buildingTileset)
     })
     */
+
+    if(props.forceTopDown){//TODO watch prop and respond to changes
+        viewer.scene.screenSpaceCameraController.enableRotate = false;
+        viewer.scene.screenSpaceCameraController.enableTilt = false;
+        viewer.scene.screenSpaceCameraController.enableLook = false;
+    }
+    // viewer.scene.screenSpaceCameraController.enableTranslate = false;
+    // viewer.scene.screenSpaceCameraController.enableZoom = false;
+
 
     viewer.camera.moveEnd.addEventListener(evt=>{
         const carto = viewer.camera.positionCartographic
@@ -125,7 +141,9 @@ onMounted(async()=>{//TODO we can probably move all this code out of the onMound
 
         let fov = viewer.camera.frustum instanceof PerspectiveFrustum ? MathCesium.toDegrees((viewer.camera.frustum as PerspectiveFrustum).fov!) : undefined
         if(typeof fov !== 'number'){
-            console.error('fov is not valid', viewer.camera.frustum, fov)
+            if(props.forceTopDown !== true){
+                console.error('fov is not valid', viewer.camera.frustum, fov)
+            }
             fov = 42
         }
 
@@ -133,7 +151,7 @@ onMounted(async()=>{//TODO we can probably move all this code out of the onMound
             latitude,
             longitude,
             elevation: carto.height
-        }, viewer.camera.positionCartographic.height, {
+        }, viewer.camera.positionCartographic.height, props.forceTopDown ? undefined : {
             heading: MathCesium.toDegrees(viewer.camera.heading),
             pitch: MathCesium.toDegrees(viewer.camera.pitch),
             roll: MathCesium.toDegrees(viewer.camera.roll),
@@ -142,20 +160,6 @@ onMounted(async()=>{//TODO we can probably move all this code out of the onMound
     })
 
     viewer.scene.screenSpaceCameraController.enableInputs = !props.disableUserControl
-
-    if(props.force2D){//TODO watch prop and respond to changes
-        viewer.scene.morphTo2D(0)
-
-        viewer.scene.screenSpaceCameraController.enableRotate = false;
-        viewer.scene.screenSpaceCameraController.enableTilt = false;
-        viewer.scene.screenSpaceCameraController.enableLook = false;
-    }
-
-    // viewer.scene.screenSpaceCameraController.enableRotate = false;
-    // viewer.scene.screenSpaceCameraController.enableTranslate = false;
-    // viewer.scene.screenSpaceCameraController.enableZoom = false;
-    // viewer.scene.screenSpaceCameraController.enableTilt = false;
-    // viewer.scene.screenSpaceCameraController.enableLook = false;
 
     viewerLoadCheckInterval = setInterval(()=>{
 
@@ -178,7 +182,10 @@ function resetCamera(){
 
     viewer.camera.setView({
         destination: Cartesian3.fromDegrees(props.startPoint.longitude, props.startPoint.latitude, props.startHeight),
-        orientation: {
+        orientation: props.forceTopDown ? {
+            heading: MathCesium.toRadians(0),
+            pitch: MathCesium.toRadians(-90),
+        } : {
             heading: MathCesium.toRadians(typeof props.startCameraHeading === 'number' ? props.startCameraHeading : 0),
             pitch: MathCesium.toRadians(typeof props.startCameraPitch === 'number' ? props.startCameraPitch : -15),
         }

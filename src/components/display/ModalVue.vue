@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import IconVue from '../general/IconVue.vue';
-import Padding from '../layout/Padding.vue';
 
 /**
  * @prop maxWidth optional max width of the modal content, default is 600px
@@ -40,6 +39,7 @@ const emit = defineEmits<{
     display: flex;
     justify-content: center;
     align-items: center;
+    z-index: 1;
 }
 
 #modal-content {

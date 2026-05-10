@@ -5,7 +5,7 @@ import List from '@/components/layout/List.vue';
 import LoadApiWithIdParamInUrl from '@/components/functional/LoadApiWithIdParamInUrl.vue';
 import ConnectionSnippet from '@/components/connection/ConnectionSnippet.vue';
 import HubWorkspaceMap from '@/components/workspace/HubWorkspaceMap.vue';
-import { Tabs, TabList, Tab, TabPanels, TabPanel, InputText, FloatLabel, InputNumber, Button, useToast, Divider, IftaLabel } from 'primevue';
+import { Tabs, TabList, Tab, TabPanels, TabPanel, InputText, Button, useToast, IftaLabel } from 'primevue';
 import Padding from '@/components/layout/Padding.vue';
 import { useRoute, useRouter } from 'vue-router';
 import { getIdQueryFromRouteOrUseDefault } from '@/util/url';
@@ -15,13 +15,18 @@ import DroneSnippet from '@/components/drone/DroneSnippet.vue';
 import { uniqueProperty } from '@/util/array';
 import LoadApiArrayWithIdParamInUrl from '@/components/functional/LoadApiArrayWithIdParamInUrl.vue';
 import { Form, FormSubmitEvent } from '@primevue/forms';
+import InputMapLocation from '@/components/functional/form/InputMapLocation.vue';
 
 const router = useRouter()
 
 const toast = useToast()
 
 async function saveWorkspace(id: number, event: FormSubmitEvent){
-   await api.rest.workspace.patch({params: {workspaceId: id}, data: {name: event.values.name}})
+   await api.rest.workspace.patch({params: {workspaceId: id}, data: {
+      name: event.values.name,
+      latitude: parseFloat(event.values.latitude),//TODO temporary fix because InputMapLocation does create strings here
+      longitude: parseFloat(event.values.longitude)
+   }})
    toast.add({severity: 'success', summary: 'Workspace saved', life: 3000})
    //TODO update loadapi data (or implement that loadapi can use live data instead of only loading on mount)
 }
@@ -77,7 +82,7 @@ async function saveWorkspace(id: number, event: FormSubmitEvent){
                            <label for="name">Name</label>
                         </IftaLabel>
 
-                        <div style="display: flex; gap: 1em">
+                        <!--<div style="display: flex; gap: 1em">
                            <IftaLabel>
                               <InputNumber id="latitude" name="latitude"></InputNumber>
                               <label for="latitude">Latitude</label>
@@ -87,7 +92,9 @@ async function saveWorkspace(id: number, event: FormSubmitEvent){
                               <InputNumber id="longitude" name="longitude"></InputNumber>
                               <label for="longitude">Longitude</label>
                            </IftaLabel>
-                        </div>
+                        </div>-->
+
+                        <InputMapLocation :model-value="{longitude: workspace.data.longitude, latitude: workspace.data.latitude}"  id-longitude="longitude" id-latitude="latitude" name-longitude="longitude" name-latitude="latitude" :default-location="{longitude: 11.6, latitude: 48.1}" :start-height="100000" @change="location => {workspace.data.longitude = location.longitude; workspace.data.latitude = location.latitude}"></InputMapLocation>
 
                         <Button type="submit" label="Save"></Button>
                      </Form>
