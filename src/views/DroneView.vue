@@ -10,12 +10,18 @@ import RemoteControllerSnippet from '@/components/remote_controller/RemoteContro
 import { sortByProperty, uniqueByProperty } from '@/util/array';
 import Spacing from '@/components/layout/Spacing.vue';
 import LoadApiArray from '@/components/functional/LoadApiArray.vue';
-import { TabList, Tabs, TabPanel, Tab, TabPanels, DataTable, Column } from 'primevue';
+import { TabList, Tabs, TabPanel, Tab, TabPanels, DataTable, Column, Button } from 'primevue';
 import { getIdQueryFromRouteOrUseDefault } from '@/util/url';
 import { useRoute, useRouter } from 'vue-router';
 import TimestampDisplayOr from '@/components/display/TimestampDisplayOr.vue';
+import { ref } from 'vue';
+import ModalVue from '@/components/display/ModalVue.vue';
+import CreateForm from '@/components/functional/form/CreateForm.vue';
+import IconVue from '@/components/general/IconVue.vue';
 
 const router = useRouter()
+
+const showAddFlightModal = ref(false)
 
 </script>
 
@@ -88,6 +94,8 @@ const router = useRouter()
 
                             <h2>Flights</h2>
 
+                            <Button @click="showAddFlightModal = true"><IconVue name="plus"></IconVue> Add Flight</Button>
+
                             <LoadApiArray :api-method="api.rest.drone.flights.get" :config="{params: {droneId: drone.data.id}}" v-slot="flights">
 
                                 <DataTable :value="flights.data" show-gridlines striped-rows sort-field="started_at" paginator :rows="20" :rows-per-page-options="[20, 50, 100]" data-key="id">
@@ -125,6 +133,22 @@ const router = useRouter()
                     </TabPanels>
                 </Tabs>
             </Padding>
+
+
+
+
+            <ModalVue :visible="showAddFlightModal" @close="showAddFlightModal = false">
+                <CreateForm title="Add Flight" :create-api-method="api.rest.flight.post" :params="{}" :fields="{
+                    drone_id: {type: 'number', required: true},
+                    started_at: {type: 'date-with-time', required: true, max: new Date()},
+                    landed_at: {type: 'date-with-time', max: new Date()},
+                    ended_at: {type: 'date-with-time', max: new Date()},
+                    track: {type: 'raw'}
+                }" :editable-fields="['started_at', 'ended_at', 'landed_at']" :initial-values="{
+                    drone_id: drone.data.id
+                }" @created="ref => {showAddFlightModal = false}"></CreateForm>
+            </ModalVue>
+
         </LoadApiWithIdParamInUrl>
     </Padding>
 

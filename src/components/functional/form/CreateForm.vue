@@ -5,12 +5,12 @@
     EF extends (keyof PROPS['config']['data'])[]">
 import { FormSubmitEvent } from '@/util/primevue';
 import { Form } from '@primevue/forms';
-import { Button, Checkbox, Select, InputNumber, IftaLabel, InputText, Message, useToast  } from 'primevue';
+import { Button, Checkbox, Select, InputNumber, IftaLabel, InputText, useToast, DatePicker  } from 'primevue';
 import { ref } from 'vue';
 
-export type Field<FieldType> = FieldType extends 'select' ? FieldTypeSelect : FieldBase<FieldType>
+export type Field<FieldType> = FieldType extends 'text' ? FieldTypeText : FieldType extends 'email' ? FieldTypeEmail : FieldType extends 'number' ? FieldTypeNumber : FieldType extends 'select' ? FieldTypeSelect : FieldType extends 'checkbox' ? FieldTypeCheckbox : FieldType extends 'date-with-time' ? FieldTypeDateWithTime : FieldType extends 'raw' ? FieldTypeRaw : FieldBase<FieldType>
 
-export type FieldType = 'text' | 'email' | 'number' | 'select' | 'checkbox'
+export type FieldType = 'text' | 'email' | 'number' | 'select' | 'checkbox' | 'date-with-time' | 'raw'
 
 export type FieldBase<FieldType> = {
     type: FieldType
@@ -26,12 +26,21 @@ export interface FieldTypeEmail extends FieldBase<'email'> {
 export interface FieldTypeNumber extends FieldBase<'number'> {
 }
 
-export interface FieldTypeCheckbox extends FieldBase<'checkbox'> {
-}
-
 export interface FieldTypeSelect extends FieldBase<'select'> {
     options: {value: any, label: string}[]
 }
+
+export interface FieldTypeCheckbox extends FieldBase<'checkbox'> {
+}
+
+export interface FieldTypeDateWithTime extends FieldBase<'date-with-time'> {
+    only_date?: boolean // if true, time will be ignored and set to 00:00:00
+    max?: Date // maximum date that can be selected
+}
+
+export interface FieldTypeRaw extends FieldBase<'raw'> {
+}
+
 
 const toast = useToast()
 
@@ -134,6 +143,17 @@ async function save(evt: FormSubmitEvent){
                                 <Select :id="fieldName" :name="fieldName" :options="props.fields[fieldName].options" option-value="value" option-label="label" :required="props.fields[fieldName].required" filter fluid></Select>
                                 <label :for="fieldName">{{ props.readableLabels?.[fieldName] ?? fieldName }}</label>
                             </IftaLabel>
+                        </template>
+
+                        <template v-else-if="props.fields[fieldName].type === 'date-with-time'">
+                            <IftaLabel>
+                                <DatePicker :id="fieldName" :name="fieldName" :required="props.fields[fieldName].required" show-time hour-format="24" :max-date="props.fields[fieldName].max" fluid></DatePicker>
+                                <label :for="fieldName">{{ props.readableLabels?.[fieldName] ?? fieldName }}</label>
+                            </IftaLabel>
+                        </template>
+
+                        <template v-else-if="props.fields[fieldName].type === 'raw'">
+                            <!-- hidden -->
                         </template>
 
                         <template v-else>
