@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import { getCurrentInstance, onBeforeUnmount, onMounted, watch } from 'vue';
+import { getCurrentInstance, inject, onBeforeUnmount, onMounted, watch } from 'vue';
 import { Cartesian3, CircleGeometry, CircleOutlineGeometry, Color, Entity, HeightReference, Viewer, Cartographic, LabelStyle, PolylineDashMaterialProperty } from 'cesium';
 import * as turf from '@turf/turf'
 import { getElevationAtPosition } from '@/util/terrain';
 
 //TODO if line elevation is below cesium terrain, clamp it to ground
 const props = defineProps<{
-    viewer: Viewer
     position: [number, number, number?]
     radius: number
     clampToGround?: boolean
@@ -17,6 +16,9 @@ const props = defineProps<{
     label?: string
     outlineDashed?: boolean
 }>()
+
+const viewer = inject<Viewer>('cesiumViewer')
+const mapContainer = inject<HTMLElement>('mapContainer')
 
 const myId = '' + getCurrentInstance()?.uid
 
@@ -43,15 +45,15 @@ async function update(){
 
 async function addCircle(){
 
-    const height = props.clampToGround ? undefined : (typeof props.position[2] === 'number' ? props.position[2] : (await getElevationAtPosition(props.viewer, props.position[0], props.position[1])).height)
+    const height = props.clampToGround ? undefined : (typeof props.position[2] === 'number' ? props.position[2] : (await getElevationAtPosition(viewer!, props.position[0], props.position[1])).height)
 
-    let circle = props.viewer.entities.getById('map-circle-' + myId)
+    let circle = viewer!.entities.getById('map-circle-' + myId)
 
     if(circle){
-        props.viewer.entities.remove(circle)//TODO dont remove entity, instead update it
+        viewer!.entities.remove(circle)//TODO dont remove entity, instead update it
     }
 
-    circle = props.viewer.entities.add({
+    circle = viewer!.entities.add({
         id: 'map-circle-' + myId,
 
         position: Cartesian3.fromDegrees(props.position[0], props.position[1], height),
@@ -86,20 +88,20 @@ async function addOutline(){
 
     const turfCircle = turf.circle([props.position[0], props.position[1]], props.radius, {units: 'meters'})
 
-    const circleHeight = props.clampToGround ? 0 : ( typeof props.position[2] === 'number' ? props.position[2] : (await getElevationAtPosition(props.viewer, props.position[0], props.position[1])).height )
+    const circleHeight = props.clampToGround ? 0 : ( typeof props.position[2] === 'number' ? props.position[2] : (await getElevationAtPosition(viewer!, props.position[0], props.position[1])).height )
 
     const positions = turfCircle.geometry.coordinates[0].map(c => {
         const cartographicPosition = Cartographic.fromDegrees(c[0], c[1], circleHeight)
         return Cartographic.toCartesian(cartographicPosition)
     })
 
-    let outline = props.viewer.entities.getById('map-circle_outline-' + myId)
+    let outline = viewer!.entities.getById('map-circle_outline-' + myId)
 
     if(outline){
-        props.viewer.entities.remove(outline)//TODO dont remove entity, instead update it
+        viewer!.entities.remove(outline)//TODO dont remove entity, instead update it
     }
 
-    outline = props.viewer.entities.add({
+    outline = viewer!.entities.add({
         id: 'map-circle_outline-' + myId,
         polyline: {
             positions,
@@ -114,11 +116,11 @@ async function addOutline(){
 }
 
 function removeCircle(){
-    props.viewer.entities.removeById('map-circle-' + myId)
+    viewer!.entities.removeById('map-circle-' + myId)
 }
 
 function removeOutline(){
-    props.viewer.entities.removeById('map-circle_outline-' + myId)
+    viewer!.entities.removeById('map-circle_outline-' + myId)
 }
 
 

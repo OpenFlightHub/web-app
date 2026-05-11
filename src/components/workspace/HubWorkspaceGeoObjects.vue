@@ -1,14 +1,9 @@
 <script setup lang="ts">
 import api from '@/api'
 import {inject, onMounted, onUnmounted, reactive} from 'vue'
-import MapMarker from '../map/MapMarker.vue';
-import { Color, Viewer } from 'cesium';
+import { Viewer } from 'cesium';
 import { ApiResponse_WorkspaceGeoObjectsGet } from 'openflighthub-api-client-sdk';
 import { updateArray, updateObject } from '@/util/vue';
-import { getColorForHex, getMapCenter } from '@/util/cesium';
-import MapPolyline from '../map/MapPolyline.vue';
-import MapPolygon from '../map/MapPolygon.vue';
-import MapCircle from '../map/MapCircle.vue';
 import GeoObject from '../geo-object/GeoObject.vue';
 
 const props = defineProps<{
