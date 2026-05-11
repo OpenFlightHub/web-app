@@ -238,6 +238,10 @@ onBeforeMount(()=>{
     width: 100%;
     height: 100%;
     pointer-events: none; // allow clicks to pass through to the map
+
+    *:not(div) {
+        pointer-events: auto; // allow interaction with direct children of the overlay
+    }
 }
 
 </style>
