@@ -31,6 +31,7 @@ import PerformanceView from '@/views/admin/system/PerformanceView.vue'
 import OsView from '@/views/admin/system/performance/OsView.vue'
 import UserView from '@/views/UserView.vue'
 import MissionView from '@/views/MissionView.vue'
+import DatabaseView from '@/views/admin/system/DatabaseView.vue'
 
 
 
@@ -251,6 +252,10 @@ export function makeRouter(pinia: Pinia){
                     {
                         path: 'performance',
                         component: PerformanceView,
+                    },
+                    {
+                        path: 'database',
+                        component: DatabaseView,
                     }
                 ]
             },
