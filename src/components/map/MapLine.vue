@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getCurrentInstance, onBeforeUnmount, onMounted, watch } from 'vue';
+import { getCurrentInstance, inject, onBeforeUnmount, onMounted, watch } from 'vue';
 import { Cartesian2, Cartesian3, Cartographic, Color, Entity, HeightReference, LabelStyle, PolylineDashMaterialProperty, VerticalOrigin, Viewer } from 'cesium';
 import { getElevationAtPosition } from '@/util/terrain';
 import { convertEllipsoidalHeightToOrthometricHeight } from '@/util/geoid';
@@ -10,7 +10,6 @@ import { midpoint } from '@turf/turf';
 
 //TODO if line elevation is below cesium terrain, clamp it to ground
 const props = defineProps<{
-    viewer: Viewer
     from: {
         position: [number, number],
         elevation?: number //if not present, marker will sit on the ground
@@ -24,6 +23,10 @@ const props = defineProps<{
     label?: string
     fontSize?: number
 }>()
+
+const viewer = inject<Viewer>('cesiumViewer')
+const mapContainer = inject<HTMLElement>('mapContainer')
+
 
 const myId = '' + getCurrentInstance()?.uid
 
@@ -54,25 +57,25 @@ function toHeightIsNotZero(){
 
 async function addLine(){
 
-    const fromPos = fromHeightIsNotZero() ? Cartographic.fromDegrees(props.from.position[0], props.from.position[1], props.from.elevation) : await getElevationAtPosition(props.viewer, props.from.position[0], props.from.position[1])
+    const fromPos = fromHeightIsNotZero() ? Cartographic.fromDegrees(props.from.position[0], props.from.position[1], props.from.elevation) : await getElevationAtPosition(viewer!, props.from.position[0], props.from.position[1])
 
-    const toPos = toHeightIsNotZero() ? Cartographic.fromDegrees(props.to.position[0], props.to.position[1], props.to.elevation) : await getElevationAtPosition(props.viewer, props.to.position[0], props.to.position[1])
+    const toPos = toHeightIsNotZero() ? Cartographic.fromDegrees(props.to.position[0], props.to.position[1], props.to.elevation) : await getElevationAtPosition(viewer!, props.to.position[0], props.to.position[1])
 
     if(props.heightIsRelative && typeof props.from.elevation === 'number'){
-        fromPos.height = (await getElevationAtPosition(props.viewer, props.from.position[0], props.from.position[1])).height + props.from.elevation
+        fromPos.height = (await getElevationAtPosition(viewer!, props.from.position[0], props.from.position[1])).height + props.from.elevation
     }
 
     if(props.heightIsRelative && typeof props.to.elevation === 'number'){
-        toPos.height = (await getElevationAtPosition(props.viewer, props.to.position[0], props.to.position[1])).height + props.to.elevation
+        toPos.height = (await getElevationAtPosition(viewer!, props.to.position[0], props.to.position[1])).height + props.to.elevation
     }
 
-    let line = props.viewer.entities.getById('map-line-' + myId)
+    let line = viewer!.entities.getById('map-line-' + myId)
 
     if(line){
-        props.viewer.entities.remove(line)//TODO dont remove entity, instead update it
+        viewer!.entities.remove(line)//TODO dont remove entity, instead update it
     }
 
-    line = props.viewer.entities.add({
+    line = viewer!.entities.add({
         id: 'map-line-' + myId,
 
         polyline: {
@@ -85,13 +88,13 @@ async function addLine(){
     })
 
 
-    let label = props.viewer.entities.getById('map-line-label-' + myId)
+    let label = viewer!.entities.getById('map-line-label-' + myId)
 
     if(label){
-        props.viewer.entities.remove(label)//TODO dont remove entity, instead update it
+        viewer!.entities.remove(label)//TODO dont remove entity, instead update it
     }
 
-    label = props.viewer.entities.add({
+    label = viewer!.entities.add({
         id: 'map-line-label-' + myId,
         position: getCenterPosition(),
         label: {
@@ -126,11 +129,11 @@ function getCenterPosition(){
 }
 
 function removeLine(){
-    props.viewer.entities.removeById('map-line-' + myId)
+    viewer!.entities.removeById('map-line-' + myId)
 }
 
 function removeLineLabel(){
-    props.viewer.entities.removeById('map-line-label-' + myId)
+    viewer!.entities.removeById('map-line-label-' + myId)
 }
 
 </script>

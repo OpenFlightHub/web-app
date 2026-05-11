@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getCurrentInstance, onBeforeUnmount, onMounted, watch } from 'vue';
+import { getCurrentInstance, inject, onBeforeUnmount, onMounted, watch } from 'vue';
 import { Cartesian3, Cartographic, Color, Entity, HeightReference, LabelStyle, Viewer } from 'cesium';
 import { getElevationAtPosition } from '@/util/terrain';
 import { along, center, distance, length, lineString, midpoint } from '@turf/turf';
@@ -7,7 +7,6 @@ import { along, center, distance, length, lineString, midpoint } from '@turf/tur
 
 //TODO if line elevation is below cesium terrain, clamp it to ground
 const props = defineProps<{
-    viewer: Viewer
     points: [number, number, number][],//lng, lat, elevation
     clampToGround?: boolean,
     heightIsRelative?: boolean // relative to ground
@@ -15,6 +14,9 @@ const props = defineProps<{
     label?: string
     fontSize?: number
 }>()
+
+const viewer = inject<Viewer>('cesiumViewer')
+const mapContainer = inject<HTMLElement>('mapContainer')
 
 const myId = '' + getCurrentInstance()?.uid
 
@@ -57,11 +59,11 @@ async function getCenterPosition(){
         if(walkedDistance + segmentLength > (lineLength / 2)){
             let currentHeight = currentPoint[2]
             if(currentHeight === 0){
-                currentHeight = (await getElevationAtPosition(props.viewer, currentPoint[0], currentPoint[1])).height
+                currentHeight = (await getElevationAtPosition(viewer!, currentPoint[0], currentPoint[1])).height
             }
             let nextHeight = nextPoint[2]
             if(nextHeight === 0){
-                nextHeight = (await getElevationAtPosition(props.viewer, nextPoint[0], nextPoint[1])).height
+                nextHeight = (await getElevationAtPosition(viewer!, nextPoint[0], nextPoint[1])).height
             }
 
             centerHeight = (currentHeight + nextHeight) / 2
@@ -96,11 +98,11 @@ async function addPolyline(){
         if(props.clampToGround){
             cartographicPosition = Cartographic.fromDegrees(lng, lat)
         } else if(typeof elevation !== 'number' || elevation === 0){
-            cartographicPosition = await getElevationAtPosition(props.viewer, lng, lat)
+            cartographicPosition = await getElevationAtPosition(viewer!, lng, lat)
             cartographicPosition.height += 10//10 to always show above terrain
         } else {
             if(props.heightIsRelative === true){
-                const terrainHeight = (await getElevationAtPosition(props.viewer, lng, lat)).height
+                const terrainHeight = (await getElevationAtPosition(viewer!, lng, lat)).height
                 cartographicPosition = Cartographic.fromDegrees(lng, lat, terrainHeight + elevation)
             } else {
                 cartographicPosition = Cartographic.fromDegrees(lng, lat, elevation)
@@ -110,13 +112,13 @@ async function addPolyline(){
         positions.push(Cartographic.toCartesian(cartographicPosition))
     }
 
-    let polyline = props.viewer.entities.getById('map-polyline-' + myId)
+    let polyline = viewer!.entities.getById('map-polyline-' + myId)
 
     if(polyline){
-        props.viewer.entities.remove(polyline)//TODO dont remove entity, instead update it
+        viewer!.entities.remove(polyline)//TODO dont remove entity, instead update it
     }
 
-    polyline = props.viewer.entities.add({
+    polyline = viewer!.entities.add({
         id: 'map-polyline-' + myId,
         polyline: {
             positions,
@@ -128,13 +130,13 @@ async function addPolyline(){
 
     const centerPosition = await getCenterPosition()
 
-    let label = props.viewer.entities.getById('map-polyline-label-' + myId)
+    let label = viewer!.entities.getById('map-polyline-label-' + myId)
 
     if(label){
-        props.viewer.entities.remove(label)//TODO dont remove entity, instead update it
+        viewer!.entities.remove(label)//TODO dont remove entity, instead update it
     }
 
-    label =  props.viewer.entities.add({
+    label =  viewer!.entities.add({
         id: 'map-polyline-label-' + myId,
         position: Cartesian3.fromDegrees(centerPosition.longitude, centerPosition.latitude, centerPosition.height),
         label: {
@@ -149,11 +151,11 @@ async function addPolyline(){
 }
 
 function removePolyline(){
-    props.viewer.entities.removeById('map-polyline-' + myId)
+    viewer!.entities.removeById('map-polyline-' + myId)
 }
 
 function removePolylineLabel(){
-    props.viewer.entities.removeById('map-polyline-label-' + myId)
+    viewer!.entities.removeById('map-polyline-label-' + myId)
 }
 
 

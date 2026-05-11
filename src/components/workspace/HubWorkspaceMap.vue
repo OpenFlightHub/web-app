@@ -1,10 +1,6 @@
 <script setup lang="ts">
 import { ApiResponse_ConnectionGet } from 'openflighthub-api-client-sdk';
 import { ref } from 'vue';
-
-import { Viewer } from "cesium";
-import "cesium/Build/Cesium/Widgets/widgets.css";
-
 import HubWorkspaceMapConnection from './HubWorkspaceMapConnection.vue';
 import { geoidIsLoaded } from '@/util/geoid';
 import Checkbox from 'primevue/checkbox'
@@ -22,10 +18,7 @@ const props = defineProps<{
     workspaceId: number
 }>()
 
-const mapContainer = ref(null as HTMLElement)
-
-const viewerIsLoaded = ref(false)
-let viewer: Viewer = null // if we make Viewer a reactive object, performance goes down the tube ...
+const mapContainer = ref<HTMLElement>()
 
 const sidebarIsOpen = ref(false)
 const showMedia = ref(false)
@@ -37,22 +30,21 @@ const showCollisionObjects = ref(false)
 
     <Fullscreenable flex="row">
         <div id="map-container" ref="mapContainer">
-            <Map id="map" :start-point="{longitude: props.longitude, latitude: props.latitude}" :start-height="10000" :start-camera-pitch="-90" @viewer-loaded="(v)=>{viewer = v; viewerIsLoaded = true}">
+            <Map id="map" v-if="mapContainer" :map-container="mapContainer" :start-point="{longitude: props.longitude, latitude: props.latitude}" :start-height="10000" :start-camera-pitch="-90">
 
+                <MapCollisionObjects v-if="showCollisionObjects"></MapCollisionObjects>
 
-                <MapCollisionObjects v-if="viewerIsLoaded && showCollisionObjects"></MapCollisionObjects>
+                <template v-if="geoidIsLoaded">
+                    <HubWorkspaceMapConnection v-for="connection in props.connections" :key="connection.id" :connection="connection"></HubWorkspaceMapConnection>
+
+                    <HubWorkspaceGeoObjects :workspace-id="props.workspaceId" :initial-longitude="props.longitude" :initial-latitude="props.latitude"></HubWorkspaceGeoObjects>
+                </template>
+
+                <template v-if="showMedia">
+                    <HubWorkspaceMapDroneMedia v-for="connection in props.connections" :key="connection.id" :connection="connection"></HubWorkspaceMapDroneMedia>
+                </template>
 
             </Map>
-
-            <template v-if="viewerIsLoaded && geoidIsLoaded">
-                <HubWorkspaceMapConnection v-for="connection in props.connections" :key="connection.id" :map-container="mapContainer" :connection="connection" :viewer="viewer"></HubWorkspaceMapConnection>
-
-                <HubWorkspaceGeoObjects :viewer="viewer" :map-container="mapContainer" :workspace-id="props.workspaceId" :initial-longitude="props.longitude" :initial-latitude="props.latitude"></HubWorkspaceGeoObjects>
-            </template>
-
-            <template v-if="viewerIsLoaded && showMedia">
-                <HubWorkspaceMapDroneMedia v-for="connection in props.connections" :key="connection.id" :viewer="viewer" :map-container="mapContainer" :connection="connection"></HubWorkspaceMapDroneMedia>
-            </template>
         </div>
 
         <div id="sidebar">

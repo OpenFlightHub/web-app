@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import { getCurrentInstance, onBeforeUnmount, onMounted, watch } from 'vue';
+import { getCurrentInstance, inject, onBeforeUnmount, onMounted, watch } from 'vue';
 import { Cartesian3, Cartographic, Color, Entity, Viewer } from 'cesium';
 import { getElevationAtPosition } from '@/util/terrain';
 
 
 //TODO if line elevation is below cesium terrain, clamp it to ground
 const props = defineProps<{
-    viewer: Viewer
     points: [number, number, number?][],
     clampToGround?: boolean
     heightIsRelative?: boolean // relative to ground
@@ -15,6 +14,9 @@ const props = defineProps<{
     outlineColor?: Color
     outlineWidth?: number
 }>()
+
+const viewer = inject<Viewer>('cesiumViewer')
+const mapContainer = inject<HTMLElement>('mapContainer')
 
 const myId = '' + getCurrentInstance()?.uid
 
@@ -50,11 +52,11 @@ async function addAll(){
         if(props.clampToGround){
             cartographicPosition = Cartographic.fromDegrees(lng, lat)
         } else if(typeof elevation !== 'number' || elevation === 0){
-            cartographicPosition = await getElevationAtPosition(props.viewer, lng, lat)
+            cartographicPosition = await getElevationAtPosition(viewer!, lng, lat)
             cartographicPosition.height += 10//10 to always show above terrain
         } else {
             if(props.heightIsRelative === true){
-                const terrainHeight = (await getElevationAtPosition(props.viewer, lng, lat)).height
+                const terrainHeight = (await getElevationAtPosition(viewer!, lng, lat)).height
                 cartographicPosition = Cartographic.fromDegrees(lng, lat, terrainHeight + elevation)
             } else {
                 cartographicPosition = Cartographic.fromDegrees(lng, lat, elevation)
@@ -64,13 +66,13 @@ async function addAll(){
         positions.push(Cartographic.toCartesian(cartographicPosition))
     }
 
-    let polygon = props.viewer.entities.getById('map-polygon-' + myId)
+    let polygon = viewer!.entities.getById('map-polygon-' + myId)
 
     if(polygon){
-        props.viewer.entities.remove(polygon)//TODO dont remove entity, instead update it
+        viewer!.entities.remove(polygon)//TODO dont remove entity, instead update it
     }
 
-    polygon = props.viewer.entities.add({
+    polygon = viewer!.entities.add({
         id: 'map-polygon-' + myId,
         polygon: {
             //@ts-ignore
@@ -89,13 +91,13 @@ async function addAll(){
 
     positions.push(positions[0])// polyline needs the first point again
 
-    let outline = props.viewer.entities.getById('map-polygon_outline-' + myId)
+    let outline = viewer!.entities.getById('map-polygon_outline-' + myId)
 
     if(outline){
-        props.viewer.entities.remove(outline)//TODO dont remove entity, instead update it
+        viewer!.entities.remove(outline)//TODO dont remove entity, instead update it
     }
 
-    outline = props.viewer.entities.add({
+    outline = viewer!.entities.add({
         id: 'map-polygon_outline-' + myId,
         polyline: {
             positions,
@@ -109,8 +111,8 @@ async function addAll(){
 
 
 function removeAll(){
-    props.viewer.entities.removeById('map-polygon-' + myId)
-    props.viewer.entities.removeById('map-polygon_outline-' + myId)
+    viewer!.entities.removeById('map-polygon-' + myId)
+    viewer!.entities.removeById('map-polygon_outline-' + myId)
 }
 
 </script>

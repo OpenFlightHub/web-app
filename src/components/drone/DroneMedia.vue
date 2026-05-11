@@ -15,14 +15,11 @@ import TimestampDisplay from '../display/TimestampDisplay.vue';
 import dayjs from 'dayjs';
 import TimeDisplay from '../display/TimeDisplay.vue';
 import MapMarker from '../map/MapMarker.vue';
-import { GetCompletionsAtPositionOptions } from 'typescript';
 import Padding from '../layout/Padding.vue';
 import RelativeContainer from '../layout/RelativeContainer.vue';
 import IconVue from '../general/IconVue.vue';
 import LinkVue from '../general/LinkVue.vue';
 import { calculateVisibleTerrainInDirection, TerrainVisibilityResult } from '@/util/terrain';
-import MapCircle from '../map/MapCircle.vue';
-import { radiansToDegrees } from '@turf/turf';
 import MapChessRect from '../map/MapChessRect.vue';
 
 const CLIENT_COVERAGE_ENABLED = false
@@ -157,7 +154,7 @@ function getClosestLocationForRelativeImagePosition(x: number, y: number){
 const viewerIsLoaded = ref(false)
 let viewer: Viewer = null // if we make Viewer a reactive object, performance goes down the tube ...
 
-const mapContainer = ref<HTMLElement>(null)
+const mapContainer = ref<HTMLElement>()
 
 
 let hasCalculatedLastFocusPoint = ref(false)
@@ -269,30 +266,30 @@ async function refreshCoverageClient(){
         <div class="media_map" ref="mapContainer">
             <template v-if="hasValidLocationInformation">
 
-                <Map :start-point="{longitude: cameraLongitude, latitude: cameraLatitude}" :start-height="hasValidHeightInformation ? cameraHeight : 5000" :start-camera-heading="hasValidCameraAngleInformation ? cameraHeading : undefined" :start-camera-pitch="hasValidCameraAngleInformation ? cameraPitch : -90" :disable-user-control="false" :camera-f-o-v="cameraFOV" @viewer-loaded="(v)=>{viewer = v; viewerIsLoaded = true; refreshCoverageClientSoon()}" v-slot="map">
+                <Map v-if="mapContainer" :map-container="mapContainer" :start-point="{longitude: cameraLongitude, latitude: cameraLatitude}" :start-height="hasValidHeightInformation ? cameraHeight : 5000" :start-camera-heading="hasValidCameraAngleInformation ? cameraHeading : undefined" :start-camera-pitch="hasValidCameraAngleInformation ? cameraPitch : -90" :disable-user-control="false" :camera-f-o-v="cameraFOV" @viewer-loaded="(v)=>{viewer = v; viewerIsLoaded = true; refreshCoverageClientSoon()}" v-slot="map">
 
                     <div id="reset-camera-view">
                         <Button @click="map.resetCamera()">Reset</Button>
                     </div>
 
+                    <MapMarker :position="[cameraLongitude, cameraLatitude]" :elevation="hasValidHeightInformation ? cameraHeight : undefined" :bearing="hasValidCameraAngleInformation ? cameraHeading : undefined" icon-url="/images/drone/icon.png" :icon-width="32" :icon-height="32" :color="Color.CYAN"></MapMarker>
+
+                    <template v-if="coverage.all.length > 0 && false">
+                        <MapLine v-for="p in coverage.all":from="{position: [cameraLongitude, cameraLatitude], elevation: cameraHeight}" :to="{position: [p.position.longitude, p.position.latitude], elevation: p.elevation}" :color="(p.debug === 'failed' ? Color.RED : p.debug === 'hole-start' ? Color.YELLOW : p.debug == 'hole-end' ? Color.ORANGE : Color.WHITE).withAlpha(0.4)"></MapLine>
+                    </template>
+
+                    <template v-if="coverage.holes.length > 0">
+                        <MapPolygon v-for="hole in coverage.holes" :points="hole.map(p => [p.position.longitude, p.position.latitude, p.elevation])" :clamp-to-ground="true" :color="Color.RED.withAlpha(0.3)" :filled="true"></MapPolygon>
+
+                    </template>
+
+                    <MapPolyline key="outer" :points="coverage.outer.length === 0 ? [] : coverage.outer.concat(coverage.outer[0]).map(p => [p.position.longitude, p.position.latitude, p.elevation])" :clamp-to-ground="true" :color="Color.GREENYELLOW.withAlpha(0.5)"></MapPolyline>
+
+                    <template v-if="(coverageClient.all instanceof Array)">
+                        <MapChessRect v-for="point of coverageClient.all" :center="[point.longitude, point.latitude]" :color="point.visible ? Color.GREEN.withAlpha(0.5) : Color.RED.withAlpha(0.5)" :rect-size-meters="coverageClient.radialStepMeters"></MapChessRect>
+                    </template>
+
                 </Map>
-
-                <MapMarker v-if="viewerIsLoaded" :viewer="viewer" :map-container="mapContainer" :position="[cameraLongitude, cameraLatitude]" :elevation="hasValidHeightInformation ? cameraHeight : undefined" :bearing="hasValidCameraAngleInformation ? cameraHeading : undefined" icon-url="/images/drone/icon.png" :icon-width="32" :icon-height="32" :color="Color.CYAN"></MapMarker>
-
-                <template v-if="viewerIsLoaded && coverage.all.length > 0 && false">
-                    <MapLine v-for="p in coverage.all" :viewer="viewer" :from="{position: [cameraLongitude, cameraLatitude], elevation: cameraHeight}" :to="{position: [p.position.longitude, p.position.latitude], elevation: p.elevation}" :color="(p.debug === 'failed' ? Color.RED : p.debug === 'hole-start' ? Color.YELLOW : p.debug == 'hole-end' ? Color.ORANGE : Color.WHITE).withAlpha(0.4)"></MapLine>
-                </template>
-
-                <template v-if="viewerIsLoaded && coverage.holes.length > 0">
-                    <MapPolygon v-for="hole in coverage.holes" :viewer="viewer" :points="hole.map(p => [p.position.longitude, p.position.latitude, p.elevation])" :clamp-to-ground="true" :color="Color.RED.withAlpha(0.3)" :filled="true"></MapPolygon>
-
-                </template>
-
-                <MapPolyline key="outer" v-if="viewerIsLoaded" :viewer="viewer" :points="coverage.outer.length === 0 ? [] : coverage.outer.concat(coverage.outer[0]).map(p => [p.position.longitude, p.position.latitude, p.elevation])" :clamp-to-ground="true" :color="Color.GREENYELLOW.withAlpha(0.5)"></MapPolyline>
-
-                <template v-if="viewerIsLoaded && coverageClient.all instanceof Array">
-                    <MapChessRect v-for="point of coverageClient.all" :viewer="viewer" :map-container="mapContainer" :center="[point.longitude, point.latitude]" :color="point.visible ? Color.GREEN.withAlpha(0.5) : Color.RED.withAlpha(0.5)" :rect-size-meters="coverageClient.radialStepMeters"></MapChessRect>
-                </template>
 
             </template>
             <div v-else>No valid location</div>

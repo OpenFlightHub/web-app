@@ -5,7 +5,7 @@ import List from '@/components/layout/List.vue';
 import LoadApiWithIdParamInUrl from '@/components/functional/LoadApiWithIdParamInUrl.vue';
 import ConnectionSnippet from '@/components/connection/ConnectionSnippet.vue';
 import HubWorkspaceMap from '@/components/workspace/HubWorkspaceMap.vue';
-import { Tabs, TabList, Tab, TabPanels, TabPanel, InputText, Button, useToast, IftaLabel } from 'primevue';
+import { Tabs, TabList, Tab, TabPanels, TabPanel } from 'primevue';
 import Padding from '@/components/layout/Padding.vue';
 import { useRoute, useRouter } from 'vue-router';
 import { getIdQueryFromRouteOrUseDefault } from '@/util/url';
@@ -14,8 +14,6 @@ import HubWorkspaceFiles from '@/components/workspace/HubWorkspaceFiles.vue';
 import DroneSnippet from '@/components/drone/DroneSnippet.vue';
 import { uniqueProperty } from '@/util/array';
 import LoadApiArrayWithIdParamInUrl from '@/components/functional/LoadApiArrayWithIdParamInUrl.vue';
-import { Form, FormSubmitEvent } from '@primevue/forms';
-import InputMapLocation from '@/components/functional/form/InputMapLocation.vue';
 import ApiForm from '@/components/functional/form/ApiForm.vue';
 
 const router = useRouter()

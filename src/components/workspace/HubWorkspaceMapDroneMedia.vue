@@ -1,17 +1,17 @@
 <script setup lang="ts">
 import { ApiResponse_ConnectionGet, ApiResponse_DroneMediaGet } from 'openflighthub-api-client-sdk';
 import { Viewer } from 'cesium';
-import { onMounted, reactive, watch } from 'vue';
+import { inject, onMounted, reactive, watch } from 'vue';
 import { updateArray } from '@/util/vue';
 import api from '@/api';
 import HubWorkspaceMapDroneMediaMarker from './HubWorkspaceMapDroneMediaMarker.vue';
 
 const props = defineProps<{
-    mapContainer: HTMLElement
-    viewer: Viewer
     connection: ApiResponse_ConnectionGet
 }>()
 
+const viewer = inject<Viewer>('cesiumViewer')
+const mapContainer = inject<HTMLElement>('mapContainer')
 
 
 const droneMedia = reactive([] as ApiResponse_DroneMediaGet)
@@ -35,7 +35,7 @@ async function setup(){
 <template>
 
     <template v-for="media in droneMedia" :key="media.id">
-        <HubWorkspaceMapDroneMediaMarker :map-container="props.mapContainer" :viewer="viewer" :media="media"></HubWorkspaceMapDroneMediaMarker>
+        <HubWorkspaceMapDroneMediaMarker :media="media"></HubWorkspaceMapDroneMediaMarker>
     </template>
 
 </template>

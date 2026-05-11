@@ -29,6 +29,8 @@ const props = defineProps<{
     maxFractionDigits?: number
 }>()
 
+const mapContainer = ref<HTMLElement>()
+
 const maxFractionDigits = computed(() => {
     if(typeof props.maxFractionDigits === 'number'){
         return props.maxFractionDigits
@@ -94,8 +96,8 @@ function changeLocation(latitude: number, longitude: number){
     </InputGroup>
 
     <ModalVue :visible="modalVisible" @close="modalVisible = false">
-        <div id="map-container">
-            <Map :start-point="{longitude: model?.longitude ?? props.defaultLocation.longitude, latitude: model?.latitude ?? props.defaultLocation.latitude}" :start-height="props.startHeight ?? 1000" style="height: 100%; width: 100%;" :forceTopDown="true" @location-changed="loc => changeLocation(loc.latitude, loc.longitude)">
+        <div id="map-container" ref="mapContainer">
+            <Map v-if="mapContainer" :map-container="mapContainer" :start-point="{longitude: model?.longitude ?? props.defaultLocation.longitude, latitude: model?.latitude ?? props.defaultLocation.latitude}" :start-height="props.startHeight ?? 1000" style="height: 100%; width: 100%;" :forceTopDown="true" @location-changed="loc => changeLocation(loc.latitude, loc.longitude)">
                 <IconVue name="plus-lg" id="crosshair"></IconVue>
             </Map>
         </div>

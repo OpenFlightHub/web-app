@@ -1,15 +1,17 @@
 <script setup lang="ts">
-import { getCurrentInstance, onBeforeUnmount, onMounted, watch } from 'vue';
+import { getCurrentInstance, inject, onBeforeUnmount, onMounted, watch } from 'vue';
 import { Cartesian3, Color, Entity, Viewer } from 'cesium';
 import { lengthToDegrees } from '@turf/turf';
 
 
 const props = defineProps<{
-    viewer: Viewer
     center: [number, number]
     rectSizeMeters: number
     color: Color
 }>()
+
+const viewer = inject<Viewer>('cesiumViewer')
+const mapContainer = inject<HTMLElement>('mapContainer')
 
 let polygon: Entity | undefined
 
@@ -63,7 +65,7 @@ async function addAll(){
 
     const positions: Cartesian3[] = getChessRectPolygon(props.center).map(p => Cartesian3.fromDegrees(p[0], p[1]))
 
-    polygon = props.viewer.entities.add({
+    polygon = viewer!.entities.add({
         id: 'map-polygon-' + myId,
         polygon: {
             //@ts-ignore
@@ -81,7 +83,7 @@ async function addAll(){
 
 function removeAll(){
     if(polygon){
-        props.viewer.entities.remove(polygon)
+        viewer!.entities.remove(polygon)
         polygon = undefined
     }
 }

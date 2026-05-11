@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getCurrentInstance, onBeforeUnmount, onMounted, onUnmounted, ref, watch } from 'vue';
+import { getCurrentInstance, inject, onBeforeUnmount, onMounted, onUnmounted, ref, watch } from 'vue';
 import { Cartesian2, Cartesian3, Color, DistanceDisplayCondition, Entity, HeightReference, LabelStyle, PolylineArrowMaterialProperty, PolylineDashMaterialProperty, VerticalOrigin, Viewer } from 'cesium';
 import { getElevationAtPosition } from '@/util/terrain';
 import { convertEllipsoidalHeightToOrthometricHeight } from '@/util/geoid';
@@ -9,8 +9,6 @@ import { colorizeCanvas } from '@/util/canvas';
 
 //TODO if marker elevation is below cesium terrain, clamp it to ground
 const props = defineProps<{
-    mapContainer: HTMLElement
-    viewer: Viewer
     position: [number, number, number?] // longitude, latitude, elevation (if not present, marker will sit on the ground)
     heightIsRelative?: boolean // if true, the height in position is relative to the ground
     iconUrl: string
@@ -27,6 +25,9 @@ const props = defineProps<{
     blink?: number // switch between color and backgroundCircle (if both are set) or color and transparent. Time in ms
     maxVisibleDistance?: number
 }>()
+
+const viewer = inject<Viewer>('cesiumViewer')
+const mapContainer = inject<HTMLElement>('mapContainer')
 
 watch(()=>props.position, updatePosition, {deep: true})
 watch(()=>props.heightIsRelative, update)
@@ -112,7 +113,7 @@ async function updatePosition(newValue: typeof props.position, oldValue: typeof 
         }
     }
 
-    let marker = props.viewer.entities.getById('map-marker-' + myId)
+    let marker = viewer!.entities.getById('map-marker-' + myId)
     if(marker){
         const pos = Cartesian3.fromDegrees(props.position[0], props.position[1], props.position[2])
         //@ts-ignore
@@ -120,7 +121,7 @@ async function updatePosition(newValue: typeof props.position, oldValue: typeof 
     }
 
 
-    let heightIndicator = props.viewer.entities.getById('map-marker-height-indicator-' + myId)
+    let heightIndicator = viewer!.entities.getById('map-marker-height-indicator-' + myId)
     if(heightIndicator){
         const pos = await makeHeightIndicatorPositions(props.position)
         if(heightIndicator){
@@ -129,7 +130,7 @@ async function updatePosition(newValue: typeof props.position, oldValue: typeof 
         }
     }
 
-    let bearingIndicator = props.viewer.entities.getById('map-marker-bearing-indicator-' + myId)
+    let bearingIndicator = viewer!.entities.getById('map-marker-bearing-indicator-' + myId)
     if(bearingIndicator){
         const pos = await makeBearingIndicatorPositions(props.position, typeof props.bearing === 'number' ? props.bearing : autoBearing)
         if(bearingIndicator){
@@ -143,7 +144,7 @@ async function updatePosition(newValue: typeof props.position, oldValue: typeof 
 
 async function update(){//TODO cesium fails to repaint polygons (height marker) if we update it too quickly (e.g. every 10ms)
 
-    if(!props.mapContainer){
+    if(!mapContainer){
         return
     }
 
@@ -164,7 +165,7 @@ function heightIsNotZero(){
 async function updateCanvasAndIcon(){
     await makeCanvas()
 
-    let marker = props.viewer.entities.getById('map-marker-' + myId)
+    let marker = viewer!.entities.getById('map-marker-' + myId)
     if(marker){
         //@ts-ignore
         marker.billboard.image = canvas
@@ -273,13 +274,13 @@ async function addMarker(){
 
     const height = props.position[2]
 
-    let marker = props.viewer.entities.getById('map-marker-' + myId)
+    let marker = viewer!.entities.getById('map-marker-' + myId)
 
     if(marker){
-        props.viewer.entities.remove(marker)//TODO dont remove entity, instead update it
+        viewer!.entities.remove(marker)//TODO dont remove entity, instead update it
     }
 
-    marker = props.viewer.entities.add({
+    marker = viewer!.entities.add({
         id: 'map-marker-' + myId,
         position: Cartesian3.fromDegrees(props.position[0], props.position[1], height),
         billboard: {
@@ -304,7 +305,7 @@ async function addMarker(){
         }
     })
 
-    markerClickMyEntityHandle = setupClickMyEntity(props.mapContainer, props.viewer, marker, ()=>{
+    markerClickMyEntityHandle = setupClickMyEntity(mapContainer!, viewer!, marker, ()=>{
         emit('click', undefined)
     })
 
@@ -316,13 +317,13 @@ function removeMarker(){
         cleanupClickMyEntity(markerClickMyEntityHandle)
     }
 
-    props.viewer.entities.removeById('map-marker-' + myId)
+    viewer!.entities.removeById('map-marker-' + myId)
 }
 
 async function getHeightValue(){
     if(typeof props.position[2] === 'number'){
         if(props.heightIsRelative){
-            const elev = await getElevationAtPosition(props.viewer, props.position[0], props.position[1])
+            const elev = await getElevationAtPosition(viewer!, props.position[0], props.position[1])
             return elev.height + props.position[2]
         } else {
             return props.position[2]
@@ -348,13 +349,13 @@ async function addHeightIndicator(){
 
     const positions = await makeHeightIndicatorPositions(props.position)
 
-    let heightIndicator = props.viewer.entities.getById('map-marker-height-indicator-' + myId)
+    let heightIndicator = viewer!.entities.getById('map-marker-height-indicator-' + myId)
 
     if(heightIndicator){
-        props.viewer.entities.remove(heightIndicator)//TODO dont remove entity, instead update it
+        viewer!.entities.remove(heightIndicator)//TODO dont remove entity, instead update it
     }
 
-    heightIndicator = props.viewer.entities.add({
+    heightIndicator = viewer!.entities.add({
         id: 'map-marker-height-indicator-' + myId,
         polyline: {
             positions,
@@ -367,11 +368,11 @@ async function addHeightIndicator(){
 }
 
 async function makeHeightIndicatorPositions(position: [number, number, number?]){
-    return [Cartesian3.fromDegrees(position[0], position[1], await getHeightValue()), Cartesian3.fromDegrees(position[0], position[1], (await getElevationAtPosition(props.viewer, position[0], position[1])).height)]
+    return [Cartesian3.fromDegrees(position[0], position[1], await getHeightValue()), Cartesian3.fromDegrees(position[0], position[1], (await getElevationAtPosition(viewer!, position[0], position[1])).height)]
 }
 
 function removeHeightIndicator(){
-    props.viewer.entities.removeById('map-marker-height-indicator-' + myId)
+    viewer!.entities.removeById('map-marker-height-indicator-' + myId)
 }
 
 
@@ -381,13 +382,13 @@ async function addBearingIndicator(){
         return
     }
 
-    let bearingIndicator = props.viewer.entities.getById('map-marker-bearing-indicator-' + myId)
+    let bearingIndicator = viewer!.entities.getById('map-marker-bearing-indicator-' + myId)
 
     if(bearingIndicator){
-        props.viewer.entities.remove(bearingIndicator)//TODO dont remove entity, instead update it
+        viewer!.entities.remove(bearingIndicator)//TODO dont remove entity, instead update it
     }
 
-    bearingIndicator = props.viewer.entities.add({
+    bearingIndicator = viewer!.entities.add({
         id: 'map-marker-bearing-indicator-' + myId,
         polyline: {
             positions: await makeBearingIndicatorPositions(props.position, typeof props.bearing === 'number' ? props.bearing : autoBearing),
@@ -404,7 +405,7 @@ async function addBearingIndicator(){
  */
 async function makeBearingIndicatorPositions(position: [number, number, number?], bearing: number){
 
-    const terrainElevation = (await getElevationAtPosition(props.viewer, position[0], position[1])).height
+    const terrainElevation = (await getElevationAtPosition(viewer!, position[0], position[1])).height
 
     let elevation = await getHeightValue()
     if(typeof elevation === 'number'){
@@ -424,7 +425,7 @@ async function makeBearingIndicatorPositions(position: [number, number, number?]
 
 
 function removeBearingIndicator(){
-    props.viewer.entities.removeById('map-marker-bearing-indicator-' + myId)
+    viewer!.entities.removeById('map-marker-bearing-indicator-' + myId)
 }
 
 </script>

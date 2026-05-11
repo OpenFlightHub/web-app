@@ -15,8 +15,6 @@ import TimestampDisplay from '@/components/display/TimestampDisplay.vue';
 import LoadApiArray from '@/components/functional/LoadApiArray.vue';
 import FlightPlayback from '@/components/flight/FlightPlayback.vue';
 
-const viewerIsLoaded = ref(false)
-let viewer: Viewer = null // if we make Viewer a reactive object, performance goes down the tube ...
 
 function getCenterPointForFlight(flight: ApiResponse_DroneCurrentFlightGet){
 
@@ -46,6 +44,8 @@ function getMaxHeightForFlight(flight: ApiResponse_DroneCurrentFlightGet){
    return maxHeight
 }
 
+const mapContainer = ref<HTMLElement>()
+
 </script>
 
 <template>
@@ -68,22 +68,16 @@ function getMaxHeightForFlight(flight: ApiResponse_DroneCurrentFlightGet){
                   <template v-if="flight.data.track.length === 0">
                      Invalid Location
                   </template>
-                  <template v-else>
 
-                     <Map id="map" :start-point="getCenterPointForFlight(flight.data)" :start-height="getMaxHeightForFlight(flight.data) + 200" :start-camera-pitch="-90" @viewer-loaded="(v)=>{viewer = v; viewerIsLoaded = true}">
+                  <Map v-else-if="mapContainer" id="map" :map-container="mapContainer" :start-point="getCenterPointForFlight(flight.data)" :start-height="getMaxHeightForFlight(flight.data) + 200" :start-camera-pitch="-90">
 
-                        <FlightPlayback v-if="viewerIsLoaded" :flight="flight.data"></FlightPlayback>
+                     <FlightPlayback :flight="flight.data"></FlightPlayback>
 
-                     </Map>
+                     <MapPolyline :points="flight.data.track.map(t => {
+                           return [t.longitude, t.latitude, t.height]
+                     })" :color="Color.BLUE"></MapPolyline>
 
-                     <template v-if="viewerIsLoaded">
-
-                        <MapPolyline :points="flight.data.track.map(t => {
-                              return [t.longitude, t.latitude, t.height]
-                        })" :viewer="viewer" :color="Color.BLUE"></MapPolyline>
-
-                     </template>
-                  </template>
+                  </Map>
 
                </div>
 

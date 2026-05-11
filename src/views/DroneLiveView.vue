@@ -74,8 +74,9 @@ function calculateHeadingBetweenPoints(pointA: Point, pointB: Point): number {
 
 const viewerIsLoaded = ref(false)
 
-
 const viewDelayMs = ref(0)
+
+const mapContainer = ref<HTMLElement>()
 </script>
 
 <template>
@@ -89,10 +90,12 @@ const viewDelayMs = ref(0)
             <div id="live-content">
                <LoadApi v-if="typeof drone.data.last_connection_id === 'number'" :api-method="api.rest.connection.get" :config="{params: {connectionId: drone.data.last_connection_id}}" v-slot="connection">
                   <LoadApi :api-method="api.rest.workspace.get" :config="{params: {workspaceId: drone.data.last_connection_id}}" v-slot="workspace">
-                     <Map :start-point="{longitude: workspace.data.longitude, latitude: workspace.data.latitude}" :start-height="0" @viewer-loaded="viewerIsLoaded = true">
-                        <FlightSimulation v-if="viewerIsLoaded" ref="flightSimulation"></FlightSimulation>
-                        <span>Delay: <TimeDisplay :time-in-ms="viewDelayMs"></TimeDisplay></span>
-                     </Map>
+                     <div ref="mapContainer">
+                        <Map v-if="mapContainer" :map-container="mapContainer" :start-point="{longitude: workspace.data.longitude, latitude: workspace.data.latitude}" :start-height="0" @viewer-loaded="viewerIsLoaded = true">
+                           <FlightSimulation v-if="viewerIsLoaded" ref="flightSimulation"></FlightSimulation>
+                           <span>Delay: <TimeDisplay :time-in-ms="viewDelayMs"></TimeDisplay></span>
+                        </Map>
+                     </div>
                   </LoadApi>
                </LoadApi>
                <ConnectionLiveStream v-if="typeof drone.data.last_connection_id === 'number'" :connection-id="drone.data.last_connection_id"></ConnectionLiveStream>
