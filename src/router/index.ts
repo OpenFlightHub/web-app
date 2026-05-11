@@ -30,6 +30,7 @@ import UsersView from '@/views/admin/users/UsersView.vue'
 import PerformanceView from '@/views/admin/system/PerformanceView.vue'
 import OsView from '@/views/admin/system/performance/OsView.vue'
 import UserView from '@/views/UserView.vue'
+import MissionView from '@/views/MissionView.vue'
 
 
 
@@ -126,6 +127,12 @@ export function makeRouter(pinia: Pinia){
                 path: '/organisation/:organisationId',
                 name: 'organisation',
                 component: OrganisationView
+            },
+
+            {
+                path: '/mission/:missionId',
+                name: 'mission',
+                component: MissionView
             },
 
             {

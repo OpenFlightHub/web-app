@@ -5,7 +5,7 @@ import List from '@/components/layout/List.vue';
 import LoadApiWithIdParamInUrl from '@/components/functional/LoadApiWithIdParamInUrl.vue';
 import ConnectionSnippet from '@/components/connection/ConnectionSnippet.vue';
 import HubWorkspaceMap from '@/components/workspace/HubWorkspaceMap.vue';
-import { Tabs, TabList, Tab, TabPanels, TabPanel } from 'primevue';
+import { Tabs, TabList, Tab, TabPanels, TabPanel, Button } from 'primevue';
 import Padding from '@/components/layout/Padding.vue';
 import { useRoute, useRouter } from 'vue-router';
 import { getIdQueryFromRouteOrUseDefault } from '@/util/url';
@@ -16,8 +16,14 @@ import { uniqueProperty } from '@/util/array';
 import LoadApiArrayWithIdParamInUrl from '@/components/functional/LoadApiArrayWithIdParamInUrl.vue';
 import ApiForm from '@/components/functional/form/ApiForm.vue';
 import MissionSnippet from '@/components/mission/MissionSnippet.vue';
+import ModalVue from '@/components/display/ModalVue.vue';
+import { ref } from 'vue';
+import LoadApiArray from '@/components/functional/LoadApiArray.vue';
+import IconVue from '@/components/general/IconVue.vue';
 
 const router = useRouter()
+
+const showCreateMissionModal = ref(false)
 
 </script>
 
@@ -45,19 +51,41 @@ const router = useRouter()
                   </TabPanel>
                   <TabPanel :value="1">
                      <LoadApiArrayWithIdParamInUrl :api-method="api.rest.workspace.missions.get" :config="{params: {}}" :id-params="['workspaceId']" v-slot="missions">
+
+                        <Button @click="showCreateMissionModal = true"><IconVue name="plus-lg"></IconVue> Create Mission</Button>
                         <List>
-                           <MissionSnippet v-for="mission of missions.data" :mission="mission" show-tasks></MissionSnippet>
+                           <MissionSnippet v-for="mission of missions.data.sort((a, b) => a.id - b.id)" :mission="mission" show-tasks></MissionSnippet>
                         </List>
+
+                        <LoadApiArray :api-method="api.rest.team.allTeams.get" :config="{}" v-slot="teams">
+                           <ModalVue :visible="showCreateMissionModal" @close="showCreateMissionModal = false">
+                              <ApiForm :apiMethod="api.rest.mission.post" type="create" :params="{}"
+                                 :initial-values="{
+                                    workspace_id: workspace.data.id,
+                                    state: 0
+                                 }"
+                                 :fields="{
+                                    name: {type: 'text', required: true},
+                                    assigned_to_team_id: {type: 'select', required: false, options: teams.data.map(team => ({ label: team.name, value: team.id }))},
+                                    description: {type: 'textarea', required: false},
+                                    state: {type: 'number', required: true},
+                                    workspace_id: {type: 'number', required: true}
+                                 }"
+                                 :editable-fields="['name', 'assigned_to_team_id', 'description']"
+                                 title="Create Mission" @created="showCreateMissionModal = false"></ApiForm>
+                           </ModalVue>
+                        </LoadApiArray>
+
                      </LoadApiArrayWithIdParamInUrl>
                   </TabPanel>
                   <TabPanel :value="2">
                      <List>
-                        <DroneSnippet v-for="droneId in uniqueProperty(connections.data, 'drone_id')" :id="droneId!"></DroneSnippet>
+                        <DroneSnippet v-for="droneId in uniqueProperty(connections.data, 'drone_id').sort()" :id="droneId!"></DroneSnippet>
                      </List>
                   </TabPanel>
                   <TabPanel :value="3">
                      <List :horizontal="true">
-                        <ConnectionLiveStream v-for="connection in connections.data" :key="connection.id" :connectionId="connection.id"></ConnectionLiveStream>
+                        <ConnectionLiveStream v-for="connection in connections.data.sort((a, b) => a.id - b.id)" :key="connection.id" :connectionId="connection.id"></ConnectionLiveStream>
                      </List>
                   </TabPanel>
                   <TabPanel :value="4">
@@ -67,7 +95,7 @@ const router = useRouter()
                   </TabPanel>
                   <TabPanel :value="5">
                      <List>
-                        <ConnectionSnippet v-for="connection in connections.data" :workspace-id="workspace.data.id" :connection-id="connection.id"></ConnectionSnippet>
+                        <ConnectionSnippet v-for="connection in connections.data.sort((a, b) => a.id - b.id)" :workspace-id="workspace.data.id" :connection-id="connection.id"></ConnectionSnippet>
                      </List>
                   </TabPanel>
                   <TabPanel :value="6">
