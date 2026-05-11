@@ -5,15 +5,14 @@
     EF extends (keyof PROPS['config']['data'])[]">
 import { FormSubmitEvent } from '@/util/primevue';
 import { Form } from '@primevue/forms';
-import { Button, Checkbox, Select, InputNumber, IftaLabel, InputText, useToast, DatePicker  } from 'primevue';
+import { Button, Checkbox, Select, InputNumber, IftaLabel, InputText, useToast, DatePicker, Textarea  } from 'primevue';
 import { ref } from 'vue';
 import { FormResolverOptions } from '@primevue/forms';
 import InputMapLocation from './InputMapLocation.vue';
 
+export type Field<FieldType, DataShape extends Record<string, string> = Record<string, string>> = FieldType extends 'text' ? FieldTypeText : FieldType extends 'email' ? FieldTypeEmail : FieldType extends 'number' ? FieldTypeNumber : FieldType extends 'select' ? FieldTypeSelect : FieldType extends 'checkbox' ? FieldTypeCheckbox : FieldType extends 'date-with-time' ? FieldTypeDateWithTime : FieldType extends 'raw' ? FieldTypeRaw : FieldType extends 'map-location' ? FieldTypeMapLocation<DataShape> : FieldType extends 'textarea' ? FieldTypeTextarea : FieldBase<FieldType>
 
-export type Field<FieldType, DataShape extends Record<string, string> = Record<string, string>> = FieldType extends 'text' ? FieldTypeText : FieldType extends 'email' ? FieldTypeEmail : FieldType extends 'number' ? FieldTypeNumber : FieldType extends 'select' ? FieldTypeSelect : FieldType extends 'checkbox' ? FieldTypeCheckbox : FieldType extends 'date-with-time' ? FieldTypeDateWithTime : FieldType extends 'raw' ? FieldTypeRaw : FieldType extends 'map-location' ? FieldTypeMapLocation<DataShape> : FieldBase<FieldType>
-
-export type FieldType = 'text' | 'email' | 'number' | 'select' | 'checkbox' | 'date-with-time' | 'raw' | 'map-location'
+export type FieldType = 'text' | 'email' | 'number' | 'select' | 'checkbox' | 'date-with-time' | 'raw' | 'map-location' | 'textarea'
 
 export type FieldBase<FieldType> = {
     type: FieldType
@@ -50,6 +49,12 @@ export interface FieldTypeMapLocation<DataShape extends Record<string, string>> 
     latitudeField: keyof DataShape
     defaultValue: number
 }
+
+export interface FieldTypeTextarea extends FieldBase<'textarea'> {
+    minRows?: number
+    placeholder?: string
+}
+
 
 
 const toast = useToast()
@@ -231,6 +236,14 @@ async function resolveValidation(e: FormResolverOptions){
                                     <label :for="props.fields[fieldName].longitudeField.toString() + '_' + props.fields[fieldName].latitudeField.toString()">{{ (props.readableLabels?.[props.fields[fieldName].longitudeField] ?? 'Longitude')+ ' / ' + (props.readableLabels?.[props.fields[fieldName].latitudeField] ?? 'Latitude') }}</label>
                                 </IftaLabel>
                             </template>
+                        </template>
+
+
+                        <template v-else-if="props.fields[fieldName].type === 'textarea'">
+                            <IftaLabel>
+                                <Textarea :id="fieldName" :name="fieldName" :required="props.fields[fieldName].required" :rows="props.fields[fieldName].minRows ?? 3" :placeholder="props.fields[fieldName].placeholder"></Textarea>
+                                <label :for="fieldName">{{ props.readableLabels?.[fieldName] ?? fieldName }}</label>
+                            </IftaLabel>
                         </template>
 
                         <template v-else>
