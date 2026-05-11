@@ -16,20 +16,10 @@ import { uniqueProperty } from '@/util/array';
 import LoadApiArrayWithIdParamInUrl from '@/components/functional/LoadApiArrayWithIdParamInUrl.vue';
 import { Form, FormSubmitEvent } from '@primevue/forms';
 import InputMapLocation from '@/components/functional/form/InputMapLocation.vue';
+import ApiForm from '@/components/functional/form/ApiForm.vue';
 
 const router = useRouter()
 
-const toast = useToast()
-
-async function saveWorkspace(id: number, event: FormSubmitEvent){
-   await api.rest.workspace.patch({params: {workspaceId: id}, data: {
-      name: event.values.name,
-      latitude: parseFloat(event.values.latitude),//TODO temporary fix because InputMapLocation does create strings here
-      longitude: parseFloat(event.values.longitude)
-   }})
-   toast.add({severity: 'success', summary: 'Workspace saved', life: 3000})
-   //TODO update loadapi data (or implement that loadapi can use live data instead of only loading on mount)
-}
 </script>
 
 <template>
@@ -75,32 +65,18 @@ async function saveWorkspace(id: number, event: FormSubmitEvent){
                   </TabPanel>
                   <TabPanel :value="5">
                      <!-- TODO only users that own workspace (team or organization) should be able to edit -->
-                     <Form :initial-values="workspace.data" @submit="(evt) => saveWorkspace(workspace.data.id, evt)" style="display: flex; gap: 1em; flex-direction: column;">
 
-                        <IftaLabel>
-                           <InputText id="name" name="name"></InputText>
-                           <label for="name">Name</label>
-                        </IftaLabel>
+                     <ApiForm :apiMethod="api.rest.workspace.patch" :params="{workspaceId: workspace.data.id}" type="edit"
+                        :initial-values="workspace.data"
+                        :fields="{
+                           name: {type: 'text', required: true},
+                           latitude: {type: 'map-location', required: true, latitudeField: 'latitude', longitudeField: 'longitude', defaultValue: 48.1},
+                           longitude: {type: 'map-location', required: true, latitudeField: 'latitude', longitudeField: 'longitude', defaultValue: 11.6}
+                        }"
+                        :editable-fields="['name', 'latitude', 'longitude']"
+                        title="Edit Workspace"
+                        @created="(updatedWorkspace) => workspace.data = updatedWorkspace"></ApiForm>
 
-                        <!--<div style="display: flex; gap: 1em">
-                           <IftaLabel>
-                              <InputNumber id="latitude" name="latitude"></InputNumber>
-                              <label for="latitude">Latitude</label>
-                           </IftaLabel>
-
-                           <IftaLabel>
-                              <InputNumber id="longitude" name="longitude"></InputNumber>
-                              <label for="longitude">Longitude</label>
-                           </IftaLabel>
-                        </div>-->
-
-                        <IftaLabel>
-                           <InputMapLocation :model-value="{longitude: workspace.data.longitude, latitude: workspace.data.latitude}"  id-longitude="longitude" id-latitude="latitude" name-longitude="longitude" name-latitude="latitude" :default-location="{longitude: 11.6, latitude: 48.1}" :start-height="100000" @change="location => {workspace.data.longitude = location.longitude; workspace.data.latitude = location.latitude}"></InputMapLocation>
-                           <label for="longitude_latitude">Longitude / Latitude</label>
-                        </IftaLabel>
-
-                        <Button type="submit" label="Save"></Button>
-                     </Form>
                   </TabPanel>
                </TabPanels>
             </Tabs>

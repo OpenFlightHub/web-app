@@ -7,10 +7,13 @@ import { FormSubmitEvent } from '@/util/primevue';
 import { Form } from '@primevue/forms';
 import { Button, Checkbox, Select, InputNumber, IftaLabel, InputText, useToast, DatePicker  } from 'primevue';
 import { ref } from 'vue';
+import { FormResolverOptions } from '@primevue/forms';
+import InputMapLocation from './InputMapLocation.vue';
 
-export type Field<FieldType> = FieldType extends 'text' ? FieldTypeText : FieldType extends 'email' ? FieldTypeEmail : FieldType extends 'number' ? FieldTypeNumber : FieldType extends 'select' ? FieldTypeSelect : FieldType extends 'checkbox' ? FieldTypeCheckbox : FieldType extends 'date-with-time' ? FieldTypeDateWithTime : FieldType extends 'raw' ? FieldTypeRaw : FieldBase<FieldType>
 
-export type FieldType = 'text' | 'email' | 'number' | 'select' | 'checkbox' | 'date-with-time' | 'raw'
+export type Field<FieldType, DataShape extends Record<string, string> = Record<string, string>> = FieldType extends 'text' ? FieldTypeText : FieldType extends 'email' ? FieldTypeEmail : FieldType extends 'number' ? FieldTypeNumber : FieldType extends 'select' ? FieldTypeSelect : FieldType extends 'checkbox' ? FieldTypeCheckbox : FieldType extends 'date-with-time' ? FieldTypeDateWithTime : FieldType extends 'raw' ? FieldTypeRaw : FieldType extends 'map-location' ? FieldTypeMapLocation<DataShape> : FieldBase<FieldType>
+
+export type FieldType = 'text' | 'email' | 'number' | 'select' | 'checkbox' | 'date-with-time' | 'raw' | 'map-location'
 
 export type FieldBase<FieldType> = {
     type: FieldType
@@ -42,15 +45,23 @@ export interface FieldTypeDateWithTime extends FieldBase<'date-with-time'> {
 export interface FieldTypeRaw extends FieldBase<'raw'> {
 }
 
+export interface FieldTypeMapLocation<DataShape extends Record<string, string>> extends FieldBase<'map-location'> {
+    longitudeField: keyof DataShape
+    latitudeField: keyof DataShape
+    defaultValue: number
+}
+
 
 const toast = useToast()
 
 const props = defineProps<{
+    type: 'create' | 'edit'
     title: string
+    confirmLabel?: string
     showCancelButton?: boolean
-    createApiMethod: PROPS['apiMethod']
+    apiMethod: PROPS['apiMethod']
     params: PROPS['config'] extends Record<string, any> ? PROPS['config']['params'] : never
-    fields: Record<keyof PROPS['config']['data'], Field<FieldType>>
+    fields: Record<keyof PROPS['config']['data'], Field<FieldType, PROPS['config']['data']>>
     editableFields: EF
     initialValues: Omit<PROPS['config']['data'], EF[number]> & Partial<PROPS['config']['data']>
     readableLabels?: Partial<Record<keyof PROPS['config']['data'], string>>
@@ -75,8 +86,6 @@ function cleanupData(data: FormSubmitEvent['values']): PROPS['config']['data']{
             continue
         }
 
-        cleanData[fieldName] = data[fieldName]
-
         if(props.fields[fieldName].type === 'date-with-time'){
             if(props.fields[fieldName].onlyDate){
                 const date = new Date(data[fieldName])
@@ -87,6 +96,18 @@ function cleanupData(data: FormSubmitEvent['values']): PROPS['config']['data']{
             } else {
                 cleanData[fieldName] = new Date(data[fieldName]).toISOString()
             }
+        } else if (props.fields[fieldName].type === 'raw'){
+            cleanData[fieldName] = data[fieldName]
+        } else if (props.fields[fieldName].type === 'checkbox'){
+            cleanData[fieldName] = !!data[fieldName]
+        } else if (props.fields[fieldName].type === 'number'){
+            cleanData[fieldName] = Number(data[fieldName])
+        } else if(props.fields[fieldName].type === 'email' || props.fields[fieldName].type === 'text'){
+            cleanData[fieldName] = '' + data[fieldName]
+        } else if(props.fields[fieldName].type === 'map-location'){
+            cleanData[fieldName] = Number(data[fieldName])
+        } else {
+            cleanData[fieldName] = data[fieldName]
         }
     }
 
@@ -100,7 +121,7 @@ async function save(evt: FormSubmitEvent){
     const cleanData = cleanupData(evt.values)
 
     try {
-        const response = await props.createApiMethod({params: props.params, data: cleanData} as PROPS['config'])
+        const response = await props.apiMethod({params: props.params, data: cleanData} as PROPS['config'])
 
         emit('created', response)
 
@@ -110,6 +131,29 @@ async function save(evt: FormSubmitEvent){
     }
 
     isSending.value = false
+}
+
+// TODO implement custom validation (especially required for map-location)
+// :resolver="resolveValidation"
+async function resolveValidation(e: FormResolverOptions){
+    const errors: Record<string, string> = {}
+
+    for(const fieldName of Object.keys(props.fields)){
+        if(props.fields[fieldName].required){
+            if(typeof e.values[fieldName] === 'undefined' || e.values[fieldName] === null || e.values[fieldName] === ''){
+                errors[fieldName] = 'This field is required'
+            }
+        }
+
+        if(props.fields[fieldName].type === 'email' && typeof e.values[fieldName] === 'string' && e.values[fieldName].length > 0){
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+            if(!emailRegex.test(e.values[fieldName])){
+                errors[fieldName] = 'Please enter a valid email address'
+            }
+        }
+    }
+
+    return errors
 }
 
 </script>
@@ -172,6 +216,23 @@ async function save(evt: FormSubmitEvent){
                             <!-- hidden -->
                         </template>
 
+                        <template v-else-if="props.fields[fieldName].type === 'map-location'">
+                            <template v-if="props.fields[fieldName].longitudeField === fieldName"><!-- only render once for longitude field -->
+                                <IftaLabel>
+                                    <InputMapLocation :model-value="{
+                                        longitude: props.initialValues[props.fields[fieldName].longitudeField.toString()] as number,
+                                        latitude: props.initialValues[props.fields[fieldName].latitudeField.toString()] as number
+                                        }" :id-longitude="props.fields[fieldName].longitudeField" :id-latitude="props.fields[fieldName].latitudeField.toString()" :name-longitude="props.fields[fieldName].longitudeField" :name-latitude="props.fields[fieldName].latitudeField.toString()" :default-location="{longitude: props.fields[fieldName].defaultValue, latitude: props.fields[fieldName].defaultValue}" :start-height="10000" @change="location => {
+                                            //@ts-ignore
+                                            props.initialValues[props.fields[fieldName].longitudeField.toString()] = location.longitude
+                                            //@ts-ignore
+                                            props.initialValues[props.fields[fieldName].latitudeField.toString()] = location.latitude
+                                        }"></InputMapLocation>
+                                    <label :for="props.fields[fieldName].longitudeField.toString() + '_' + props.fields[fieldName].latitudeField.toString()">{{ (props.readableLabels?.[props.fields[fieldName].longitudeField] ?? 'Longitude')+ ' / ' + (props.readableLabels?.[props.fields[fieldName].latitudeField] ?? 'Latitude') }}</label>
+                                </IftaLabel>
+                            </template>
+                        </template>
+
                         <template v-else>
                             Unsupported field type "{{ (props.fields[fieldName] as Field<FieldType>).type }}" for field {{ fieldName }}.
                         </template>
@@ -182,7 +243,7 @@ async function save(evt: FormSubmitEvent){
         </template>
 
         <div id="buttons">
-            <Button type="submit" label="Create" :disabled="isSending"></Button>
+            <Button type="submit" :label="props.confirmLabel ?? (props.type === 'create' ? 'Create' : 'Save')" :disabled="isSending"></Button>
             <Button v-if="showCancelButton" label="Cancel" class="p-button-secondary" @click="$form.reset(); emit('cancel')"></Button>
         </div>
 

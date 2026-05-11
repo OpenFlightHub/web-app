@@ -47,18 +47,20 @@ const valueAsString = computed(() => {
     return ''
 })
 
-function updateModelFromText() {
-    const parts = valueAsString.value.split(',')
-    if (parts.length === 2) {
-        const lat = parseFloat(parts[0])
-        const lng = parseFloat(parts[1])
-        if (!isNaN(lat) && !isNaN(lng)) {
-            model.value = {
-                latitude: lat,
-                longitude: lng
+function updateModelFromTextSoon(evt: InputEvent) {
+    setTimeout(()=>{//wait until input value is updated
+        const parts = (evt.target as HTMLInputElement).value.split(',')
+        if (parts.length === 2) {
+            const lat = parseFloat(parts[0])
+            const lng = parseFloat(parts[1])
+            if (!isNaN(lat) && !isNaN(lng)) {
+                model.value = {
+                    latitude: lat,
+                    longitude: lng
+                }
             }
         }
-    }
+    }, 0)
 }
 
 const modalVisible = ref(false)
@@ -84,9 +86,9 @@ function changeLocation(latitude: number, longitude: number){
     <InputNumber :id="props.idLongitude" :name="props.nameLongitude" style="display: none;" :max-fraction-digits="props.maxFractionDigits ?? DEFAULT_MAX_FRACTION_DIGITS"></InputNumber>
     <InputNumber :id="props.idLatitude" :name="props.nameLatitude" style="display: none;" :max-fraction-digits="props.maxFractionDigits ?? DEFAULT_MAX_FRACTION_DIGITS"></InputNumber>
 
-    <InputGroup @click.stop.prevent="modalVisible = true">
-        <InputText v-model="valueAsString" :id="props.idLongitude + '_' + props.idLatitude" :name="props.nameLongitude + '_' + props.nameLatitude" @input="updateModelFromText"></InputText>
-        <InputGroupAddon>
+    <InputGroup>
+        <InputText v-model="valueAsString" :id="props.idLongitude + '_' + props.idLatitude" :name="props.nameLongitude + '_' + props.nameLatitude" @input="updateModelFromTextSoon"></InputText>
+        <InputGroupAddon @click.stop.prevent="modalVisible = true">
             <IconVue name="map" style="cursor: pointer;"></IconVue>
         </InputGroupAddon>
     </InputGroup>

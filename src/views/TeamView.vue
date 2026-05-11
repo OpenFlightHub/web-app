@@ -9,7 +9,7 @@ import LoadApiWithIdParamInUrl from '@/components/functional/LoadApiWithIdParamI
 import LoadApiArrayWithIdParamInUrl from '@/components/functional/LoadApiArrayWithIdParamInUrl.vue';
 import LoadApi from '@/components/functional/LoadApi.vue';
 import ModalVue from '@/components/display/ModalVue.vue';
-import CreateForm from '@/components/functional/form/CreateForm.vue';
+import ApiForm from '@/components/functional/form/ApiForm.vue';
 import { ref } from 'vue';
 import IconVue from '@/components/general/IconVue.vue';
 import { Button, useConfirm, useToast, TabPanel, TabList, Tab, Tabs, TabPanels } from 'primevue';
@@ -112,9 +112,9 @@ function removeMember(teamId: number, userId: number) {
 
 
         <ModalVue :visible="showInviteMemberModal" @close="showInviteMemberModal = false">
-            <CreateForm title="Invite Member" :create-api-method="api.rest.team.inviteMember.post" :params="{teamId: team.data.id}" :fields="{
+            <ApiForm type="create" title="Invite Member" confirm-label="Invite" :api-method="api.rest.team.inviteMember.post" :params="{teamId: team.data.id}" :fields="{
                 email: {type: 'email', required: true}
-            }" :editable-fields="['email']" :initial-values="{}" @created="ref => {showInviteMemberModal = false}"></CreateForm>
+            }" :editable-fields="['email']" :initial-values="{}" @created="ref => {showInviteMemberModal = false}"></ApiForm>
         </ModalVue>
 
     </LoadApiWithIdParamInUrl>

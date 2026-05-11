@@ -11,7 +11,7 @@ import TeamSnippet from '@/components/team/TeamSnippet.vue';
 import UserSnippet from '@/components/user/UserSnippet.vue';
 import { ref } from 'vue';
 import ModalVue from '@/components/display/ModalVue.vue';
-import CreateForm from '@/components/functional/form/CreateForm.vue';
+import ApiForm from '@/components/functional/form/ApiForm.vue';
 import LoadApiArray from '@/components/functional/LoadApiArray.vue';
 import IconVue from '@/components/general/IconVue.vue';
 import { Button } from 'primevue';
@@ -57,12 +57,12 @@ const showCreateTeamModal = ref(false)
 
         <LoadApiArray :api-method="api.rest.organisation.users.get" :config="{params: {organisationId: organisation.data.id}}" v-slot="users">
             <ModalVue :visible="showCreateTeamModal" @close="showCreateTeamModal = false">
-                <CreateForm title="Create Team" :create-api-method="api.rest.team.post" :params="{}" :fields="{
+                <ApiForm type="create" title="Create Team" :api-method="api.rest.team.post" :params="{}" :fields="{
                     name: {type: 'text', required: true},
                     logo_file_id: {type: 'number'},
                     organisation_id: {type: 'number', required: true},
                     owner_user_id: {type: 'select', required: true, options: users.data.map(user => ({value: user.id, label: user.name}))}
-                }" :editable-fields="['name', 'owner_user_id']" :initial-values="{organisation_id: organisation.data.id}" @created="ref => {showCreateTeamModal = false}"></CreateForm>
+                }" :editable-fields="['name', 'owner_user_id']" :initial-values="{organisation_id: organisation.data.id}" @created="ref => {showCreateTeamModal = false}"></ApiForm>
             </ModalVue>
         </LoadApiArray>
 

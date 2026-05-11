@@ -7,7 +7,7 @@ import Spacing from '@/components/layout/Spacing.vue';
 import UserSnippet from '@/components/user/UserSnippet.vue';
 import { ref } from 'vue';
 import ModalVue from '@/components/display/ModalVue.vue';
-import CreateForm from '@/components/functional/form/CreateForm.vue';
+import ApiForm from '@/components/functional/form/ApiForm.vue';
 import IconVue from '@/components/general/IconVue.vue';
 import { Button } from 'primevue';
 
@@ -35,10 +35,10 @@ const showCreateModal = ref(false)
 
 
     <ModalVue :visible="showCreateModal" @close="showCreateModal = false">
-        <CreateForm title="Create User" :create-api-method="api.rest.admin.users.post" :params="{}" :fields="{
+        <ApiForm type="create" title="Create User" :api-method="api.rest.admin.users.post" :params="{}" :fields="{
             name: {type: 'text'},
             email: {type: 'email', required: true}
-        }" :editable-fields="['name', 'email']" :initial-values="{}" @created="ref => {showCreateModal = false}"></CreateForm>
+        }" :editable-fields="['name', 'email']" :initial-values="{}" @created="ref => {showCreateModal = false}"></ApiForm>
     </ModalVue>
 
 </template>
