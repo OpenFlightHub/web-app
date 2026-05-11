@@ -1,3 +1,7 @@
 {
-  "recommendations": ["Vue.volar", "figma.figma-vscode-extension"]
+  "recommendations": [
+    "Vue.volar",
+    "figma.figma-vscode-extension",
+    "naumovs.color-highlight"
+  ]
 }
