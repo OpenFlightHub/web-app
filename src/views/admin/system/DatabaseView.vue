@@ -30,14 +30,16 @@ const router = useRouter();
                 <TabPanel :value="0">
 
                     <table>
-                        <tr>
-                            <td>Total Size:</td>
-                            <td><FileSizeDisplay :size-in-bytes="info.data.database.size" :lowest="'MB'"></FileSizeDisplay></td>
-                        </tr>
-                        <tr>
-                            <td>Version:</td>
-                            <td>{{ info.data.database.version }}</td>
-                        </tr>
+                        <tbody>
+                            <tr>
+                                <td>Total Size:</td>
+                                <td><FileSizeDisplay :size-in-bytes="info.data.database.size" :lowest="'MB'"></FileSizeDisplay></td>
+                            </tr>
+                            <tr>
+                                <td>Version:</td>
+                                <td>{{ info.data.database.version }}</td>
+                            </tr>
+                        </tbody>
                     </table>
 
                 </TabPanel>
