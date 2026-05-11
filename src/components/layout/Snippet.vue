@@ -48,6 +48,8 @@ const clazz = computed(()=>{
 #router_link {
     transition: all 0.2s ease;
     color: var(--text-color);
+    font-style: normal;
+    text-decoration: none;
 
     &:hover {
         filter: brightness(90%) saturate(90%);
