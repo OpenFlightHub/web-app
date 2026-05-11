@@ -8,6 +8,7 @@ import List from '../layout/List.vue';
 import TaskSnippet from '../task/TaskSnippet.vue';
 import { ref } from 'vue';
 import IconVue from '../general/IconVue.vue';
+import TeamReference from '../team/TeamReference.vue';
 
 const props = defineProps<{
     mission: ApiResponse_MissionGet
@@ -22,6 +23,13 @@ const extendTasks = ref(false)
 
     <Snippet :to-url="'/mission/' + props.mission.id">
         <h3 id="title">{{ props.mission.name }} <MissionBadge :state="props.mission.state"></MissionBadge></h3>
+
+        <h4>Assigned to:
+            <TeamReference v-if="typeof props.mission.assigned_to_team_id === 'number'" :id="props.mission.assigned_to_team_id"></TeamReference>
+            <span v-else>-</span>
+        </h4>
+
+
         <p id="description">{{ props.mission.description }}</p>
 
         <template v-if="props.showTasks">
