@@ -44,7 +44,7 @@ let viewerLoadCheckInterval: ReturnType<typeof setInterval> | undefined = undefi
 
 let viewer: Viewer = new Viewer(props.mapContainer, {
     //terrain: new Terrain(CesiumTerrainProvider.fromIonAssetId(4613429)),
-    terrain: getSetting('use-dev-terrain') ? new Terrain(CesiumTerrainProvider.fromUrl('https://dev.openflighthub.org/ctb/terrain_sued_oa_1m')) : Terrain.fromWorldTerrain(),
+    terrain: getSetting('use-dev-terrain') ? new Terrain(CesiumTerrainProvider.fromUrl('https://dev.openflighthub.org/ctb/20cm_siplinger-output')) : Terrain.fromWorldTerrain(),
     // terrain: new Terrain(CesiumTerrainProvider.fromUrl('https://dev.openflighthub.org/terrain2/tiles/dynamic/?minZoom=1&maxZoom=18&cog=/config/tiles.vrt')),
     animation: false,
     timeline: false,
