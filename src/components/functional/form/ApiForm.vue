@@ -72,6 +72,7 @@ const props = defineProps<{
     initialValues: IV
     readableLabels?: Partial<Record<keyof PROPS['config']['data'], string>>
     watchInitialValues?: (keyof IV)[]
+    checkFunction?: () => (true | string)
 }>()
 
 const emit = defineEmits<{
@@ -132,6 +133,15 @@ function cleanupData(data: FormSubmitEvent['values']): PROPS['config']['data']{
 }
 
 async function save(evt: FormSubmitEvent){
+
+    if(props.checkFunction){
+        const checkResult = props.checkFunction()
+        if(checkResult !== true){
+            errorMessage.value = '' + checkResult
+            return
+        }
+    }
+
     isSending.value = true
     errorMessage.value = ''
 

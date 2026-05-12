@@ -29,7 +29,7 @@ function select(showingType: ShowingType){
     </div>
 
     <template v-if="showing === 'draw-point'">
-        <MapDrawPoint :workspace-id="props.workspaceId"></MapDrawPoint>
+        <MapDrawPoint :workspace-id="props.workspaceId" @created="select('none')"></MapDrawPoint>
     </template>
 
 </template>

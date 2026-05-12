@@ -1,16 +1,15 @@
 <script setup lang="ts">
-import { computed, reactive, ref } from 'vue';
+import { reactive, ref } from 'vue';
 import MapClickListener from '../MapClickListener.vue';
 import { updateObject } from '@/util/vue';
 import MapMarker from '../MapMarker.vue';
 import ApiForm from '@/components/functional/form/ApiForm.vue';
 import api from '@/api';
-import { useToast, IftaLabel, Select, Button } from 'primevue';
+import { useToast, IftaLabel } from 'primevue';
 import Padding from '@/components/layout/Padding.vue';
-import { getGeoObjectColorSelectOptions } from '@/util/api';
 import SelectApiColor from '@/components/functional/form/SelectApiColor.vue';
 import { Color } from 'cesium';
-import IconVue from '@/components/general/IconVue.vue';
+import { ApiResponse_WorkspaceGeoObjectsPost } from 'openflighthub-api-client-sdk';
 
 const props = defineProps<{
     workspaceId: number
@@ -25,7 +24,7 @@ const locationData = reactive({
 })
 
 const emit = defineEmits<{
-    click: [value:undefined]
+    created: [value: ApiResponse_WorkspaceGeoObjectsPost]
 }>()
 
 const toast = useToast()
@@ -73,11 +72,14 @@ const config = reactive({
                         }
                     }).then(()=>{
                         toast.add({severity: 'success', summary: 'Success', detail: 'Point linked to task'})
+                        emit('created', ref)
                     }).catch(err=>{
                         toast.add({severity: 'error', summary: 'Error', detail: 'Could not link point to task: ' + err})
                     })
+                } else {
+                    emit('created', ref)
                 }
-            }" :watch-initial-values="['config']">
+            }" :watch-initial-values="['config']" :check-function="()=>hasLocation === true ? true : 'Please select a location for the point by clicking on the map'">
 
                 <IftaLabel>
                     <SelectApiColor field-name="color" @change="newColor => config.color = newColor" initial-color="BLUE"></SelectApiColor>
