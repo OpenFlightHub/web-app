@@ -168,7 +168,7 @@ async function save(evt: FormSubmitEvent){
 
         emit('created', response)
 
-        toast.add({severity: 'success', summary: 'Created successfully', life: 3000})
+        toast.add({severity: 'success', summary: props.type === 'create' ? 'Created successfully' : 'Saved successfully', life: 3000})
     } catch (err){
         errorMessage.value = '' + err
     }

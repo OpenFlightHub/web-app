@@ -56,7 +56,7 @@ const config = reactive({
     color: api.CONSTANTS.GEO_OBJECT_COLORS.BLUE
 })
 
-const label = ref('')
+const label = ref(props.existingGeoObject ? props.existingGeoObject.name : '')
 
 </script>
 
@@ -80,6 +80,7 @@ const label = ref('')
                     name: {type: 'text', required: true},
                     config: {type: 'raw', required: true}
                 }" :editable-fields="['name']" :initial-values="{
+                    name: props.existingGeoObject.name,
                     config
                 }" @created="(ref) => {
                     emit('edit-done', ref)
