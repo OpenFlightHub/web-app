@@ -16,6 +16,7 @@ export function updateObject(current: object, update: object){
 
     for(const key of Object.keys(current)){
         if(!update.hasOwnProperty(key)){
+            //@ts-ignore
             delete current[key]
         }
     }
