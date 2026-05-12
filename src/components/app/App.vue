@@ -42,7 +42,13 @@ const animateBackground = computed(()=>{
 
         <AutomaticFileDownload></AutomaticFileDownload>
 
-        <Toast></Toast>
+        <Toast>
+            <!-- was once a fix for weird vue warnings related to $pcTabs
+            <template #closeicon>
+                <span class="p-toast-close-icon" aria-hidden="true">&times;</span>
+            </template>
+            -->
+        </Toast>
         <ConfirmDialog></ConfirmDialog>
     </div>
 
