@@ -5,3 +5,4 @@ export function getGeoObjectColorSelectOptions(){
 
     return Object.keys(colors).map(key => ({label: key, value: colors[key as keyof typeof colors]}))
 }
+//TODO merge with colors.ts!!!

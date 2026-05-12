@@ -13,4 +13,4 @@ const THEME_COLORS = {
 
 export function getColor(name: keyof typeof THEME_COLORS){
     return Color.fromCssColorString(THEME_COLORS[name])
-}
+}//TODO merge with api colors!!!!
