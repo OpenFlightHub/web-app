@@ -36,7 +36,8 @@ smoothMovement.addListener('position-update', ({ position, time }) => {
          pitch: -10,
          roll: 0
       },
-      flyToDuration: 0.1
+      flyToDuration: 0.1,
+      fov: 100//TODO real drone fov of wide camera?
    })
 
    lastPosition = position
