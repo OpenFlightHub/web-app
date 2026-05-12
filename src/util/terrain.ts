@@ -32,6 +32,9 @@ export type TerrainVisibilityResult = {
     all: TerrainVisibilitySample[]
 }
 
+/**
+ * height is relative to geoid, if you need orthometric (normal height) use convertEllipsoidalHeightToOrthometricHeight()
+ */
 export async function getElevationAtPosition(viewer: Viewer, longitude: number, latitude: number){
 
     const inAirPos = Cartographic.fromDegrees(longitude, latitude, undefined, new Cartographic())

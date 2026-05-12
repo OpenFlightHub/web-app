@@ -133,6 +133,16 @@ export function toCssRGBA(color: Color){
 }
 
 export function getMapCenter(viewer: Viewer){
+    return getMapTerrainLocationAt(viewer, 0.5, 0.5)
+}
+
+/**
+ *
+ * @param realtiveX 0-1 (0 = left, 1 = right)
+ * @param relativeY 0-1 (0 = top, 1 = bottom)
+ * @returns 0,0 if viewer is undefined or terrain not available
+ */
+export function getMapTerrainLocationAt(viewer: Viewer, relativeX: number, relativeY: number){
     const DEFAULT = {
         latitude: 0,
         longitude: 0
@@ -142,7 +152,7 @@ export function getMapCenter(viewer: Viewer){
         return DEFAULT
     }
 
-    let windowPosition = new Cartesian2(viewer.container.clientWidth / 2, viewer.container.clientHeight / 2);
+    let windowPosition = new Cartesian2(relativeX * viewer.container.clientWidth, relativeY * viewer.container.clientHeight);
 
     let pickRay = viewer.scene.camera.getPickRay(windowPosition)
 

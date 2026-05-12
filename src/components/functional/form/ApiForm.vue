@@ -2,11 +2,12 @@
     T extends void | Record<string, any>,
     C extends {data: Record<string, any>, params?: Record<string, any>}, AM extends ((config: C) => Promise<T>),
     PROPS extends {apiMethod: AM, config: Parameters<AM>[0]},
-    EF extends (keyof PROPS['config']['data'])[]">
+    EF extends (keyof PROPS['config']['data'])[],
+    IV extends Omit<PROPS['config']['data'], EF[number]> & Partial<PROPS['config']['data']>">
 import { FormSubmitEvent } from '@/util/primevue';
 import { Form } from '@primevue/forms';
 import { Button, Checkbox, Select, InputNumber, IftaLabel, InputText, useToast, DatePicker, Textarea  } from 'primevue';
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { FormResolverOptions } from '@primevue/forms';
 import InputMapLocation from './InputMapLocation.vue';
 
@@ -68,14 +69,25 @@ const props = defineProps<{
     params: PROPS['config'] extends Record<string, any> ? PROPS['config']['params'] : never
     fields: Record<keyof PROPS['config']['data'], Field<FieldType, PROPS['config']['data']>>
     editableFields: EF
-    initialValues: Omit<PROPS['config']['data'], EF[number]> & Partial<PROPS['config']['data']>
+    initialValues: IV
     readableLabels?: Partial<Record<keyof PROPS['config']['data'], string>>
+    watchInitialValues?: (keyof IV)[]
 }>()
 
 const emit = defineEmits<{
     created: [createdObject: T]
     cancel: []
 }>()
+
+const form = ref()
+
+if(props.watchInitialValues){
+    for(const fieldName of props.watchInitialValues){
+        watch(() => props.initialValues[fieldName], (newValue) => {
+            form.value!.setFieldValue(fieldName, newValue)
+        })
+    }
+}
 
 const isSending = ref(false)
 const errorMessage = ref('')
@@ -167,7 +179,7 @@ async function resolveValidation(e: FormResolverOptions){
 
     <h2>{{ props.title }}</h2>
 
-    <Form v-slot="$form" :initial-values="props.initialValues" @submit="save" :validate-on-mount="true" :validate-on-value-update="true" :validate-on-blur="true">
+    <Form ref="form" v-slot="$form" :initial-values="props.initialValues" @submit="save" :validate-on-mount="true" :validate-on-value-update="true" :validate-on-blur="true">
 
         <template v-if="props.fields">
             <div id="fields">
@@ -205,7 +217,7 @@ async function resolveValidation(e: FormResolverOptions){
 
                         <template v-else-if="props.fields[fieldName].type === 'select'">
                             <IftaLabel>
-                                <Select :id="fieldName" :name="fieldName" :options="props.fields[fieldName].options" option-value="value" option-label="label" :required="props.fields[fieldName].required" filter fluid></Select>
+                                <Select :id="fieldName" :name="fieldName" :options="props.fields[fieldName].options" option-value="value" option-label="label" :required="props.fields[fieldName].required" fluid></Select>
                                 <label :for="fieldName">{{ props.readableLabels?.[fieldName] ?? fieldName }}</label>
                             </IftaLabel>
                         </template>
@@ -252,6 +264,8 @@ async function resolveValidation(e: FormResolverOptions){
                     </template>
 
                 </template>
+
+                <slot></slot>
             </div>
         </template>
 

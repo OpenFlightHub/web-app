@@ -10,6 +10,7 @@ import Map from '../map/Map.vue';
 import HubWorkspaceGeoObjects from './HubWorkspaceGeoObjects.vue';
 import Fullscreenable from '../functional/Fullscreenable.vue';
 import MapCollisionObjects from '../info/collision-objects/MapCollisionObjects.vue';
+import MapDrawMenu from '../map/MapDrawMenu.vue';
 
 const props = defineProps<{
     connections: ApiResponse_ConnectionGet[]
@@ -43,6 +44,8 @@ const showCollisionObjects = ref(false)
                 <template v-if="showMedia">
                     <HubWorkspaceMapDroneMedia v-for="connection in props.connections" :key="connection.id" :connection="connection"></HubWorkspaceMapDroneMedia>
                 </template>
+
+                <MapDrawMenu :workspace-id="props.workspaceId"></MapDrawMenu>
 
             </Map>
         </div>
@@ -110,4 +113,5 @@ const showCollisionObjects = ref(false)
 
     }
 }
+
 </style>
