@@ -52,8 +52,6 @@ let intervalId = setInterval(()=>{
 
     loadCollisionObjects(true)
 
-console.log('adding camera move end listener to load collision objects')
-
     viewer.scene.camera.moveEnd.addEventListener(()=>{
 
         const newQueryParams = calculcateQueryParams()
@@ -63,8 +61,6 @@ console.log('adding camera move end listener to load collision objects')
             [currentQueryParams.longitude, newQueryParams.latitude],
             {units: 'meters'}
         )
-
-        console.log('distance to current position', distanceToCurrentPosition)
 
         if(distanceToCurrentPosition > COLLISION_OBJECTS_RADIUS / 2){
             // trigger reload
@@ -99,8 +95,6 @@ async function loadCollisionObjects(forceReload = false){
     }
 
     updateArray(objects.value, await api.rest.info.collisionObjects.get({queryParams: currentQueryParams}))
-
-    console.log('loaded collision objects', objects.value.length)
 
     updateShownObjects()
 }
@@ -145,8 +139,6 @@ function updateShownObjects(){
     const objectsToAdd = visibleObjects.filter(vo => !shownObjects.find(so => so.id === vo.id))
     shownObjects.push(...objectsToAdd)
     addedCount += objectsToAdd.length
-
-    console.log('updating filtered objects', shownObjects.length, 'added:', addedCount, 'removed:', removedCount, 'updated:', updatedCount)
 }
 
 function filterVisible(objects: ApiResponse_InfoCollisionObjectsGet){
@@ -155,8 +147,6 @@ function filterVisible(objects: ApiResponse_InfoCollisionObjectsGet){
     }
 
     const cameraHeading = radiansToDegrees(viewer.camera.heading)
-
-    console.log('camera heading', cameraHeading)
 
     const visibleObjects: ApiResponse_InfoCollisionObjectsGet = []
 

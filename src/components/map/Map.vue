@@ -142,7 +142,6 @@ viewer.camera.moveEnd.addEventListener(evt=>{
 
     const longitude = MathCesium.toDegrees(carto.longitude)
     const latitude = MathCesium.toDegrees(carto.latitude)
-    console.log('camera.moveEnd', longitude, latitude, carto.height)
     //TODO append to url
 
     let fov = viewer.camera.frustum instanceof PerspectiveFrustum ? MathCesium.toDegrees((viewer.camera.frustum as PerspectiveFrustum).fov!) : undefined
