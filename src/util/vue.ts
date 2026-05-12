@@ -1,4 +1,5 @@
-import { Reactive } from "vue"
+import { Reactive, watch } from "vue"
+import { objectsAreEqual } from "./object"
 
 /**
  * deletes all existing properties of object, adds all properties from new object
@@ -40,4 +41,22 @@ export function updateArray(current: Reactive<Array<any>> | Array<any>, update: 
 
 export function cloneObject<T>(obj: T): T {
     return JSON.parse(JSON.stringify(obj))
+}
+
+//@ts-ignore
+export const watchForRealChange: typeof watch = function(a: Parameters<typeof watch>[0], b: Parameters<typeof watch>[1], options?: Parameters<typeof watch>[2]){
+    watch(a, (newValue, oldValue, onCleanup)=>{
+        if(newValue === oldValue){
+            return
+        }
+
+        if(typeof newValue === 'object' && typeof oldValue === 'object'){
+            if(objectsAreEqual(newValue, oldValue)){
+                return
+            }
+        }
+
+        b(newValue, oldValue, onCleanup)
+
+    }, options)
 }

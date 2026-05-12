@@ -6,6 +6,7 @@ import { convertEllipsoidalHeightToOrthometricHeight } from '@/util/geoid';
 import { cleanupClickMyEntity, ClickMyEntityHandle, getPointFromOriginWithBearingAndDistance, setupClickMyEntity, toCssRGBA } from '@/util/cesium';
 import * as turf from '@turf/turf';
 import { colorizeCanvas } from '@/util/canvas';
+import { watchForRealChange } from '@/util/vue';
 
 //TODO if marker elevation is below cesium terrain, clamp it to ground
 const props = defineProps<{
@@ -29,22 +30,25 @@ const props = defineProps<{
 const viewer = inject<Viewer>('cesiumViewer')
 const mapContainer = inject<HTMLElement>('mapContainer')
 
-watch(()=>props.position, updatePosition, {deep: true})
-watch(()=>props.heightIsRelative, update)
-watch(()=>props.iconUrl, update)
-watch(()=>props.iconWidth, update)
-watch(()=>props.iconHeight, update)
-watch(()=>props.label, update)
-watch(()=>props.color, update, {deep: true})
-watch(()=>props.fontSize, update)
-watch(()=>props.showHeightIndicator, update)
-watch(()=>props.showHeightMeanSeaLevelInLabel, update)
-watch(()=>props.bearing, update)
-watch(()=>props.autoBearing, update)
-watch(()=>props.backgroundCircle, updateCanvasAndIcon, {deep: true})
-
-watch(()=>props.blink, update)
-watch(()=>props.maxVisibleDistance, update)
+//TODO refactor other map elements to use watchForRealChange
+watchForRealChange(()=>props.position, updatePosition, {deep: true})
+watchForRealChange(()=>props.heightIsRelative, update)
+watchForRealChange(()=>props.iconUrl, update)
+watchForRealChange(()=>props.iconWidth, update)
+watchForRealChange(()=>props.iconHeight, update)
+watchForRealChange(()=>props.label, update)
+watchForRealChange(()=>props.color, (newValue, oldValue)=>{
+    console.log('update color', newValue, oldValue)
+    update()
+}, {deep: true})
+watchForRealChange(()=>props.fontSize, update)
+watchForRealChange(()=>props.showHeightIndicator, update)
+watchForRealChange(()=>props.showHeightMeanSeaLevelInLabel, update)
+watchForRealChange(()=>props.bearing, update)
+watchForRealChange(()=>props.autoBearing, update)
+watchForRealChange(()=>props.backgroundCircle, updateCanvasAndIcon, {deep: true})
+watchForRealChange(()=>props.blink, update)
+watchForRealChange(()=>props.maxVisibleDistance, update)
 
 
 const BACKGROUND_CIRCLE_OVERLAP = 0.3
