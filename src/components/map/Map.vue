@@ -78,7 +78,8 @@ layers.addImageryProvider(
     new WebMapServiceImageryProvider({
         url: 'https://geoservices.bayern.de/od/wms/dop/v1/dop20?',
         layers: 'by_dop20c',
-        credit: 'Datenquellen: Bayerische Vermessungsverwaltung, © Europäische Union, enthält Copernicus Sentinel-2 Daten 2018, verarbeitet durch das Bundesamt für Kartographie und Geodäsie (BKG)'
+        credit: 'Datenquellen: Bayerische Vermessungsverwaltung, © Europäische Union, enthält Copernicus Sentinel-2 Daten 2018, verarbeitet durch das Bundesamt für Kartographie und Geodäsie (BKG)',
+        enablePickFeatures: false//not supported
     })
 
     // new TileLayer({
@@ -99,7 +100,8 @@ layers.addImageryProvider(
         parameters: {
             transparent: true,
             format: 'image/png'
-        }
+        },
+        enablePickFeatures: true//TODO show information about the clicked feature, see https://cesium.com/docs/cesiumjs-ref-doc/WebMapServiceImageryProvider.html#pickFeatures
     })
 )
 
