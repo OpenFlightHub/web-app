@@ -30,8 +30,10 @@ async function setup(){
         const existingElement = geoObjects[existingElementIndex]
 
         if(data.event_type === 'create' || data.event_type === 'update' && !existingElement){
+            //@ts-ignore
             geoObjects.push(data.data)
         } else if (data.event_type === 'update'){
+            //@ts-ignore
             updateObject(existingElement, data.data)
         } else if(data.event_type === 'delete'){
             geoObjects.splice(existingElementIndex, 1)
