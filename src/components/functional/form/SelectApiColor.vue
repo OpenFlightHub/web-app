@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import { Select } from 'primevue';
 import { getGeoObjectColorSelectOptions } from '@/util/api';
-import api from '@/api';
 
 
 const props = defineProps<{
     fieldName: string
-    initialColor?: keyof typeof api.CONSTANTS.GEO_OBJECT_COLORS
+    initialColor?: string
 }>()
 
 const emit = defineEmits<{
@@ -24,7 +23,7 @@ function getColorNameForValue(value: string){
 
 <template>
 
-    <Select :id="props.fieldName" :name="props.fieldName" :options="options" option-value="value" option-label="label" @change="evt => emit('change', evt.value)" :default-value="options.find(opt => opt.label === props.initialColor?.toLowerCase())?.value">
+    <Select :id="props.fieldName" :name="props.fieldName" :options="options" option-value="value" option-label="label" @change="evt => emit('change', evt.value)" :default-value="props.initialColor">
         <template #value="selected">
             <div v-if="selected.value" class="entry">
                 <span class="image_circle" :style="{background: selected.value}" />

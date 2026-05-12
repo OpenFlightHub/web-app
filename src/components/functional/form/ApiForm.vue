@@ -76,8 +76,9 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-    created: [createdObject: T]
+    created: [createdObject: T]//TODO rename to saved
     cancel: []
+    change: [formData: PROPS['config']['data']]
 }>()
 
 const form = ref()
@@ -130,6 +131,21 @@ function cleanupData(data: FormSubmitEvent['values']): PROPS['config']['data']{
     }
 
     return cleanData
+}
+
+function emitChange(){
+    setTimeout(()=>{//wait until form is updated with values
+
+        const values = form.value.states
+
+        const data: Record<string, any> = {}
+
+        for(const fieldName of Object.keys(values)){
+            data[fieldName] = values[fieldName].value
+        }
+
+        emit('change', cleanupData(data))
+    }, 0)
 }
 
 async function save(evt: FormSubmitEvent){
@@ -199,42 +215,42 @@ async function resolveValidation(e: FormResolverOptions){
                     <template v-if="props.editableFields.includes(fieldName)">
                         <template v-if="props.fields[fieldName].type === 'text'">
                             <IftaLabel>
-                                <InputText :id="fieldName" :name="fieldName" :required="props.fields[fieldName].required" :minlength="props.fields[fieldName].required ? 1 : undefined"></InputText>
+                                <InputText :id="fieldName" :name="fieldName" :required="props.fields[fieldName].required" :minlength="props.fields[fieldName].required ? 1 : undefined" @update:model-value="emitChange"></InputText>
                                 <label :for="fieldName">{{ props.readableLabels?.[fieldName] ?? fieldName }}</label>
                             </IftaLabel>
                         </template>
 
                         <template v-else-if="props.fields[fieldName].type === 'email'">
                             <IftaLabel>
-                                <InputText :id="fieldName" :name="fieldName" :required="props.fields[fieldName].required" :minlength="props.fields[fieldName].required ? 1 : undefined" type="email"></InputText>
+                                <InputText :id="fieldName" :name="fieldName" :required="props.fields[fieldName].required" :minlength="props.fields[fieldName].required ? 1 : undefined" type="email" @update:model-value="emitChange"></InputText>
                                 <label :for="fieldName">{{ props.readableLabels?.[fieldName] ?? fieldName }}</label>
                             </IftaLabel>
                         </template>
 
                         <template v-else-if="props.fields[fieldName].type === 'number'">
                             <IftaLabel>
-                                <InputNumber :id="fieldName" :name="fieldName" :required="props.fields[fieldName].required"></InputNumber>
+                                <InputNumber :id="fieldName" :name="fieldName" :required="props.fields[fieldName].required" @update:model-value="emitChange"></InputNumber>
                                 <label :for="fieldName">{{ props.readableLabels?.[fieldName] ?? fieldName }}</label>
                             </IftaLabel>
                         </template>
 
                         <template v-else-if="props.fields[fieldName].type === 'checkbox'">
                             <IftaLabel>
-                                <Checkbox :id="fieldName" :name="fieldName" :required="props.fields[fieldName].required"></Checkbox>
+                                <Checkbox :id="fieldName" :name="fieldName" :required="props.fields[fieldName].required" @update:model-value="emitChange"></Checkbox>
                                 <label :for="fieldName">{{ props.readableLabels?.[fieldName] ?? fieldName }}</label>
                             </IftaLabel>
                         </template>
 
                         <template v-else-if="props.fields[fieldName].type === 'select'">
                             <IftaLabel>
-                                <Select :id="fieldName" :name="fieldName" :options="props.fields[fieldName].options" option-value="value" option-label="label" :required="props.fields[fieldName].required" fluid></Select>
+                                <Select :id="fieldName" :name="fieldName" :options="props.fields[fieldName].options" option-value="value" option-label="label" :required="props.fields[fieldName].required" fluid @update:model-value="emitChange"></Select>
                                 <label :for="fieldName">{{ props.readableLabels?.[fieldName] ?? fieldName }}</label>
                             </IftaLabel>
                         </template>
 
                         <template v-else-if="props.fields[fieldName].type === 'date-with-time'">
                             <IftaLabel>
-                                <DatePicker :id="fieldName" :name="fieldName" :required="props.fields[fieldName].required" :show-time="props.fields[fieldName].onlyDate !== true" hour-format="24" :max-date="props.fields[fieldName].max" fluid></DatePicker>
+                                <DatePicker :id="fieldName" :name="fieldName" :required="props.fields[fieldName].required" :show-time="props.fields[fieldName].onlyDate !== true" hour-format="24" :max-date="props.fields[fieldName].max" fluid @update:model-value="emitChange"></DatePicker>
                                 <label :for="fieldName">{{ props.readableLabels?.[fieldName] ?? fieldName }}</label>
                             </IftaLabel>
                         </template>
@@ -254,6 +270,7 @@ async function resolveValidation(e: FormResolverOptions){
                                             props.initialValues[props.fields[fieldName].longitudeField.toString()] = location.longitude
                                             //@ts-ignore
                                             props.initialValues[props.fields[fieldName].latitudeField.toString()] = location.latitude
+                                            emitChange()
                                         }"></InputMapLocation>
                                     <label :for="props.fields[fieldName].longitudeField.toString() + '_' + props.fields[fieldName].latitudeField.toString()">{{ (props.readableLabels?.[props.fields[fieldName].longitudeField] ?? 'Longitude')+ ' / ' + (props.readableLabels?.[props.fields[fieldName].latitudeField] ?? 'Latitude') }}</label>
                                 </IftaLabel>
@@ -263,7 +280,7 @@ async function resolveValidation(e: FormResolverOptions){
 
                         <template v-else-if="props.fields[fieldName].type === 'textarea'">
                             <IftaLabel>
-                                <Textarea :id="fieldName" :name="fieldName" :required="props.fields[fieldName].required" :rows="props.fields[fieldName].minRows ?? 3" :placeholder="props.fields[fieldName].placeholder"></Textarea>
+                                <Textarea :id="fieldName" :name="fieldName" :required="props.fields[fieldName].required" :rows="props.fields[fieldName].minRows ?? 3" :placeholder="props.fields[fieldName].placeholder" @update:model-value="emitChange"></Textarea>
                                 <label :for="fieldName">{{ props.readableLabels?.[fieldName] ?? fieldName }}</label>
                             </IftaLabel>
                         </template>

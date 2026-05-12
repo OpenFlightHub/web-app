@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { Button } from 'primevue';
 import MapDrawPoint from '../map/draw/MapDrawPoint.vue';
 import ImageVue from '../general/ImageVue.vue';
+import { GeoObjectEditEvent } from '@/components/geo-object/GeoObjectEvents';
 
 const props = defineProps<{
     workspaceId: number
@@ -12,11 +13,29 @@ const props = defineProps<{
 type ShowingType = 'none' | 'draw-point'
 const showing = ref<ShowingType>('none')
 
+let editEventId = -1
+
 function select(showingType: ShowingType){
     if(showing.value === showingType){
         showing.value = 'none'
     } else {
         showing.value = showingType
+        window.dispatchEvent(new GeoObjectEditEvent(--editEventId))
+    }
+}
+
+
+onMounted(() => {
+    window.addEventListener(GeoObjectEditEvent.EVENT_NAME, onEditEvent)
+})
+
+onBeforeUnmount(() => {
+    window.removeEventListener(GeoObjectEditEvent.EVENT_NAME, onEditEvent)
+})
+
+function onEditEvent(evt: Event){
+    if(evt instanceof GeoObjectEditEvent && evt.geoObjectId !== editEventId){
+        showing.value = 'none'
     }
 }
 
@@ -29,7 +48,7 @@ function select(showingType: ShowingType){
     </div>
 
     <template v-if="showing === 'draw-point'">
-        <MapDrawPoint :workspace-id="props.workspaceId" @created="select('none')"></MapDrawPoint>
+        <MapDrawPoint :workspace-id="props.workspaceId" @create-done="select('none')"></MapDrawPoint>
     </template>
 
 </template>

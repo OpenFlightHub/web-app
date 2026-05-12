@@ -6,10 +6,39 @@ import { getColorForHex } from '@/util/cesium';
 import MapPolyline from '../map/MapPolyline.vue';
 import MapPolygon from '../map/MapPolygon.vue';
 import MapCircle from '../map/MapCircle.vue';
+import { onBeforeUnmount, onMounted, ref } from 'vue';
+import MapDrawPoint from '../map/draw/MapDrawPoint.vue';
+import IconVue from '../general/IconVue.vue';
+import { GeoObjectEditEvent } from '@/components/geo-object/GeoObjectEvents';
 
 const props = defineProps<{
     geoObject: ApiResponse_WorkspaceGeoObjectsGet[number]
 }>()
+
+const editIsVisible = ref(false)
+
+onMounted(() => {
+    window.addEventListener(GeoObjectEditEvent.EVENT_NAME, onEditEvent)
+})
+
+onBeforeUnmount(() => {
+    window.removeEventListener(GeoObjectEditEvent.EVENT_NAME, onEditEvent)
+})
+
+function onEditEvent(evt: Event){
+    if(evt instanceof GeoObjectEditEvent && evt.geoObjectId !== props.geoObject.id){
+        editIsVisible.value = false
+    }
+}
+
+function showEdit(){
+    editIsVisible.value = true
+    window.dispatchEvent(new GeoObjectEditEvent(props.geoObject.id))
+}
+
+function hideEdit(){
+    editIsVisible.value = false
+}
 
 </script>
 
@@ -18,7 +47,15 @@ const props = defineProps<{
 
     <template v-if="geoObject.type === 0/* TODO use Message_Type_Event_Object_Data_Geo_Object_Type_Type_TYPES.marking */">
 
-        <MapMarker v-if="geoObject.sub_type === 0/* TODO use Message_Type_Event_Object_Data_Geo_Object_Type_SubType_TYPES.marking*/" :position="geoObject.config.point" :label="geoObject.name" icon-url="/images/geo_objects/markings/0.png" :icon-width="24" :icon-height="24" :show-height-indicator="true" :color="getColorForHex(geoObject.config.color)"></MapMarker>
+        <template v-if="geoObject.sub_type === 0/* TODO use Message_Type_Event_Object_Data_Geo_Object_Type_SubType_TYPES.marking*/">
+
+            <MapDrawPoint v-if="editIsVisible" :workspace-id="props.geoObject.workspace_id" :existing-geo-object="props.geoObject">
+                <IconVue class="edit_close" name="x-lg" interactive @click="hideEdit"></IconVue>
+            </MapDrawPoint>
+
+            <MapMarker v-else :position="geoObject.config.point" :label="geoObject.name" icon-url="/images/geo_objects/markings/0.png" :icon-width="24" :icon-height="24" :show-height-indicator="true" :color="getColorForHex(geoObject.config.color)" @click="showEdit"></MapMarker>
+
+        </template>
 
         <!-- TODO implement configurable clamp to ground-->
         <MapPolyline v-if="geoObject.sub_type === 1/* TODO use Message_Type_Event_Object_Data_Geo_Object_Type_SubType_TYPES.marking*/" :points="geoObject.config.line" :color="getColorForHex(geoObject.config.color)" :label="geoObject.name"></MapPolyline>
@@ -47,8 +84,17 @@ const props = defineProps<{
 
     </template>
 
+
 </template>
 
 <style scoped lang="scss">
+
+.edit_close {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    z-index: 1;
+    cursor: pointer;
+}
 
 </style>

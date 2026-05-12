@@ -27,6 +27,7 @@ const props = defineProps<{
     color?: string //overwrite default color css
     buttonIconPos?: 'right' | 'left' | 'top' | 'bottom'
     size?: {pixel: number} | {em: number}// by default size is 1em
+    interactive?: boolean //if true, cursor will be pointer and color will change on hover
 }>()
 
 const style = computed(()=>{
@@ -43,7 +44,19 @@ const style = computed(()=>{
 <template>
 
     <span :style="[style, props.color ? 'color: ' + props.color : '']" :class="['bi', 'bi-' + props.name, {
-        'p-button-icon': props.buttonIconPos
+        'p-button-icon': props.buttonIconPos,
+        interactive: props.interactive === true
     }, props.buttonIconPos ? ('p-button-icon-' + props.buttonIconPos) : '']"></span>
 
 </template>
+
+<style lang="scss" scoped>
+.interactive {
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+        color: var(--primary);
+    }
+}
+</style>

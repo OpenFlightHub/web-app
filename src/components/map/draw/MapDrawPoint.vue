@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { reactive, ref } from 'vue';
+import { onMounted, reactive, ref } from 'vue';
 import MapClickListener from '../MapClickListener.vue';
 import { updateObject } from '@/util/vue';
 import MapMarker from '../MapMarker.vue';
@@ -9,12 +9,33 @@ import { useToast, IftaLabel } from 'primevue';
 import Padding from '@/components/layout/Padding.vue';
 import SelectApiColor from '@/components/functional/form/SelectApiColor.vue';
 import { Color } from 'cesium';
-import { ApiResponse_WorkspaceGeoObjectsPost } from 'openflighthub-api-client-sdk';
+import { ApiResponse_WorkspaceGeoObjectPatch, ApiResponse_WorkspaceGeoObjectsGet, ApiResponse_WorkspaceGeoObjectsPost } from 'openflighthub-api-client-sdk';
 
 const props = defineProps<{
     workspaceId: number
     taskId?: number
+    existingGeoObject?: ApiResponse_WorkspaceGeoObjectsGet[number]
 }>()
+
+
+onMounted(() => {
+
+    if(props.existingGeoObject){
+        if(props.existingGeoObject.type !== 0 || props.existingGeoObject.sub_type !== 0){
+            throw new Error('Existing geo object must be of type marking')
+        }
+
+        updateObject(locationData, {
+            longitude: props.existingGeoObject.config.point[0],
+            latitude: props.existingGeoObject.config.point[1],
+            height: props.existingGeoObject.config.point[2]
+        })
+
+        updateObject(config, props.existingGeoObject.config)
+
+        hasLocation.value = true
+    }
+})
 
 const hasLocation = ref(false)
 const locationData = reactive({
@@ -24,7 +45,8 @@ const locationData = reactive({
 })
 
 const emit = defineEmits<{
-    created: [value: ApiResponse_WorkspaceGeoObjectsPost]
+    'create-done': [value: ApiResponse_WorkspaceGeoObjectsPost]
+    'edit-done': [value: ApiResponse_WorkspaceGeoObjectPatch]
 }>()
 
 const toast = useToast()
@@ -33,6 +55,8 @@ const config = reactive({
     point: [locationData.longitude, locationData.latitude, locationData.height] as [number, number, number],
     color: api.CONSTANTS.GEO_OBJECT_COLORS.BLUE
 })
+
+const label = ref('')
 
 </script>
 
@@ -46,47 +70,73 @@ const config = reactive({
         config.point[2] = loc.height
     }"></MapClickListener>
 
-    <MapMarker v-if="hasLocation" :position="[locationData.longitude, locationData.latitude, locationData.height]" icon-url="/images/geo_objects/markings/0.png" :icon-width="32" :icon-height="32" :color="Color.fromCssColorString(config.color)">
+    <MapMarker v-if="hasLocation" :position="[locationData.longitude, locationData.latitude, locationData.height]" icon-url="/images/geo_objects/markings/0.png" :icon-width="32" :icon-height="32" :color="Color.fromCssColorString(config.color)" :label="label">
     </MapMarker>
 
     <div id="form">
         <Padding>
-            <ApiForm :api-method="api.rest.workspace.geoObjects.post" type="create" title="Create Point" :params="{workspaceId: props.workspaceId}" :fields="{
-                name: {type: 'text', required: true},
-                type:  {type: 'number', required: true},
-                sub_type:  {type: 'number', required: true},
-                uuid: {type: 'text', required: false},
-                config: {type: 'raw', required: true}
-            }" :editable-fields="['name']" :initial-values="{
-                type: 0,
-                sub_type: 0,
-                config
-            }" @created="(ref) => {
-                if(typeof props.taskId === 'number'){
-                    api.rest.task.linkGeoObject.post({
-                        params: {
-                            taskId: props.taskId
-                        },
-                        data: {
-                            geo_object_id: ref.id
-                        }
-                    }).then(()=>{
-                        toast.add({severity: 'success', summary: 'Success', detail: 'Point linked to task'})
-                        emit('created', ref)
-                    }).catch(err=>{
-                        toast.add({severity: 'error', summary: 'Error', detail: 'Could not link point to task: ' + err})
-                    })
-                } else {
-                    emit('created', ref)
-                }
-            }" :watch-initial-values="['config']" :check-function="()=>hasLocation === true ? true : 'Please select a location for the point by clicking on the map'">
+            <template v-if="props.existingGeoObject">
+                <ApiForm :api-method="api.rest.workspace.geoObject.patch" type="edit" title="Edit Point" :params="{workspaceId: props.workspaceId, geoObjectId: props.existingGeoObject.id}" :fields="{
+                    name: {type: 'text', required: true},
+                    config: {type: 'raw', required: true}
+                }" :editable-fields="['name']" :initial-values="{
+                    config
+                }" @created="(ref) => {
+                    emit('edit-done', ref)
+                }" :watch-initial-values="['config']" @change="newData => {
+                    label = newData.name || ''
+                }">
 
-                <IftaLabel>
-                    <SelectApiColor field-name="color" @change="newColor => config.color = newColor" initial-color="BLUE"></SelectApiColor>
-                    <label for="color">Color</label>
-                </IftaLabel>
+                    <IftaLabel>
+                        <SelectApiColor field-name="color" @change="newColor => config.color = newColor" :initial-color="config.color"></SelectApiColor>
+                        <label for="color">Color</label>
+                    </IftaLabel>
 
-            </ApiForm>
+                </ApiForm>
+            </template>
+            <template v-else>
+                <ApiForm :api-method="api.rest.workspace.geoObjects.post" type="create" title="Create Point" :params="{workspaceId: props.workspaceId}" :fields="{
+                    name: {type: 'text', required: true},
+                    type:  {type: 'number', required: true},
+                    sub_type:  {type: 'number', required: true},
+                    uuid: {type: 'text', required: false},
+                    config: {type: 'raw', required: true}
+                }" :editable-fields="['name']" :initial-values="{
+                    type: 0,
+                    sub_type: 0,
+                    config
+                }" @created="(ref) => {
+                    if(typeof props.taskId === 'number'){
+                        api.rest.task.linkGeoObject.post({
+                            params: {
+                                taskId: props.taskId
+                            },
+                            data: {
+                                geo_object_id: ref.id
+                            }
+                        }).then(()=>{
+                            toast.add({severity: 'success', summary: 'Success', detail: 'Point linked to task'})
+                            emit('create-done', ref)
+                        }).catch(err=>{
+                            toast.add({severity: 'error', summary: 'Error', detail: 'Could not link point to task: ' + err})
+                        })
+                    } else {
+                        emit('create-done', ref)
+                    }
+                }" :watch-initial-values="['config']" :check-function="()=>hasLocation === true ? true : 'Please select a location for the point by clicking on the map'" @change="newData => {
+                    label = newData.name
+                }">
+
+                    <IftaLabel>
+                        <SelectApiColor field-name="color" @change="newColor => config.color = newColor" :initial-color="config.color"></SelectApiColor>
+                        <label for="color">Color</label>
+                    </IftaLabel>
+
+                </ApiForm>
+            </template>
+
+            <slot></slot>
+
         </Padding>
     </div>
 
