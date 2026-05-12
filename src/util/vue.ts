@@ -36,3 +36,7 @@ export function updateArray(current: Reactive<Array<any>> | Array<any>, update: 
 
     current.push(...update)
 }
+
+export function cloneObject<T>(obj: T): T {
+    return JSON.parse(JSON.stringify(obj))
+}

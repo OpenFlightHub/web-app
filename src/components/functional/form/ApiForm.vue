@@ -292,7 +292,10 @@ async function resolveValidation(e: FormResolverOptions){
 
                 </template>
 
-                <slot></slot>
+                <slot v-bind="{reset: ()=>{
+                    $form.reset()
+                    emit('change', props.initialValues)
+                }}"></slot>
             </div>
         </template>
 

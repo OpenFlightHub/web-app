@@ -8,8 +8,8 @@ import MapPolygon from '../map/MapPolygon.vue';
 import MapCircle from '../map/MapCircle.vue';
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 import MapDrawPoint from '../map/draw/MapDrawPoint.vue';
-import IconVue from '../general/IconVue.vue';
 import { GeoObjectEditEvent } from '@/components/geo-object/GeoObjectEvents';
+import { cloneObject, updateObject } from '@/util/vue';
 
 const props = defineProps<{
     geoObject: ApiResponse_WorkspaceGeoObjectsGet[number]
@@ -49,8 +49,8 @@ function hideEdit(){
 
         <template v-if="geoObject.sub_type === 0/* TODO use Message_Type_Event_Object_Data_Geo_Object_Type_SubType_TYPES.marking*/">
 
-            <MapDrawPoint v-if="editIsVisible" :workspace-id="props.geoObject.workspace_id" :existing-geo-object="props.geoObject">
-                <IconVue class="edit_close" name="x-lg" interactive @click="hideEdit"></IconVue>
+            <MapDrawPoint v-if="editIsVisible" :workspace-id="props.geoObject.workspace_id" :existing-geo-object="cloneObject(props.geoObject)" @edit-done="newValue => updateObject(props.geoObject, newValue)"  @cancel="hideEdit">
+
             </MapDrawPoint>
 
             <MapMarker v-else :position="geoObject.config.point" :label="geoObject.name" icon-url="/images/geo_objects/markings/0.png" :icon-width="24" :icon-height="24" :show-height-indicator="true" :color="getColorForHex(geoObject.config.color)" @click="showEdit"></MapMarker>
@@ -88,13 +88,5 @@ function hideEdit(){
 </template>
 
 <style scoped lang="scss">
-
-.edit_close {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    z-index: 1;
-    cursor: pointer;
-}
 
 </style>

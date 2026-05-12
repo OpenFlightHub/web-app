@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue';
+import { onMounted, reactive, ref, toRaw } from 'vue';
 import MapClickListener from '../MapClickListener.vue';
 import { updateObject } from '@/util/vue';
 import MapMarker from '../MapMarker.vue';
@@ -10,6 +10,7 @@ import Padding from '@/components/layout/Padding.vue';
 import SelectApiColor from '@/components/functional/form/SelectApiColor.vue';
 import { Color } from 'cesium';
 import { ApiResponse_WorkspaceGeoObjectPatch, ApiResponse_WorkspaceGeoObjectsGet, ApiResponse_WorkspaceGeoObjectsPost } from 'openflighthub-api-client-sdk';
+import IconVue from '@/components/general/IconVue.vue';
 
 const props = defineProps<{
     workspaceId: number
@@ -31,7 +32,7 @@ onMounted(() => {
             height: props.existingGeoObject.config.point[2]
         })
 
-        updateObject(config, props.existingGeoObject.config)
+        updateObject(config, toRaw(props.existingGeoObject.config))
 
         hasLocation.value = true
     }
@@ -47,6 +48,7 @@ const locationData = reactive({
 const emit = defineEmits<{
     'create-done': [value: ApiResponse_WorkspaceGeoObjectsPost]
     'edit-done': [value: ApiResponse_WorkspaceGeoObjectPatch]
+    cancel: [value: void]
 }>()
 
 const toast = useToast()
@@ -86,12 +88,14 @@ const label = ref(props.existingGeoObject ? props.existingGeoObject.name : '')
                     emit('edit-done', ref)
                 }" :watch-initial-values="['config']" @change="newData => {
                     label = newData.name || ''
-                }">
+                }" v-slot="{reset}">
 
                     <IftaLabel>
                         <SelectApiColor field-name="color" @change="newColor => config.color = newColor" :initial-color="config.color"></SelectApiColor>
                         <label for="color">Color</label>
                     </IftaLabel>
+
+                    <IconVue class="edit_close" name="x-lg" interactive @click="reset(); emit('cancel')"></IconVue>
 
                 </ApiForm>
             </template>
@@ -152,4 +156,14 @@ const label = ref(props.existingGeoObject ? props.existingGeoObject.name : '')
     height: 100%;
     background: rgba(0, 0, 0, 0.8);
 }
+
+
+.edit_close {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    z-index: 1;
+    cursor: pointer;
+}
+
 </style>
