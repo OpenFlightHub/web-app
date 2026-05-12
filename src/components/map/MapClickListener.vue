@@ -12,7 +12,6 @@ const emit = defineEmits<{
 }>()
 
 onMounted(()=>{
-    console.log('setting up click listener', mapContainer)
     mapContainer!.addEventListener('click', onClick)
 })
 
@@ -31,13 +30,9 @@ async function onClick(evt: MouseEvent){
     const relativeX = (clickX - containerX) / bounds.width
     const relativeY = (clickY - containerY) / bounds.height
 
-    console.log('clicked relative', relativeX, relativeY)
-
     const clickedLocation = getMapTerrainLocationAt(viewer!, relativeX, relativeY)
 
     const elevation = (await getElevationAtPosition(viewer!, clickedLocation.longitude, clickedLocation.latitude)).height
-
-    console.log('clicked location:', clickedLocation, 'elevation:', elevation)
 
     emit('click', {
         longitude: clickedLocation.longitude,
