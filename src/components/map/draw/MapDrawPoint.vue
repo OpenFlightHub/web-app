@@ -72,7 +72,7 @@ const label = ref(props.existingGeoObject ? props.existingGeoObject.name : '')
         config.point[2] = loc.height
     }"></MapClickListener>
 
-    <MapMarker v-if="hasLocation" :position="[locationData.longitude, locationData.latitude, locationData.height]" icon-url="/images/geo_objects/markings/0.png" :icon-width="32" :icon-height="32" :color="Color.fromCssColorString(config.color)" :label="label">
+    <MapMarker v-if="hasLocation" :position="[locationData.longitude, locationData.latitude, locationData.height]" icon-url="/images/geo_objects/markings/0.png" :icon-width="24" :icon-height="24" :color="Color.fromCssColorString(config.color)" :label="label">
     </MapMarker>
 
     <div id="form">
