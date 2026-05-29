@@ -28,6 +28,7 @@ onMounted(() => {
         }
 
         updateObject(locationData, props.existingGeoObject.config.line)
+        editMode.value = 'both-set'
 
         updateObject(config, toRaw(props.existingGeoObject.config))
     }

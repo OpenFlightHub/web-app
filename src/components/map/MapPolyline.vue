@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { getCurrentInstance, inject, onBeforeUnmount, onMounted, watch } from 'vue';
-import { Cartesian3, Cartographic, Color, Entity, HeightReference, LabelStyle, Viewer } from 'cesium';
+import { Cartesian3, Cartographic, Color, HeightReference, LabelStyle, Viewer } from 'cesium';
 import { getElevationAtPosition } from '@/util/terrain';
-import { along, center, distance, length, lineString, midpoint } from '@turf/turf';
+import { distance, length, lineString, midpoint } from '@turf/turf';
+import { cleanupClickMyEntity, setupClickMyEntity, ClickMyEntityHandle } from '@/util/cesium';
 
 
 //TODO if line elevation is below cesium terrain, clamp it to ground
@@ -15,6 +16,13 @@ const props = defineProps<{
     fontSize?: number
     lineWidth?: number
 }>()
+
+const emit = defineEmits<{
+    click: []
+}>()
+
+let markerClickMyEntityHandle: ClickMyEntityHandle
+
 
 const viewer = inject<Viewer>('cesiumViewer')
 const mapContainer = inject<HTMLElement>('mapContainer')
@@ -149,10 +157,18 @@ async function addPolyline(){
             disableDepthTestDistance: centerPosition.height !== 0 ? 5000000 : Number.POSITIVE_INFINITY, // show always above terrain https://community.cesium.com/t/points-labels-stuck-under-terrain/11141
         }
     })
+
+    markerClickMyEntityHandle = setupClickMyEntity(mapContainer!, viewer!, polyline, ()=>{
+        emit('click')
+    })
 }
 
 function removePolyline(){
     viewer!.entities.removeById('map-polyline-' + myId)
+
+    if(markerClickMyEntityHandle){
+        cleanupClickMyEntity(markerClickMyEntityHandle)
+    }
 }
 
 function removePolylineLabel(){

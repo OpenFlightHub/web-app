@@ -62,7 +62,7 @@ function hideEdit(){
             <MapDrawLine v-if="editIsVisible" :workspace-id="props.geoObject.workspace_id" :existing-geo-object="cloneObject(props.geoObject)" @edit-done="newValue => updateObject(props.geoObject, newValue)" @cancel="hideEdit"></MapDrawLine>
 
             <!-- TODO implement configurable clamp to ground-->
-            <MapPolyline v-else :points="geoObject.config.line" :color="getColorForHex(geoObject.config.color)" :label="geoObject.name"></MapPolyline>
+            <MapPolyline v-else :points="geoObject.config.line" :color="getColorForHex(geoObject.config.color)" :label="geoObject.name" @click="showEdit"></MapPolyline>
         </template>
 
         <!-- TODO implement configurable clamp to ground-->
