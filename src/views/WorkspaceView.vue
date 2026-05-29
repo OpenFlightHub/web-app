@@ -14,14 +14,14 @@ import HubWorkspaceFiles from '@/components/workspace/HubWorkspaceFiles.vue';
 import DroneSnippet from '@/components/drone/DroneSnippet.vue';
 import { uniqueProperty } from '@/util/array';
 import LoadApiArrayWithIdParamInUrl from '@/components/functional/LoadApiArrayWithIdParamInUrl.vue';
-import ApiForm from '@/components/functional/form/ApiForm.vue';
 import MissionSnippet from '@/components/mission/MissionSnippet.vue';
 import ModalVue from '@/components/display/ModalVue.vue';
 import { ref } from 'vue';
-import LoadApiArray from '@/components/functional/LoadApiArray.vue';
 import IconVue from '@/components/general/IconVue.vue';
 import TeamSnippet from '@/components/team/TeamSnippet.vue';
 import {DataTable, Column} from 'primevue';
+import MissionCreateForm from '@/components/mission/MissionCreateForm.vue';
+import WorkspaceInviteTeamForm from '@/components/workspace/WorkspaceInviteTeamForm.vue';
 
 const router = useRouter()
 
@@ -61,24 +61,9 @@ const showInviteTeamModal = ref(false)
                            <MissionSnippet v-for="mission of missions.data.sort((a, b) => a.id - b.id)" :mission="mission" show-tasks></MissionSnippet>
                         </List>
 
-                        <LoadApiArray :api-method="api.rest.team.allTeams.get" :config="{}" v-slot="teams">
-                           <ModalVue :visible="showCreateMissionModal" @close="showCreateMissionModal = false">
-                              <ApiForm :apiMethod="api.rest.mission.post" type="create" :params="{}"
-                                 :initial-values="{
-                                    workspace_id: workspace.data.id,
-                                    state: 0
-                                 }"
-                                 :fields="{
-                                    name: {type: 'text', required: true},
-                                    assigned_to_team_id: {type: 'select', required: false, options: teams.data.map(team => ({ label: team.name, value: team.id }))},
-                                    description: {type: 'textarea', required: false},
-                                    state: {type: 'number', required: true},
-                                    workspace_id: {type: 'number', required: true}
-                                 }"
-                                 :editable-fields="['name', 'assigned_to_team_id', 'description']"
-                                 title="Create Mission" @created="showCreateMissionModal = false"></ApiForm>
-                           </ModalVue>
-                        </LoadApiArray>
+                        <ModalVue :visible="showCreateMissionModal" @close="showCreateMissionModal = false">
+                           <MissionCreateForm :workspace-id="workspace.data.id" @created="showCreateMissionModal = false" @cancel="showCreateMissionModal = false"></MissionCreateForm>
+                        </ModalVue>
 
                      </LoadApiArrayWithIdParamInUrl>
                   </TabPanel>
@@ -105,16 +90,7 @@ const showInviteTeamModal = ref(false)
                   <TabPanel :value="6">
                      <!-- TODO only users that own workspace (team or organization) should be able to edit -->
 
-                     <ApiForm :apiMethod="api.rest.workspace.patch" :params="{workspaceId: workspace.data.id}" type="edit"
-                        :initial-values="workspace.data"
-                        :fields="{
-                           name: {type: 'text', required: true},
-                           latitude: {type: 'map-location', required: true, latitudeField: 'latitude', longitudeField: 'longitude', defaultValue: 48.1},
-                           longitude: {type: 'map-location', required: true, latitudeField: 'latitude', longitudeField: 'longitude', defaultValue: 11.6}
-                        }"
-                        :editable-fields="['name', 'latitude', 'longitude']"
-                        title="Edit Workspace"
-                        @created="(updatedWorkspace) => workspace.data = updatedWorkspace"></ApiForm>
+
 
                         <h3>Access</h3>
 
@@ -122,15 +98,9 @@ const showInviteTeamModal = ref(false)
 
                            <Button @click="showInviteTeamModal = true"><IconVue name="plus-lg"></IconVue>Invite Team</Button>
 
-                           <LoadApiArray :api-method="api.rest.team.allTeams.get" :config="{}" v-slot="allTeams">
-                                 <ModalVue :visible="showInviteTeamModal" @close="showInviteTeamModal = false">
-                                    <ApiForm type="action" title="Invite Team" :api-method="api.rest.workspace.inviteTeam.post" :params="{
-                                       workspaceId: workspace.data.id
-                                    }" :fields="{
-                                       team_id: {type: 'select', required: true, options: allTeams.data.filter(team => !permissions.data.find(permission => permission.team_id === team.id)).map(team => ({value: team.id, label: team.name}))}
-                                    }" :initial-values="{}" :editable-fields="['team_id']" @created="ref => {showInviteTeamModal = false}"></ApiForm>
-                                 </ModalVue>
-                           </LoadApiArray>
+                           <ModalVue :visible="showInviteTeamModal" @close="showInviteTeamModal = false">
+                              <WorkspaceInviteTeamForm :workspace="workspace.data" @created="showInviteTeamModal = false" @cancel="showInviteTeamModal = false"></WorkspaceInviteTeamForm>
+                           </ModalVue>
 
                            <DataTable :value="permissions.data" show-gridlines striped-rows sort-field="team_id" :sort-order="1">
                               <Column field="team_id" hidden sortable></Column>
