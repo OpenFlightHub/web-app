@@ -4,7 +4,6 @@ import List from '@/components/layout/List.vue';
 import LoadApiWithIdParamInUrl from '@/components/functional/LoadApiWithIdParamInUrl.vue';
 import Padding from '@/components/layout/Padding.vue';
 import LoadApiArrayWithIdParamInUrl from '@/components/functional/LoadApiArrayWithIdParamInUrl.vue';
-import ApiForm from '@/components/functional/form/ApiForm.vue';
 import TaskSnippet from '@/components/task/TaskSnippet.vue';
 import ModalVue from '@/components/display/ModalVue.vue';
 import { ref } from 'vue';
@@ -14,6 +13,7 @@ import TaskGeoObjects from '@/components/task/TaskGeoObjects.vue';
 import LoadApi from '@/components/functional/LoadApi.vue';
 import IconVue from '@/components/general/IconVue.vue';
 import { Button } from 'primevue';
+import TaskCreateForm from '@/components/task/TaskCreateForm.vue';
 
 const showCreateTaskModal = ref(false)
 
@@ -53,20 +53,7 @@ const mapContainer = ref<HTMLDivElement>()
                                     </List>
 
                                     <ModalVue :visible="showCreateTaskModal" @close="showCreateTaskModal = false">
-                                        <ApiForm :apiMethod="api.rest.task.post" type="create" :params="{}"
-                                        :initial-values="{
-                                        mission_id: mission.data.id,
-                                        state: 0
-                                        }"
-                                        :fields="{
-                                        name: {type: 'text', required: true},
-                                        description: {type: 'textarea', required: true},
-                                        mission_id: {type: 'number', required: true},
-                                        state: {type: 'number', required: true}
-                                        }"
-                                        :editable-fields="['name', 'description']"
-                                        title="Create Task"
-                                        @created="showCreateTaskModal = false"></ApiForm>
+                                        <TaskCreateForm :missionId="mission.data.id" @created="showCreateTaskModal = false" @cancel="showCreateTaskModal = false"></TaskCreateForm>
                                     </ModalVue>
                                 </div>
                             </Padding>

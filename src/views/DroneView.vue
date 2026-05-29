@@ -16,8 +16,8 @@ import { useRoute, useRouter } from 'vue-router';
 import TimestampDisplayOr from '@/components/display/TimestampDisplayOr.vue';
 import { ref } from 'vue';
 import ModalVue from '@/components/display/ModalVue.vue';
-import ApiForm from '@/components/functional/form/ApiForm.vue';
 import IconVue from '@/components/general/IconVue.vue';
+import FlightCreateForm from '@/components/flight/FlightCreateForm.vue';
 
 const router = useRouter()
 
@@ -145,15 +145,7 @@ const showAddFlightModal = ref(false)
 
 
             <ModalVue :visible="showAddFlightModal" @close="showAddFlightModal = false">
-                <ApiForm type="create" title="Add Flight" :api-method="api.rest.flight.post" :params="{}" :fields="{
-                    drone_id: {type: 'number', required: true},
-                    started_at: {type: 'date-with-time', required: true, noSeconds: true, max: new Date()},
-                    landed_at: {type: 'date-with-time', noSeconds: true, max: new Date()},
-                    ended_at: {type: 'date-with-time', noSeconds: true, max: new Date()},
-                    track: {type: 'raw'}
-                }" :editable-fields="['started_at', 'ended_at', 'landed_at']" :initial-values="{
-                    drone_id: drone.data.id
-                }" @created="() => {showAddFlightModal = false}"></ApiForm>
+                <FlightCreateForm :droneId="drone.data.id" @created="showAddFlightModal = false" @cancel="showAddFlightModal = false"></FlightCreateForm>
             </ModalVue>
 
         </LoadApiWithIdParamInUrl>

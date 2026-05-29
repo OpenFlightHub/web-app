@@ -16,6 +16,8 @@ import { Button, useConfirm, useToast, TabPanel, TabList, Tab, Tabs, TabPanels }
 import { getIdQueryFromRouteOrUseDefault } from '@/util/url';
 import { useRoute, useRouter } from 'vue-router';
 import WorkspaceSnippet from '@/components/workspace/WorkspaceSnippet.vue';
+import WorkspaceCreateForm from '@/components/workspace/WorkspaceCreateForm.vue';
+import TeamInviteMemberForm from '@/components/team/TeamInviteMemberForm.vue';
 
 const showInviteMemberModal = ref(false)
 
@@ -83,17 +85,7 @@ const showCreateWorkspaceModal = ref(false)
 
 
                         <ModalVue :visible="showCreateWorkspaceModal" @close="showCreateWorkspaceModal = false">
-                            <ApiForm type="create" title="Create Workspace" :api-method="api.rest.workspace.post" :params="{}" :fields="{
-                                name: {type: 'text', required: true},
-                                latitude: {type: 'map-location', required: true, latitudeField: 'latitude', longitudeField: 'longitude', defaultValue: 48.1},
-                                longitude: {type: 'map-location', required: true, latitudeField: 'latitude', longitudeField: 'longitude', defaultValue: 11.6},
-                                //@ts-ignore
-                                team_id: {type: 'number', required: true}
-                            }" :editable-fields="['name', 'latitude', 'longitude']" :initial-values="{
-                                latitude: 48.1,
-                                longitude: 11.6,
-                                team_id: team.data.id
-                            }" @created="ref => {showCreateWorkspaceModal = false}"></ApiForm>
+                            <WorkspaceCreateForm :type="'team'" :id="team.data.id" @created="showCreateWorkspaceModal = false" @cancel="showCreateWorkspaceModal = false"></WorkspaceCreateForm>
                         </ModalVue>
 
                     </TabPanel>
@@ -132,9 +124,7 @@ const showCreateWorkspaceModal = ref(false)
 
 
         <ModalVue :visible="showInviteMemberModal" @close="showInviteMemberModal = false">
-            <ApiForm type="create" title="Invite Member" confirm-label="Invite" :api-method="api.rest.team.inviteMember.post" :params="{teamId: team.data.id}" :fields="{
-                email: {type: 'email', required: true}
-            }" :editable-fields="['email']" :initial-values="{}" @created="ref => {showInviteMemberModal = false}"></ApiForm>
+            <TeamInviteMemberForm :team-id="team.data.id" @created="showInviteMemberModal = false" @cancel="showInviteMemberModal = false"></TeamInviteMemberForm>
         </ModalVue>
 
     </LoadApiWithIdParamInUrl>

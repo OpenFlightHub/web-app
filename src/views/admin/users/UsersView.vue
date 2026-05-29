@@ -10,6 +10,7 @@ import ModalVue from '@/components/display/ModalVue.vue';
 import ApiForm from '@/components/functional/form/ApiForm.vue';
 import IconVue from '@/components/general/IconVue.vue';
 import { Button } from 'primevue';
+import UserCreateForm from '@/components/user/UserCreateForm.vue';
 
 const showCreateModal = ref(false)
 
@@ -35,10 +36,7 @@ const showCreateModal = ref(false)
 
 
     <ModalVue :visible="showCreateModal" @close="showCreateModal = false">
-        <ApiForm type="create" title="Create User" :api-method="api.rest.admin.users.post" :params="{}" :fields="{
-            name: {type: 'text'},
-            email: {type: 'email', required: true}
-        }" :editable-fields="['name', 'email']" :initial-values="{}" @created="ref => {showCreateModal = false}"></ApiForm>
+        <UserCreateForm @created="showCreateModal = false" @cancel="showCreateModal = false"></UserCreateForm>
     </ModalVue>
 
 </template>
