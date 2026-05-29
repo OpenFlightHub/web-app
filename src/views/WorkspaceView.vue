@@ -20,10 +20,14 @@ import ModalVue from '@/components/display/ModalVue.vue';
 import { ref } from 'vue';
 import LoadApiArray from '@/components/functional/LoadApiArray.vue';
 import IconVue from '@/components/general/IconVue.vue';
+import TeamSnippet from '@/components/team/TeamSnippet.vue';
+import {DataTable, Column} from 'primevue';
 
 const router = useRouter()
 
 const showCreateMissionModal = ref(false)
+
+const showInviteTeamModal = ref(false)
 
 </script>
 
@@ -111,6 +115,41 @@ const showCreateMissionModal = ref(false)
                         :editable-fields="['name', 'latitude', 'longitude']"
                         title="Edit Workspace"
                         @created="(updatedWorkspace) => workspace.data = updatedWorkspace"></ApiForm>
+
+                        <h3>Access</h3>
+
+                        <LoadApiArrayWithIdParamInUrl :api-method="api.rest.workspace.permissions.get" :config="{params: {}}" :id-params="['workspaceId']" v-slot="permissions">
+
+                           <Button @click="showInviteTeamModal = true"><IconVue name="plus-lg"></IconVue>Invite Team</Button>
+
+                           <LoadApiArray :api-method="api.rest.team.allTeams.get" :config="{}" v-slot="allTeams">
+                                 <ModalVue :visible="showInviteTeamModal" @close="showInviteTeamModal = false">
+                                    <ApiForm type="action" title="Invite Team" :api-method="api.rest.workspace.inviteTeam.post" :params="{
+                                       workspaceId: workspace.data.id
+                                    }" :fields="{
+                                       team_id: {type: 'select', required: true, options: allTeams.data.filter(team => !permissions.data.find(permission => permission.team_id === team.id)).map(team => ({value: team.id, label: team.name}))}
+                                    }" :initial-values="{}" :editable-fields="['team_id']" @created="ref => {showInviteTeamModal = false}"></ApiForm>
+                                 </ModalVue>
+                           </LoadApiArray>
+
+                           <DataTable :value="permissions.data" show-gridlines striped-rows sort-field="team_id" :sort-order="1">
+                              <Column field="team_id" hidden sortable></Column>
+                              <Column field="team" header="Team" sortable>
+                                 <template #body="slotProps">
+                                    <TeamSnippet :id="slotProps.data.team_id"></TeamSnippet>
+                                 </template>
+                              </Column>
+                              <Column field="actions" header="">
+                                 <template #body="slotProps">
+                                       <Button severity="danger" @click="api.rest.workspace.kickTeam.post({
+                                          params: {workspaceId: workspace.data.id},
+                                          data: {team_id: slotProps.data.team_id}
+                                          })"><IconVue name="x-lg"></IconVue>Kick Team</Button>
+                                 </template>
+                              </Column>
+                        </DataTable>
+
+                        </LoadApiArrayWithIdParamInUrl>
 
                   </TabPanel>
                </TabPanels>

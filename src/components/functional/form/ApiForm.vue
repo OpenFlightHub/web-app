@@ -61,7 +61,7 @@ export interface FieldTypeTextarea extends FieldBase<'textarea'> {
 const toast = useToast()
 
 const props = defineProps<{
-    type: 'create' | 'edit'
+    type: 'create' | 'edit' | 'action'
     title: string
     confirmLabel?: string
     showCancelButton?: boolean
@@ -76,7 +76,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-    created: [createdObject: T]//TODO rename to saved
+    created: [createdObject: T]//TODO rename to done
     cancel: []
     change: [formData: PROPS['config']['data']]
 }>()
@@ -168,7 +168,7 @@ async function save(evt: FormSubmitEvent){
 
         emit('created', response)
 
-        toast.add({severity: 'success', summary: props.type === 'create' ? 'Created successfully' : 'Saved successfully', life: 3000})
+        toast.add({severity: 'success', summary: props.type === 'create' ? 'Created successfully' : props.type === 'edit' ? 'Saved successfully' : 'Action completed successfully', life: 3000})
     } catch (err){
         errorMessage.value = '' + err
     }
@@ -300,7 +300,7 @@ async function resolveValidation(e: FormResolverOptions){
         </template>
 
         <div id="buttons">
-            <Button type="submit" :label="props.confirmLabel ?? (props.type === 'create' ? 'Create' : 'Save')" :disabled="isSending"></Button>
+            <Button type="submit" :label="props.confirmLabel ?? (props.type === 'create' ? 'Create' : props.type === 'edit' ? 'Save' : 'OK')" :disabled="isSending"></Button>
             <Button v-if="showCancelButton" label="Cancel" class="p-button-secondary" @click="$form.reset(); emit('cancel')"></Button>
         </div>
 
