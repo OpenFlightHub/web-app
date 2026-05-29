@@ -10,7 +10,7 @@ import { Button, Checkbox, Select, InputNumber, IftaLabel, InputText, useToast, 
 import { ref, watch } from 'vue';
 import { FormResolverOptions } from '@primevue/forms';
 import InputMapLocation from './InputMapLocation.vue';
-import MappedBadge from '@/components/display/MappedBadge.vue';
+import SelectMappedBadge from './SelectMappedBadge.vue';
 
 export type Field<FieldType, DataShape extends Record<string, string> = Record<string, string>> = FieldType extends 'text' ? FieldTypeText : FieldType extends 'email' ? FieldTypeEmail : FieldType extends 'number' ? FieldTypeNumber : FieldType extends 'select' ? FieldTypeSelect : FieldType extends 'checkbox' ? FieldTypeCheckbox : FieldType extends 'date-with-time' ? FieldTypeDateWithTime : FieldType extends 'raw' ? FieldTypeRaw : FieldType extends 'map-location' ? FieldTypeMapLocation<DataShape> : FieldType extends 'textarea' ? FieldTypeTextarea : FieldBase<FieldType>
 
@@ -225,21 +225,21 @@ async function resolveValidation(e: FormResolverOptions){
                     <template v-if="props.editableFields.includes(fieldName)">
                         <template v-if="props.fields[fieldName].type === 'text'">
                             <IftaLabel>
-                                <InputText :id="fieldName" :name="fieldName" :required="props.fields[fieldName].required" :minlength="props.fields[fieldName].required ? 1 : undefined" @update:model-value="emitChange"></InputText>
+                                <InputText :id="fieldName" :name="fieldName" :required="props.fields[fieldName].required" fluid :minlength="props.fields[fieldName].required ? 1 : undefined" @update:model-value="emitChange"></InputText>
                                 <label :for="fieldName">{{ props.readableLabels?.[fieldName] ?? fieldName }}</label>
                             </IftaLabel>
                         </template>
 
                         <template v-else-if="props.fields[fieldName].type === 'email'">
                             <IftaLabel>
-                                <InputText :id="fieldName" :name="fieldName" :required="props.fields[fieldName].required" :minlength="props.fields[fieldName].required ? 1 : undefined" type="email" @update:model-value="emitChange"></InputText>
+                                <InputText :id="fieldName" :name="fieldName" :required="props.fields[fieldName].required" fluid :minlength="props.fields[fieldName].required ? 1 : undefined" type="email" @update:model-value="emitChange"></InputText>
                                 <label :for="fieldName">{{ props.readableLabels?.[fieldName] ?? fieldName }}</label>
                             </IftaLabel>
                         </template>
 
                         <template v-else-if="props.fields[fieldName].type === 'number'">
                             <IftaLabel>
-                                <InputNumber :id="fieldName" :name="fieldName" :required="props.fields[fieldName].required" @update:model-value="emitChange"></InputNumber>
+                                <InputNumber :id="fieldName" :name="fieldName" fluid :required="props.fields[fieldName].required" @update:model-value="emitChange"></InputNumber>
                                 <label :for="fieldName">{{ props.readableLabels?.[fieldName] ?? fieldName }}</label>
                             </IftaLabel>
                         </template>
@@ -253,12 +253,8 @@ async function resolveValidation(e: FormResolverOptions){
 
                         <template v-else-if="props.fields[fieldName].type === 'select'">
                             <IftaLabel>
-                                <Select :id="fieldName" :name="fieldName" :options="props.fields[fieldName].options" option-value="value" option-label="label" :required="props.fields[fieldName].required" fluid @update:model-value="emitChange">
-                                    <template #option="slotProps">
-                                        <MappedBadge v-if="props.fields[fieldName].mappedBadge" :value="slotProps.option.value" :color-map="props.fields[fieldName].mappedBadge.colorMap">{{ slotProps.option.label }}</MappedBadge>
-                                        <span v-else>{{ slotProps.option.label }}</span>
-                                    </template>
-                                </Select>
+                                <SelectMappedBadge v-if="props.fields[fieldName].mappedBadge" :field-name="fieldName" :options="props.fields[fieldName].options" :required="props.fields[fieldName].required" :color-map="props.fields[fieldName].mappedBadge.colorMap" @change="emitChange"></SelectMappedBadge>
+                                <Select v-else :id="fieldName" :name="fieldName" :options="props.fields[fieldName].options" option-value="value" option-label="label" :required="props.fields[fieldName].required" fluid @update:model-value="emitChange"></Select>
                                 <label :for="fieldName">{{ props.readableLabels?.[fieldName] ?? fieldName }}</label>
                             </IftaLabel>
                         </template>
