@@ -48,7 +48,7 @@ function onEditEvent(evt: Event){
     </div>
 
     <template v-if="showing === 'draw-point'">
-        <MapDrawPoint :workspace-id="props.workspaceId" @create-done="select('none')" @cancel="select('none')"></MapDrawPoint>
+        <MapDrawPoint :workspace-id="props.workspaceId" :task-id="props.taskId" @create-done="select('none')" @cancel="select('none')"></MapDrawPoint>
     </template>
 
 </template>

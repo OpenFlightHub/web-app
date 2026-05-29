@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import { TASK_STATES } from './states';
 
 
 const props = defineProps<{
@@ -7,17 +8,7 @@ const props = defineProps<{
 }>()
 
 const label = computed(()=>{
-    switch(props.state){
-        case 0: return 'planned'
-        case 1: return 'accepted'
-        case 2: return 'in progress'
-        case 3: return 'done'
-        case 4: return 'rejected'
-        case 5: return 'failed'
-        case 6: return 'canceled'
-
-        default: return '?'
-    }
+    return Object.entries(TASK_STATES).find(([_, value]) => value === props.state)?.[0] ?? '?'
 })
 
 </script>

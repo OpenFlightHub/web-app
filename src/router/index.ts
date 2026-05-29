@@ -32,6 +32,7 @@ import OsView from '@/views/admin/system/performance/OsView.vue'
 import UserView from '@/views/UserView.vue'
 import MissionView from '@/views/MissionView.vue'
 import DatabaseView from '@/views/admin/system/DatabaseView.vue'
+import TaskView from '@/views/TaskView.vue'
 
 
 
@@ -134,6 +135,11 @@ export function makeRouter(pinia: Pinia){
                 path: '/mission/:missionId',
                 name: 'mission',
                 component: MissionView
+            },
+            {
+                path: '/task/:taskId',
+                name: 'task',
+                component: TaskView
             },
 
             {

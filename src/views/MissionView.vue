@@ -40,8 +40,10 @@ const showMissionEditModal = ref(false)
 
                             <SplitVue horizontal>
                                 <template #left_or_top>
-                                    <div ref="mapContainer" style="max-height: 80vh;">
+                                    <div ref="mapContainer" style="height: 80vh;">
                                         <Map v-if="mapContainer" :map-container="mapContainer!" :start-point="{longitude: workspace.data.longitude, latitude: workspace.data.latitude}" :start-height="10000" :start-camera-heading="0" :start-camera-pitch="-90"><!-- implement calculating start point from task geoobjects -->
+
+                                            <!-- TODO this is kind of unperformant because there is duplication for every task (geoobjects are bound to the same workspace)-->
 
                                             <TaskGeoObjects v-for="task of tasks.data" :key="task.id" :workspace-id="mission.data.workspace_id" :task="task"></TaskGeoObjects>
 
