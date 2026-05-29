@@ -125,15 +125,15 @@ const label = ref(props.existingGeoObject ? props.existingGeoObject.name : '')
                                 geo_object_id: ref.id
                             }
                         }).then(()=>{
-                            toast.add({severity: 'success', summary: 'Success', detail: 'Point linked to task'})
+                            toast.add({severity: 'success', summary: 'Success', detail: 'Circle linked to task'})
                             emit('create-done', ref)
                         }).catch(err=>{
-                            toast.add({severity: 'error', summary: 'Error', detail: 'Could not link point to task: ' + err})
+                            toast.add({severity: 'error', summary: 'Error', detail: 'Could not link circle to task: ' + err})
                         })
                     } else {
                         emit('create-done', ref)
                     }
-                }" :watch-initial-values="['config']" :check-function="()=>hasLocation === true ? true : 'Please select a location for the point by clicking on the map'" @change="newData => {
+                }" :watch-initial-values="['config']" :check-function="()=>hasLocation === true ? true : 'Please select a location for the circle by clicking on the map'" @change="newData => {
                     label = newData.name
                 }">
 

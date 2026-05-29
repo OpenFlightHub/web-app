@@ -5,13 +5,14 @@ import MapDrawPoint from '../map/draw/MapDrawPoint.vue';
 import ImageVue from '../general/ImageVue.vue';
 import { GeoObjectEditEvent } from '@/components/geo-object/GeoObjectEvents';
 import MapDrawCircle from './draw/MapDrawCircle.vue';
+import MapDrawLine from './draw/MapDrawLine.vue';
 
 const props = defineProps<{
     workspaceId: number
     taskId?: number
 }>()
 
-type ShowingType = 'none' | 'draw-point' | 'draw-circle'
+type ShowingType = 'none' | 'draw-point' | 'draw-line' | 'draw-circle'
 const showing = ref<ShowingType>('none')
 
 let editEventId = -1
@@ -47,11 +48,17 @@ function onEditEvent(evt: Event){
     <div id="draw-menu">
         <Button @click="select('draw-point')" :severity="showing === 'draw-point' ? 'secondary' : undefined"><ImageVue url="/images/geo_objects/markings/0.png" :size="{em: 0.8}"></ImageVue></Button>
 
+        <Button @click="select('draw-line')" :severity="showing === 'draw-line' ? 'secondary' : undefined"><ImageVue url="/images/geo_objects/markings/1.png" :size="{em: 0.8}"></ImageVue></Button>
+
         <Button @click="select('draw-circle')" :severity="showing === 'draw-circle' ? 'secondary' : undefined"><ImageVue url="/images/geo_objects/markings/3.png" :size="{em: 0.8}"></ImageVue></Button>
     </div>
 
     <template v-if="showing === 'draw-point'">
         <MapDrawPoint :workspace-id="props.workspaceId" :task-id="props.taskId" @create-done="select('none')" @cancel="select('none')"></MapDrawPoint>
+    </template>
+
+    <template v-if="showing === 'draw-line'">
+        <MapDrawLine :workspace-id="props.workspaceId" :task-id="props.taskId" @create-done="select('none')" @cancel="select('none')"></MapDrawLine>
     </template>
 
     <template v-if="showing === 'draw-circle'">

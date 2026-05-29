@@ -13,6 +13,7 @@ const props = defineProps<{
     color: Color
     label?: string
     fontSize?: number
+    lineWidth?: number
 }>()
 
 const viewer = inject<Viewer>('cesiumViewer')
@@ -122,7 +123,7 @@ async function addPolyline(){
         id: 'map-polyline-' + myId,
         polyline: {
             positions,
-            width: 4,
+            width: props.lineWidth ?? 4,
             clampToGround: props.clampToGround === true,
             material: props.color
         }

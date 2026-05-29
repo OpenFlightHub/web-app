@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject, onBeforeMount, onBeforeUnmount, onMounted } from 'vue';
+import { inject, onBeforeUnmount, onMounted } from 'vue';
 import { Viewer } from 'cesium';
 import { getElevationAtPosition } from '@/util/terrain';
 import { getMapTerrainLocationAt } from '@/util/cesium';

@@ -11,6 +11,7 @@ import MapDrawPoint from '../map/draw/MapDrawPoint.vue';
 import { GeoObjectEditEvent } from '@/components/geo-object/GeoObjectEvents';
 import { cloneObject, updateObject } from '@/util/vue';
 import MapDrawCircle from '../map/draw/MapDrawCircle.vue';
+import MapDrawLine from '../map/draw/MapDrawLine.vue';
 
 const props = defineProps<{
     geoObject: ApiResponse_WorkspaceGeoObjectsGet[number]
@@ -58,8 +59,10 @@ function hideEdit(){
 
         <template v-if="geoObject.sub_type === 1/* TODO use Message_Type_Event_Object_Data_Geo_Object_Type_SubType_TYPES.marking*/">
 
+            <MapDrawLine v-if="editIsVisible" :workspace-id="props.geoObject.workspace_id" :existing-geo-object="cloneObject(props.geoObject)" @edit-done="newValue => updateObject(props.geoObject, newValue)" @cancel="hideEdit"></MapDrawLine>
+
             <!-- TODO implement configurable clamp to ground-->
-            <MapPolyline  :points="geoObject.config.line" :color="getColorForHex(geoObject.config.color)" :label="geoObject.name"></MapPolyline>
+            <MapPolyline v-else :points="geoObject.config.line" :color="getColorForHex(geoObject.config.color)" :label="geoObject.name"></MapPolyline>
         </template>
 
         <!-- TODO implement configurable clamp to ground-->

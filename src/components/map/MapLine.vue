@@ -20,8 +20,10 @@ const props = defineProps<{
     },
     heightIsRelative?: boolean // relative to ground
     color: Color
+    dashed?: boolean
     label?: string
     fontSize?: number
+    lineWidth?: number
 }>()
 
 const viewer = inject<Viewer>('cesiumViewer')
@@ -80,10 +82,11 @@ async function addLine(){
 
         polyline: {
             positions: [Cartographic.toCartesian(fromPos), Cartographic.toCartesian(toPos)],
-            width: 2,
-            material: new PolylineDashMaterialProperty({
+            width: props.lineWidth ?? 3,
+            material: props.dashed ? new PolylineDashMaterialProperty({
                 color: props.color
-            })
+            }) : props.color,
+            clampToGround: !fromHeightIsNotZero() && !toHeightIsNotZero()
         }
     })
 
