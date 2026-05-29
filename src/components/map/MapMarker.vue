@@ -57,7 +57,7 @@ let lastPosition: [number, number, number?]
 
 
 const emit = defineEmits<{
-    click: [value:undefined]
+    click: []
 }>()
 
 let markerClickMyEntityHandle: ClickMyEntityHandle
@@ -310,7 +310,7 @@ async function addMarker(){
     })
 
     markerClickMyEntityHandle = setupClickMyEntity(mapContainer!, viewer!, marker, ()=>{
-        emit('click', undefined)
+        emit('click')
     })
 
 }

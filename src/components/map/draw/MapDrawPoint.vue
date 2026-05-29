@@ -8,9 +8,9 @@ import api from '@/api';
 import { useToast, IftaLabel } from 'primevue';
 import Padding from '@/components/layout/Padding.vue';
 import SelectApiColor from '@/components/functional/form/SelectApiColor.vue';
-import { Color } from 'cesium';
 import { ApiResponse_WorkspaceGeoObjectPatch, ApiResponse_WorkspaceGeoObjectsGet, ApiResponse_WorkspaceGeoObjectsPost } from 'openflighthub-api-client-sdk';
 import IconVue from '@/components/general/IconVue.vue';
+import { getColorForHex } from '@/util/cesium.js';
 
 const props = defineProps<{
     workspaceId: number
@@ -23,7 +23,7 @@ onMounted(() => {
 
     if(props.existingGeoObject){
         if(props.existingGeoObject.type !== 0 || props.existingGeoObject.sub_type !== 0){
-            throw new Error('Existing geo object must be of type marking')
+            throw new Error('Existing geo object must be of type marking and point')
         }
 
         updateObject(locationData, {
@@ -72,7 +72,7 @@ const label = ref(props.existingGeoObject ? props.existingGeoObject.name : '')
         config.point[2] = loc.height
     }"></MapClickListener>
 
-    <MapMarker v-if="hasLocation" :position="[locationData.longitude, locationData.latitude, locationData.height]" icon-url="/images/geo_objects/markings/0.png" :icon-width="24" :icon-height="24" :color="Color.fromCssColorString(config.color)" :label="label">
+    <MapMarker v-if="hasLocation" :position="[locationData.longitude, locationData.latitude, locationData.height]" icon-url="/images/geo_objects/markings/0.png" :icon-width="24" :icon-height="24" :color="getColorForHex(config.color)" :label="label">
     </MapMarker>
 
     <div id="form">

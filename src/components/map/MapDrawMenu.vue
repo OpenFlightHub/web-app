@@ -4,13 +4,14 @@ import { Button } from 'primevue';
 import MapDrawPoint from '../map/draw/MapDrawPoint.vue';
 import ImageVue from '../general/ImageVue.vue';
 import { GeoObjectEditEvent } from '@/components/geo-object/GeoObjectEvents';
+import MapDrawCircle from './draw/MapDrawCircle.vue';
 
 const props = defineProps<{
     workspaceId: number
     taskId?: number
 }>()
 
-type ShowingType = 'none' | 'draw-point'
+type ShowingType = 'none' | 'draw-point' | 'draw-circle'
 const showing = ref<ShowingType>('none')
 
 let editEventId = -1
@@ -45,10 +46,16 @@ function onEditEvent(evt: Event){
 
     <div id="draw-menu">
         <Button @click="select('draw-point')" :severity="showing === 'draw-point' ? 'secondary' : undefined"><ImageVue url="/images/geo_objects/markings/0.png" :size="{em: 0.8}"></ImageVue></Button>
+
+        <Button @click="select('draw-circle')" :severity="showing === 'draw-circle' ? 'secondary' : undefined"><ImageVue url="/images/geo_objects/markings/3.png" :size="{em: 0.8}"></ImageVue></Button>
     </div>
 
     <template v-if="showing === 'draw-point'">
         <MapDrawPoint :workspace-id="props.workspaceId" :task-id="props.taskId" @create-done="select('none')" @cancel="select('none')"></MapDrawPoint>
+    </template>
+
+    <template v-if="showing === 'draw-circle'">
+        <MapDrawCircle :workspace-id="props.workspaceId" :task-id="props.taskId" @create-done="select('none')" @cancel="select('none')"></MapDrawCircle>
     </template>
 
 </template>
@@ -63,6 +70,7 @@ function onEditEvent(evt: Event){
     display: flex;
     flex-direction: column;
     transform: translateY(-50%);
+    gap: 0.5em;
 }
 
 </style>

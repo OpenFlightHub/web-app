@@ -10,6 +10,7 @@ import { onBeforeUnmount, onMounted, ref } from 'vue';
 import MapDrawPoint from '../map/draw/MapDrawPoint.vue';
 import { GeoObjectEditEvent } from '@/components/geo-object/GeoObjectEvents';
 import { cloneObject, updateObject } from '@/util/vue';
+import MapDrawCircle from '../map/draw/MapDrawCircle.vue';
 
 const props = defineProps<{
     geoObject: ApiResponse_WorkspaceGeoObjectsGet[number]
@@ -49,22 +50,29 @@ function hideEdit(){
 
         <template v-if="geoObject.sub_type === 0/* TODO use Message_Type_Event_Object_Data_Geo_Object_Type_SubType_TYPES.marking*/">
 
-            <MapDrawPoint v-if="editIsVisible" :workspace-id="props.geoObject.workspace_id" :existing-geo-object="cloneObject(props.geoObject)" @edit-done="newValue => updateObject(props.geoObject, newValue)"  @cancel="hideEdit">
-
-            </MapDrawPoint>
+            <MapDrawPoint v-if="editIsVisible" :workspace-id="props.geoObject.workspace_id" :existing-geo-object="cloneObject(props.geoObject)" @edit-done="newValue => updateObject(props.geoObject, newValue)"  @cancel="hideEdit"></MapDrawPoint>
 
             <MapMarker v-else :position="geoObject.config.point" :label="geoObject.name" icon-url="/images/geo_objects/markings/0.png" :icon-width="24" :icon-height="24" :show-height-indicator="true" :color="getColorForHex(geoObject.config.color)" @click="showEdit"></MapMarker>
 
         </template>
 
-        <!-- TODO implement configurable clamp to ground-->
-        <MapPolyline v-if="geoObject.sub_type === 1/* TODO use Message_Type_Event_Object_Data_Geo_Object_Type_SubType_TYPES.marking*/" :points="geoObject.config.line" :color="getColorForHex(geoObject.config.color)" :label="geoObject.name"></MapPolyline>
+        <template v-if="geoObject.sub_type === 1/* TODO use Message_Type_Event_Object_Data_Geo_Object_Type_SubType_TYPES.marking*/">
+
+            <!-- TODO implement configurable clamp to ground-->
+            <MapPolyline  :points="geoObject.config.line" :color="getColorForHex(geoObject.config.color)" :label="geoObject.name"></MapPolyline>
+        </template>
 
         <!-- TODO implement configurable clamp to ground-->
         <MapPolygon v-if="geoObject.sub_type === 2/* TODO use Message_Type_Event_Object_Data_Geo_Object_Type_SubType_TYPES.marking*/" :points="geoObject.config.polygon/*TODO support multi-array polygon*/" :color="getColorForHex(geoObject.config.color, 0.3)" :filled="true" :outline-color="getColorForHex(geoObject.config.color)"></MapPolygon>
 
-        <!-- TODO implement configurable clamp to ground-->
-        <MapCircle v-if="geoObject.sub_type === 3/* TODO use Message_Type_Event_Object_Data_Geo_Object_Type_SubType_TYPES.marking*/" :label="geoObject.name" :position="geoObject.config.center" :radius="geoObject.config.radius" :color="getColorForHex(geoObject.config.color, 0.3)" :filled="true" :outline-color="getColorForHex(geoObject.config.color)"></MapCircle>
+        <template v-if="geoObject.sub_type === 3/* TODO use Message_Type_Event_Object_Data_Geo_Object_Type_SubType_TYPES.marking*/">
+
+            <MapDrawCircle v-if="editIsVisible" :workspace-id="props.geoObject.workspace_id" :existing-geo-object="cloneObject(props.geoObject)" @edit-done="newValue => updateObject(props.geoObject, newValue)" @cancel="hideEdit"></MapDrawCircle>
+
+            <!-- TODO implement configurable clamp to ground-->
+            <MapCircle :label="geoObject.name" :position="geoObject.config.center" :radius="geoObject.config.radius" :color="getColorForHex(geoObject.config.color, 0.3)" :filled="true" :outline-color="getColorForHex(geoObject.config.color)" @click="showEdit"></MapCircle>
+
+        </template>
 
     </template>
 
