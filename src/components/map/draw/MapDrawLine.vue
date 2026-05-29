@@ -62,26 +62,26 @@ const label = ref(props.existingGeoObject ? props.existingGeoObject.name : '')
 <template>
 
     <MapClickListener @click="(loc)=>{
-        console.log('editMode', editMode, loc, locationData)
+
+        const locAsNumberArray: [number, number, number] = [loc.longitude, loc.latitude, loc.height]
 
         switch(editMode){
             case 'empty':
-                locationData[0] = [loc.longitude, loc.latitude, loc.height]
-                locationData[1] = [loc.longitude, loc.latitude, loc.height]
+                updateArray(locationData, [locAsNumberArray, locAsNumberArray])
                 editMode = 'first-set'
                 break
             case 'first-set':
-                locationData[1] = [loc.longitude, loc.latitude, loc.height]
+                locationData[1] = locAsNumberArray
                 editMode = 'both-set'
                 break
             case 'both-set':
                 //reset
 
-                updateArray(locationData, [[loc.longitude, loc.latitude, loc.height]])
+                updateArray(locationData, [locAsNumberArray, locAsNumberArray])
                 editMode = 'first-set'
                 break
         }
-        console.log('updated locationData', locationData, editMode)
+
         config.line = cloneObject(locationData)
 
     }"></MapClickListener>
