@@ -16,7 +16,6 @@ import { Button, useConfirm, useToast, TabPanel, TabList, Tab, Tabs, TabPanels }
 import { getIdQueryFromRouteOrUseDefault } from '@/util/url';
 import { useRoute, useRouter } from 'vue-router';
 import WorkspaceSnippet from '@/components/workspace/WorkspaceSnippet.vue';
-import LoadApiArray from '@/components/functional/LoadApiArray.vue';
 
 const showInviteMemberModal = ref(false)
 
