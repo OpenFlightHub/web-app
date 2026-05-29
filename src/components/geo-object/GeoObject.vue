@@ -70,7 +70,7 @@ function hideEdit(){
             <MapDrawCircle v-if="editIsVisible" :workspace-id="props.geoObject.workspace_id" :existing-geo-object="cloneObject(props.geoObject)" @edit-done="newValue => updateObject(props.geoObject, newValue)" @cancel="hideEdit"></MapDrawCircle>
 
             <!-- TODO implement configurable clamp to ground-->
-            <MapCircle :label="geoObject.name" :position="geoObject.config.center" :radius="geoObject.config.radius" :color="getColorForHex(geoObject.config.color, 0.3)" :filled="true" :outline-color="getColorForHex(geoObject.config.color)" @click="showEdit"></MapCircle>
+            <MapCircle v-else :label="geoObject.name" :position="geoObject.config.center" :radius="geoObject.config.radius" :color="getColorForHex(geoObject.config.color, 0.3)" :filled="true" :outline-color="getColorForHex(geoObject.config.color)" @click="showEdit"></MapCircle>
 
         </template>
 
