@@ -2,6 +2,7 @@
 import { ApiResponse_WorkspaceGet } from 'openflighthub-api-client-sdk';
 import ApiForm from '../functional/form/ApiForm.vue';
 import api from '@/api/index.js';
+import { updateObject } from '@/util/vue.js';
 
 const props = defineProps<{
     workspace: ApiResponse_WorkspaceGet
@@ -25,7 +26,10 @@ const emit = defineEmits<{
         }"
         :editable-fields="['name', 'latitude', 'longitude']"
         title="Edit Workspace"
-        @created="(updatedWorkspace) =>/* TODO should we update the prop? */ emit('created', updatedWorkspace)"></ApiForm>
+        @created="(updatedWorkspace) =>{
+            updateObject(props.workspace, updatedWorkspace)
+            emit('created', updatedWorkspace)
+        }" @cancel="emit('cancel')"></ApiForm>
 
 </template>
 

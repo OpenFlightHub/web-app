@@ -32,7 +32,7 @@ const emit = defineEmits<{
                 workspace_id: {type: 'number', required: true}
             }"
             :editable-fields="['name', 'assigned_to_team_id', 'description']"
-            title="Create Mission" @created="(createdMission) => emit('created', createdMission)" @cancel="emit('cancel')"></ApiForm>
+            title="Create Mission" @created="emit('created', $event)" @cancel="emit('cancel')"></ApiForm>
     </LoadApiArray>
 
 </template>

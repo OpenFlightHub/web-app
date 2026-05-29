@@ -8,7 +8,7 @@ const props = defineProps<{
 
 <template>
 
-    <div id="split">
+    <div id="split" :class="{horizontal: props.horizontal}">
         <slot name="left_or_top"></slot>
         <slot name="right_or_bottom"></slot>
     </div>
@@ -20,6 +20,7 @@ const props = defineProps<{
 #split {
     display: flex;
     flex-direction: row;
+    gap: 1em;
 
     &:not(.horizontal) > * {
         width: 50%;
