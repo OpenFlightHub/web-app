@@ -10,6 +10,7 @@ const props = defineProps<{
     workspaceId: number
     initialLongitude: number
     initialLatitude: number//TODO implement movement of map
+    showOnlyAircraft?: boolean
 }>()
 
 const viewer = inject<Viewer>('cesiumViewer')
@@ -59,7 +60,10 @@ onUnmounted(destroy)
 
 <template>
 
-    <GeoObject v-for="geoObject of geoObjects" :key="geoObject.id" :geo-object="geoObject"></GeoObject>
+    <template v-for="geoObject of geoObjects" :key="geoObject.id" :geo-object="geoObject">
+        <GeoObject v-if="!props.showOnlyAircraft ||
+            (geoObject.type === 1 || geoObject.type === 2 && (geoObject.sub_type === 0 || geoObject.sub_type === 1 || geoObject.sub_type === 2))" :key="geoObject.id" :geo-object="geoObject"></GeoObject>
+    </template>
 
 </template>
 
