@@ -37,7 +37,7 @@ const showCollisionObjects = ref(false)
                 <MapCollisionObjects v-if="showCollisionObjects"></MapCollisionObjects>
 
                 <template v-if="geoidIsLoaded">
-                    <HubWorkspaceMapConnection v-for="connection in props.connections" :key="connection.id" :connection="connection"></HubWorkspaceMapConnection>
+                    <HubWorkspaceMapConnection v-for="connection in props.connections" :key="connection.id" :connection="connection"></HubWorkspaceMapConnection><!-- TODO once we implemented making geoobject units from drone connections, we can delete this -->
 
                     <HubWorkspaceGeoObjects :workspace-id="props.workspaceId" :initial-longitude="props.longitude" :initial-latitude="props.latitude"></HubWorkspaceGeoObjects>
                 </template>
