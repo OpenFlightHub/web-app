@@ -203,6 +203,27 @@ function resetCamera(){
     }
 }
 
+export type mapHelpersType = typeof mapHelpers
+
+const mapHelpers = {
+    mapGoTo
+}
+
+function mapGoTo(longitude: number, latitude: number, elevation: number){
+    viewer.camera.flyTo({
+        destination: Cartesian3.fromDegrees(longitude, latitude, elevation),
+        orientation: {
+            heading: 0,
+            pitch: MathCesium.toRadians(-90),
+            roll: 0
+        },
+        duration: 0.6
+        //TODO use fov
+    })
+}
+
+provide('mapHelpers', mapHelpers)
+
 export type MapPosition3D = {
     position: [number, number],
     elevation: number

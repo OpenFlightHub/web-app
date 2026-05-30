@@ -2,22 +2,36 @@
 import { ApiResponse_WorkspaceGeoObjectsGet } from 'openflighthub-api-client-sdk';
 import Snippet from '../layout/Snippet.vue';
 import GeoObjectTypeBadge from './GeoObjectTypeBadge.vue';
+import { GeoObjectFocusEvent } from './GeoObjectEvents.js';
 
 const props = defineProps<{
     geoObject: ApiResponse_WorkspaceGeoObjectsGet[number]
 }>()
 
+function emitFocus(){
+    window.dispatchEvent(new GeoObjectFocusEvent(props.geoObject.id))
+}
+
 </script>
 
 <template>
 
-    <Snippet>
+    <Snippet @click.prevent.stop="emitFocus" class="snippet_geoobject">
         <h3 id="title">{{ props.geoObject.name }} <GeoObjectTypeBadge :type="props.geoObject.type"></GeoObjectTypeBadge></h3>
     </Snippet>
 
 </template>
 
 <style scoped lang="scss">
+
+.snippet_geoobject {
+    cursor: pointer;
+    border: 0.1em solid transparent;
+
+    &:hover {
+        border-color: var(--color-neutral-light);
+    }
+}
 
 #title {
     display: flex;

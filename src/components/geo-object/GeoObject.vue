@@ -6,12 +6,14 @@ import { getColorForHex } from '@/util/cesium';
 import MapPolyline from '../map/MapPolyline.vue';
 import MapPolygon from '../map/MapPolygon.vue';
 import MapCircle from '../map/MapCircle.vue';
-import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { inject, onBeforeUnmount, onMounted, ref } from 'vue';
 import MapDrawPoint from '../map/draw/MapDrawPoint.vue';
-import { GeoObjectEditEvent } from '@/components/geo-object/GeoObjectEvents';
+import { GeoObjectEditEvent, GeoObjectFocusEvent } from '@/components/geo-object/GeoObjectEvents';
 import { cloneObject, updateObject } from '@/util/vue';
 import MapDrawCircle from '../map/draw/MapDrawCircle.vue';
 import MapDrawLine from '../map/draw/MapDrawLine.vue';
+import { getCenter } from '@/util/geo_objects.js';
+import { mapHelpersType } from '../map/Map.vue';
 
 const props = defineProps<{
     geoObject: ApiResponse_WorkspaceGeoObjectsGet[number]
@@ -19,12 +21,16 @@ const props = defineProps<{
 
 const editIsVisible = ref(false)
 
+const mapHelpers = inject<mapHelpersType>('mapHelpers')
+
 onMounted(() => {
     window.addEventListener(GeoObjectEditEvent.EVENT_NAME, onEditEvent)
+    window.addEventListener(GeoObjectFocusEvent.EVENT_NAME, onFocusEvent)
 })
 
 onBeforeUnmount(() => {
     window.removeEventListener(GeoObjectEditEvent.EVENT_NAME, onEditEvent)
+    window.removeEventListener(GeoObjectFocusEvent.EVENT_NAME, onFocusEvent)
 })
 
 function onEditEvent(evt: Event){
@@ -32,6 +38,16 @@ function onEditEvent(evt: Event){
         editIsVisible.value = false
     }
 }
+
+function onFocusEvent(evt: Event){
+    if(evt instanceof GeoObjectFocusEvent && evt.geoObjectId === props.geoObject.id){
+        const center = getCenter([props.geoObject])
+        if(center[0] !== 0 || center[1] !== 0){
+            mapHelpers!.mapGoTo(center[0], center[1], 5000)
+        }
+    }
+}
+
 
 function showEdit(){
     editIsVisible.value = true

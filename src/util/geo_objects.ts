@@ -61,14 +61,25 @@ function getCenterOfCoordinates(coordinates: number[][]): [number, number] {
     return [totalLongitude / coordinates.length, totalLatitude / coordinates.length]
 }
 
-
-export function getCenterOfTaskGeoObjects(task: ApiResponse_TaskGet, workspace: ApiResponse_WorkspaceGet) {
+export function getCenterOfTaskGeoObjectsOrFalse(task: ApiResponse_TaskGet) {
 
     if (task.geo_objects.length === 0) {
-        return {latitude: typeof workspace.latitude === 'number' ? workspace.latitude : 0, longitude: typeof workspace.longitude === 'number' ? workspace.longitude : 0}
+        return false
     }
 
     const center = getCenter(task.geo_objects)
 
     return {latitude: center[1], longitude: center[0]}
+
+}
+
+export function getCenterOfTaskGeoObjects(task: ApiResponse_TaskGet, workspace: ApiResponse_WorkspaceGet) {
+
+    const center = getCenterOfTaskGeoObjectsOrFalse(task)
+
+    if (center === false) {
+        return {latitude: workspace.latitude, longitude: workspace.longitude}
+    }
+
+    return center
 }

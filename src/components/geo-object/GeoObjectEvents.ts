@@ -10,3 +10,16 @@ export class GeoObjectEditEvent extends CustomEvent<void> {
     }
 
 }
+
+export class GeoObjectFocusEvent extends CustomEvent<void> {
+
+    static EVENT_NAME = 'geo-object-focus'
+
+    readonly geoObjectId: number
+
+    constructor(geoObjectId: number) {
+        super('geo-object-focus')
+        this.geoObjectId = geoObjectId
+    }
+
+}
