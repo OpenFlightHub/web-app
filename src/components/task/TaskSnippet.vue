@@ -9,6 +9,7 @@ import GeoObjectSnippet from '../geo-object/GeoObjectSnippet.vue';
 
 const props = defineProps<{
     task: ApiResponse_TaskGet
+    showDescription?: boolean
     showGeoObjects?: boolean
 }>()
 
@@ -20,7 +21,7 @@ const geoObjectsExtended = ref(false)
 
     <Snippet :to-url="'/task/' + props.task.id">
         <h3 id="title">{{ props.task.name }} <TaskStateBadge :state="props.task.state"></TaskStateBadge></h3>
-        <p id="description">{{ props.task.description }}</p>
+        <p v-if="props.showDescription" id="description">{{ props.task.description }}</p>
 
         <template v-if="props.showGeoObjects">
             <h4 @click.stop.prevent="geoObjectsExtended = !geoObjectsExtended" style="cursor: pointer;">Related GeoObjects ({{ props.task.geo_objects.length }})<IconVue :name="geoObjectsExtended ? 'caret-up-fill' : 'caret-down-fill'"></IconVue></h4>
