@@ -30,7 +30,11 @@ const showMissionEditModal = ref(false)
 
     <LoadApiWithIdParamInUrl :api-method="api.rest.mission.get" :config="{params: {}}" :id-params="['missionId']" v-slot="mission">
         <Padding>
-            <h1>Mission: {{ mission.data.name }} <Button @click="showMissionEditModal = true"><IconVue name="pencil"></IconVue></Button></h1>
+            <div style="display: flex; justify-content: space-between; gap: 1em;">
+                <h1>Mission: {{ mission.data.name }} <Button @click="showMissionEditModal = true"><IconVue name="pencil"></IconVue></Button></h1>
+
+                <RouterLink :to="'/workspace/' + mission.data.workspace_id">View Workspace</RouterLink>
+            </div>
 
             <LoadApi :api-method="api.rest.workspace.get" :config="{params: {workspaceId: mission.data.workspace_id}}" v-slot="workspace">
                 <LoadApiArrayWithIdParamInUrl :api-method="api.rest.mission.tasks.get" :config="{params: {}}" :id-params="['missionId']" v-slot="tasks">
