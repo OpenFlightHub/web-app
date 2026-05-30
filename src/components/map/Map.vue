@@ -55,7 +55,7 @@ let viewer: Viewer = new Viewer(props.mapContainer, {
     selectionIndicator: props.disableUserControl !== true,
     infoBox: false,
     baseLayerPicker: getSetting('allow-bing-maps') === true,
-    sceneModePicker: props.disableUserControl !== true && props.forceTopDown !== true,
+    sceneModePicker: false,
     geocoder: props.disableUserControl !== true
 })
 
@@ -111,13 +111,6 @@ layers.addImageryProvider(
 // })
 //viewer.imageryLayers.addImageryProvider(openstreetmap) //TODO add attribution see https://operations.osmfoundation.org/policies/tiles/
 
-
-
-if(props.forceTopDown){//TODO watch prop and respond to changes
-    viewer.scene.mode = SceneMode.SCENE2D
-}
-
-
 resetCamera()
 
 /*
@@ -127,10 +120,22 @@ createOsmBuildingsAsync().then(buildingTileset => {
 })
 */
 
+
+viewer.scene.preRender.addEventListener(() => {
+    if(props.forceTopDown){
+        viewer.camera.setView({
+            orientation: {
+                heading: 0,
+                pitch: MathCesium.toRadians(-90),
+                roll: 0
+            }
+        })
+    }
+})
+
 if(props.forceTopDown){//TODO watch prop and respond to changes
-    viewer.scene.screenSpaceCameraController.enableRotate = false;
-    viewer.scene.screenSpaceCameraController.enableTilt = false;
-    viewer.scene.screenSpaceCameraController.enableLook = false;
+    viewer.scene.screenSpaceCameraController.enableTilt = false
+    viewer.scene.screenSpaceCameraController.enableLook = false
 }
 // viewer.scene.screenSpaceCameraController.enableTranslate = false;
 // viewer.scene.screenSpaceCameraController.enableZoom = false;
