@@ -47,7 +47,8 @@ const showInviteTeamModal = ref(false)
                   <Tab :value="3">Streams</Tab>
                   <Tab :value="4">Files</Tab>
                   <Tab :value="5">Connections</Tab>
-                  <Tab :value="6">Settings</Tab>
+                  <Tab :value="6">Special Views</Tab>
+                  <Tab :value="7">Settings</Tab>
                </TabList>
                <TabPanels>
                   <TabPanel :value="0">
@@ -88,6 +89,12 @@ const showInviteTeamModal = ref(false)
                      </List>
                   </TabPanel>
                   <TabPanel :value="6">
+                     <h3>Special Views:</h3>
+                     <List>
+                        <RouterLink :to="'/workspace/' + workspace.data.id + '/air-space-monitoring'">Air Space Monitoring</RouterLink>
+                     </List>
+                  </TabPanel>
+                  <TabPanel :value="7">
                      <!-- TODO only users that own workspace (team or organization) should be able to edit -->
 
 

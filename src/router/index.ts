@@ -33,6 +33,7 @@ import UserView from '@/views/UserView.vue'
 import MissionView from '@/views/MissionView.vue'
 import DatabaseView from '@/views/admin/system/DatabaseView.vue'
 import TaskView from '@/views/TaskView.vue'
+import WorkspaceAirSpaceMonitoringView from '@/views/WorkspaceAirSpaceMonitoringView.vue'
 
 
 
@@ -196,6 +197,10 @@ export function makeRouter(pinia: Pinia){
             {
                 path: '/workspace/:workspaceId',
                 component: WorkspaceView
+            },
+            {
+                path: '/workspace/:workspaceId/air-space-monitoring',
+                component: WorkspaceAirSpaceMonitoringView
             },
             {
                 path: '/connection/:connectionId',
