@@ -120,25 +120,10 @@ createOsmBuildingsAsync().then(buildingTileset => {
 })
 */
 
-
-viewer.scene.preRender.addEventListener(() => {
-    if(props.forceTopDown){
-        viewer.camera.setView({
-            orientation: {
-                heading: 0,
-                pitch: MathCesium.toRadians(-90),
-                roll: 0
-            }
-        })
-    }
-})
-
 if(props.forceTopDown){//TODO watch prop and respond to changes
     viewer.scene.screenSpaceCameraController.enableTilt = false
     viewer.scene.screenSpaceCameraController.enableLook = false
 }
-// viewer.scene.screenSpaceCameraController.enableTranslate = false;
-// viewer.scene.screenSpaceCameraController.enableZoom = false;
 
 
 viewer.camera.moveEnd.addEventListener(evt=>{
