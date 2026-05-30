@@ -52,11 +52,10 @@ let viewer: Viewer = new Viewer(props.mapContainer, {
     fullscreenButton: false,
     navigationHelpButton: false,
     navigationInstructionsInitiallyVisible: props.disableUserControl !== true,
-    //projectionPicker: props.disableUserControl !== true,
     selectionIndicator: props.disableUserControl !== true,
     infoBox: false,
     baseLayerPicker: getSetting('allow-bing-maps') === true,
-    sceneModePicker: props.disableUserControl !== true,
+    sceneModePicker: props.disableUserControl !== true && props.forceTopDown !== true,
     geocoder: props.disableUserControl !== true
 })
 
