@@ -17,6 +17,7 @@ const props = defineProps<{
     longitude: number
     latitude: number
     workspaceId: number
+    forceTopDown?: boolean
 }>()
 
 const mapContainer = ref<HTMLElement>()
@@ -31,7 +32,7 @@ const showCollisionObjects = ref(false)
 
     <Fullscreenable flex="row">
         <div id="map-container" ref="mapContainer">
-            <Map id="map" v-if="mapContainer" :map-container="mapContainer" :start-point="{longitude: props.longitude, latitude: props.latitude}" :start-height="10000" :start-camera-pitch="-90">
+            <Map id="map" v-if="mapContainer" :map-container="mapContainer" :start-point="{longitude: props.longitude, latitude: props.latitude}" :start-height="10000" :start-camera-pitch="-90" :force-top-down="props.forceTopDown">
 
                 <MapCollisionObjects v-if="showCollisionObjects"></MapCollisionObjects>
 
