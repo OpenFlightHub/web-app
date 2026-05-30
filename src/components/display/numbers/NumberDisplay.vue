@@ -4,6 +4,7 @@
  */
 const props = defineProps<{
     number: number
+    unit?: string
     decimals?: number
 }>()
 
@@ -11,6 +12,6 @@ const props = defineProps<{
 
 <template>
 
-    <span>{{ props.number.toFixed(props.decimals ?? 2) }}</span>
+    <span>{{ props.number.toFixed(props.decimals ?? 2)  + (props.unit ?? '') }}</span>
 
 </template>

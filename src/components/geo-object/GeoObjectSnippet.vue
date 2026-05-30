@@ -17,7 +17,7 @@ function emitFocus(){
 <template>
 
     <Snippet @click.prevent.stop="emitFocus" class="snippet_geoobject">
-        <h3 id="title">{{ props.geoObject.name }} <GeoObjectTypeBadge :type="props.geoObject.type"></GeoObjectTypeBadge></h3>
+        <h3 id="title">{{ props.geoObject.name }} <GeoObjectTypeBadge :type="props.geoObject.type" :sub-type="props.geoObject.sub_type"></GeoObjectTypeBadge></h3>
     </Snippet>
 
 </template>
