@@ -245,25 +245,12 @@ onBeforeMount(()=>{
 
 <template>
 
-    <div id="map-overlay" ref="mapContainer">
+    <div ref="mapContainer">
         <slot v-bind="{resetCamera}"></slot>
     </div>
 
 </template>
 
 <style scoped lang="scss">
-
-#map-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none; // allow clicks to pass through to the map
-
-    *:not(div) {
-        pointer-events: auto; // allow interaction with direct children of the overlay
-    }
-}
 
 </style>

@@ -41,7 +41,7 @@ const showTaskEditModal = ref(false)
                     <SplitVue class="split_view_outer">
                         <template #left_or_top>
 
-                            <div ref="mapContainer" style="height: 80vh;">
+                            <div ref="mapContainer" style="height: 80vh; position: relative;">
                                 <Map v-if="mapContainer" :map-container="mapContainer!" :start-point="getCenterOfTaskGeoObjects(task.data, workspace.data)" :start-height="10000" :start-camera-heading="0" :start-camera-pitch="-90">
 
                                     <TaskGeoObjects :workspace-id="mission.data.workspace_id" :task="task.data"></TaskGeoObjects>
