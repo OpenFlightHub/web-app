@@ -26,7 +26,7 @@ const emit = defineEmits<{
             :initial-values="props.mission"
             :fields="{
                 name: {type: 'text', required: true},
-                assigned_to_team_id: {type: 'select', required: false, options: teams.data.map(team => ({ label: team.name, value: team.id }))},
+                assigned_to_team_id: {type: 'select', required: false, options: teams.data.map(team => ({ label: team.name, value: team.id })), allowNull: true},
                 description: {type: 'textarea', required: false},
                 state: {type: 'select', required: true, options: Object.entries(MISSION_STATES).map(([key, value]) => ({ label: key, value })), mappedBadge: {colorMap: MISSION_COLOR_MAP}}
             }"

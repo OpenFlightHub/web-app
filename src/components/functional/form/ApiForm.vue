@@ -11,6 +11,7 @@ import { ref, watch } from 'vue';
 import { FormResolverOptions } from '@primevue/forms';
 import InputMapLocation from './InputMapLocation.vue';
 import SelectMappedBadge from './SelectMappedBadge.vue';
+import { cloneObject } from '@/util/vue.js';
 
 export type Field<FieldType, DataShape extends Record<string, string> = Record<string, string>> = FieldType extends 'text' ? FieldTypeText : FieldType extends 'email' ? FieldTypeEmail : FieldType extends 'number' ? FieldTypeNumber : FieldType extends 'select' ? FieldTypeSelect : FieldType extends 'checkbox' ? FieldTypeCheckbox : FieldType extends 'date-with-time' ? FieldTypeDateWithTime : FieldType extends 'raw' ? FieldTypeRaw : FieldType extends 'map-location' ? FieldTypeMapLocation<DataShape> : FieldType extends 'textarea' ? FieldTypeTextarea : FieldBase<FieldType>
 
@@ -35,6 +36,7 @@ export interface FieldTypeSelect extends FieldBase<'select'> {
         value: any
         label: string
     }[]
+    allowNull?: boolean
     mappedBadge?: {
         colorMap: {
             value: number
@@ -111,7 +113,7 @@ function cleanupData(data: FormSubmitEvent['values']): PROPS['config']['data']{
 
         cleanData[fieldName] = props.initialValues[fieldName]
 
-        if(typeof data[fieldName] === 'undefined' || data[fieldName] === null){
+        if(typeof data[fieldName] === 'undefined'){
             continue
         }
 
@@ -209,6 +211,10 @@ async function resolveValidation(e: FormResolverOptions){
     return errors
 }
 
+function withNullOption(options: {value: any, label: string}[]): {value: any, label: string}[]{
+    return [{value: null, label: 'None'}, ...cloneObject(options)]
+}
+
 </script>
 
 <template>
@@ -254,7 +260,7 @@ async function resolveValidation(e: FormResolverOptions){
                         <template v-else-if="props.fields[fieldName].type === 'select'">
                             <IftaLabel>
                                 <SelectMappedBadge v-if="props.fields[fieldName].mappedBadge" :field-name="fieldName" :options="props.fields[fieldName].options" :required="props.fields[fieldName].required" :color-map="props.fields[fieldName].mappedBadge.colorMap" @change="emitChange"></SelectMappedBadge>
-                                <Select v-else :id="fieldName" :name="fieldName" :options="props.fields[fieldName].options" option-value="value" option-label="label" :required="props.fields[fieldName].required" fluid @update:model-value="emitChange"></Select>
+                                <Select v-else :id="fieldName" :name="fieldName" :options="props.fields[fieldName].allowNull ? withNullOption(props.fields[fieldName].options) : props.fields[fieldName].options" option-value="value" option-label="label" :required="props.fields[fieldName].required" fluid @update:model-value="emitChange"></Select>
                                 <label :for="fieldName">{{ props.readableLabels?.[fieldName] ?? fieldName }}</label>
                             </IftaLabel>
                         </template>
