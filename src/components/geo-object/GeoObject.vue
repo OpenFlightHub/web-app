@@ -35,7 +35,7 @@ onBeforeUnmount(() => {
 
 function onEditEvent(evt: Event){
     if(evt instanceof GeoObjectEditEvent && evt.geoObjectId !== props.geoObject.id){
-        editIsVisible.value = false
+        editIsVisible.value = false//TODO only allow editing in specific cases?
     }
 }
 
