@@ -1,7 +1,7 @@
 export const MISSION_STATES = {
     planned: 0,
     accepted: 1,
-    in_progress: 2,
+    'in progress': 2,
     done: 3,
     rejected: 4,
     failed: 5,
