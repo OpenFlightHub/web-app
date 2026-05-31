@@ -42,10 +42,6 @@ async function setup(){
             throw new Error('unsupported map element event_type: ' + data.event_type)
         }
 
-    }, {
-        latitude: props.initialLatitude,
-        longitude: props.initialLongitude,
-        radius: 100 * 1000
     })
 }
 
