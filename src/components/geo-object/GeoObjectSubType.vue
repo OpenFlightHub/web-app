@@ -24,8 +24,9 @@ const label = computed(()=>{
                 case 0: return 'Airplane'
                 case 1: return 'Helicopter'
                 case 2: return 'UAV'
-                case 3: return 'Gliding'
-                case 4: return 'Other'
+                case 3: return 'Glider'
+                case 4: return 'Chute'
+                case 5: return 'Other'
                 default: return '?'
             }
         }

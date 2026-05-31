@@ -26,13 +26,9 @@ async function setup(){
         const existingElement = geoObjects[existingElementIndex]
 
         if (data.event_type === 'update' && existingElement){
-            updateObject(existingElement, data.data)
+            updateObject(existingElement, data.data!)
         }
 
-    }, {
-        latitude: workspace.latitude,
-        longitude: workspace.longitude,
-        radius: 100 * 1000
     })
 }
 
