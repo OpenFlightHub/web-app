@@ -1,6 +1,11 @@
 import { Color } from "cesium";
 
 export function colorizeCanvas(canvas: HTMLCanvasElement, color: Color){
+
+    if(canvas.width === 0 && canvas.height === 0){
+        return
+    }
+
     const imageData = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height)
 
     for(let y = 0; y < canvas.height; y++){
