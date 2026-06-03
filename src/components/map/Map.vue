@@ -91,7 +91,7 @@ layers.addImageryProvider(
 )
 
 // DIPUL https://www.dipul.de/homepage/de/hilfe/anleitung-fuer-den-web-map-service-wms/#/wms-nutzungsbedingungen
-layers.addImageryProvider(
+/*layers.addImageryProvider(
     new WebMapServiceImageryProvider({
         url: 'https://uas-betrieb.de/geoservices/dipul/wms?',
         layers: 'dipul:wohngrundstuecke,dipul:flugplaetze',
@@ -102,7 +102,8 @@ layers.addImageryProvider(
         },
         enablePickFeatures: true//TODO show information about the clicked feature, see https://cesium.com/docs/cesiumjs-ref-doc/WebMapServiceImageryProvider.html#pickFeatures
     })
-)
+)*/
+//TODO enabling the DIPUL layer causes huge freezes when paaning the map
 
 
 //TODO currently switching to 2D crashes cesium
