@@ -90,7 +90,7 @@ const mapContainer = ref<HTMLElement>()
 
             <div id="live-content">
                <LoadApi v-if="typeof drone.data.last_connection_id === 'number'" :api-method="api.rest.connection.get" :config="{params: {connectionId: drone.data.last_connection_id}}" v-slot="connection">
-                  <LoadApi :api-method="api.rest.workspace.get" :config="{params: {workspaceId: drone.data.last_connection_id}}" v-slot="workspace">
+                  <LoadApi :api-method="api.rest.workspace.get" :config="{params: {workspaceId: connection.data.workspace_id}}" v-slot="workspace">
                      <div ref="mapContainer">
                         <Map v-if="mapContainer" :map-container="mapContainer" :start-point="{longitude: workspace.data.longitude, latitude: workspace.data.latitude}" :start-height="0" @viewer-loaded="viewerIsLoaded = true">
                            <FlightSimulation v-if="viewerIsLoaded" ref="flightSimulation"></FlightSimulation>
