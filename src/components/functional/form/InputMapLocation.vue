@@ -2,7 +2,7 @@
 import ModalVue from '@/components/display/ModalVue.vue';
 import { computed, ref } from 'vue';
 import Map from '@/components/map/Map.vue';
-import { InputText, InputNumber, InputGroup, InputGroupAddon } from 'primevue';
+import { InputText, InputNumber, InputGroup, InputGroupAddon, Button } from 'primevue';
 import IconVue from '@/components/general/IconVue.vue';
 
 const DEFAULT_MAX_FRACTION_DIGITS = 6
@@ -101,6 +101,9 @@ function changeLocation(latitude: number, longitude: number){
                 <IconVue name="plus-lg" id="crosshair"></IconVue>
             </Map>
         </div>
+        <div style="display: flex; justify-content: center; margin-top: 1em;">
+            <Button @click="modalVisible = false">OK</Button>
+        </div>
     </ModalVue>
 
 </template>
@@ -111,6 +114,7 @@ function changeLocation(latitude: number, longitude: number){
     position: relative;
     width: 400px;
     height: 400px;
+    overflow: hidden;
 
     #crosshair {
         position: absolute;
