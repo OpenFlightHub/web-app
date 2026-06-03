@@ -52,8 +52,8 @@ const emit = defineEmits<{
 
 #close-icon {
     position: absolute;
-    top: 0.5em;
-    right: 0.5em;
+    top: 0.3em;
+    right: 0.3em;
     z-index: 1;
     cursor: pointer;
 }
