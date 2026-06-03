@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ApiResponse_ConnectionGet } from 'openflighthub-api-client-sdk';
-import { ref } from 'vue';
+import { nextTick, ref, watch } from 'vue';
 import HubWorkspaceMapConnection from './HubWorkspaceMapConnection.vue';
 import { geoidIsLoaded } from '@/util/geoid';
 import Checkbox from 'primevue/checkbox'
@@ -25,6 +25,20 @@ const mapContainer = ref<HTMLElement>()
 const sidebarIsOpen = ref(false)
 const showMedia = ref(false)
 const showCollisionObjects = ref(false)
+
+watch(()=> props.workspaceId, ()=>{
+    console.log('workspaceId changed, forcing update of map')
+    forceReRenderMap()
+})
+
+function forceReRenderMap(){
+    const mapContainerValue = mapContainer.value
+    mapContainer.value = undefined
+
+    nextTick(()=>{
+        mapContainer.value = mapContainerValue
+    })
+}
 
 </script>
 
