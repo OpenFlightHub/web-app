@@ -32,18 +32,27 @@ const editIsVisible = ref(false)
 const infoIsVisible = ref(false)
 
 const mapHelpers = inject<mapHelpersType>('mapHelpers')
+const mapContainer = inject<HTMLElement>('mapContainer')
 
 onMounted(() => {
     window.addEventListener(GeoObjectEditEvent.EVENT_NAME, onEditEvent)
     window.addEventListener(GeoObjectFocusEvent.EVENT_NAME, onFocusEvent)
     window.addEventListener(GeoObjectShowInfoEvent.EVENT_NAME, onShowInfoEvent)
+    mapContainer!.addEventListener('click', onMapClick)
 })
 
 onBeforeUnmount(() => {
     window.removeEventListener(GeoObjectEditEvent.EVENT_NAME, onEditEvent)
     window.removeEventListener(GeoObjectFocusEvent.EVENT_NAME, onFocusEvent)
     window.removeEventListener(GeoObjectShowInfoEvent.EVENT_NAME, onShowInfoEvent)
+    mapContainer!.removeEventListener('click', onMapClick)
 })
+
+function onMapClick(){
+    if(infoIsVisible.value){
+        infoIsVisible.value = false
+    }
+}
 
 function onEditEvent(evt: Event){
     if(evt instanceof GeoObjectEditEvent && evt.geoObjectId !== props.geoObject.id){
@@ -78,6 +87,11 @@ function hideEdit(){
     editIsVisible.value = false
 }
 
+function hideEditAndShowInfo(){
+    hideEdit()
+    showInfo()
+}
+
 function showInfo(){
     window.dispatchEvent(new GeoObjectShowInfoEvent(props.geoObject.id))
 }
@@ -97,7 +111,7 @@ function editDone(newValue: ApiResponse_WorkspaceGeoObjectsGet[number]){
 
         <template v-if="geoObject.sub_type === 0/* TODO use Message_Type_Event_Object_Data_Geo_Object_Type_SubType_TYPES.marking*/">
 
-            <MapDrawPoint v-if="editIsVisible && typeof props.geoObject.workspace_id === 'number'" :workspace-id="props.geoObject.workspace_id" :existing-geo-object="cloneObject(props.geoObject)" @edit-done="editDone"  @cancel="hideEdit"></MapDrawPoint>
+            <MapDrawPoint v-if="editIsVisible && typeof props.geoObject.workspace_id === 'number'" :workspace-id="props.geoObject.workspace_id" :existing-geo-object="cloneObject(props.geoObject)" @edit-done="editDone"  @cancel="hideEditAndShowInfo"></MapDrawPoint>
 
             <MapMarker v-else :position="geoObject.config.point" :label="geoObject.name" icon-url="/images/geo_objects/markings/0.png" :icon-width="24" :icon-height="24" :show-height-indicator="true" :color="getColorForHex(geoObject.config.color)" @click="showInfo"></MapMarker>
 
@@ -105,7 +119,7 @@ function editDone(newValue: ApiResponse_WorkspaceGeoObjectsGet[number]){
 
         <template v-if="geoObject.sub_type === 1/* TODO use Message_Type_Event_Object_Data_Geo_Object_Type_SubType_TYPES.marking*/">
 
-            <MapDrawLine v-if="editIsVisible && typeof props.geoObject.workspace_id === 'number'" :workspace-id="props.geoObject.workspace_id" :existing-geo-object="cloneObject(props.geoObject)" @edit-done="editDone" @cancel="hideEdit"></MapDrawLine>
+            <MapDrawLine v-if="editIsVisible && typeof props.geoObject.workspace_id === 'number'" :workspace-id="props.geoObject.workspace_id" :existing-geo-object="cloneObject(props.geoObject)" @edit-done="editDone" @cancel="hideEditAndShowInfo"></MapDrawLine>
 
             <!-- TODO implement configurable clamp to ground-->
             <MapPolyline v-else :points="geoObject.config.line" :color="getColorForHex(geoObject.config.color)" :label="geoObject.name" @click="showInfo"></MapPolyline>
@@ -116,7 +130,7 @@ function editDone(newValue: ApiResponse_WorkspaceGeoObjectsGet[number]){
 
         <template v-if="geoObject.sub_type === 3/* TODO use Message_Type_Event_Object_Data_Geo_Object_Type_SubType_TYPES.marking*/">
 
-            <MapDrawCircle v-if="editIsVisible && typeof props.geoObject.workspace_id === 'number'" :workspace-id="props.geoObject.workspace_id" :existing-geo-object="cloneObject(props.geoObject)" @edit-done="editDone" @cancel="hideEdit"></MapDrawCircle>
+            <MapDrawCircle v-if="editIsVisible && typeof props.geoObject.workspace_id === 'number'" :workspace-id="props.geoObject.workspace_id" :existing-geo-object="cloneObject(props.geoObject)" @edit-done="editDone" @cancel="hideEditAndShowInfo"></MapDrawCircle>
 
             <!-- TODO implement configurable clamp to ground-->
             <MapCircle v-else :label="geoObject.name" :position="geoObject.config.center" :radius="geoObject.config.radius" :color="getColorForHex(geoObject.config.color, 0.3)" :filled="true" :outline-color="getColorForHex(geoObject.config.color)" @click="showInfo"></MapCircle>
