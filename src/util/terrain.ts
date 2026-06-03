@@ -32,6 +32,8 @@ export type TerrainVisibilityResult = {
     all: TerrainVisibilitySample[]
 }
 
+const USE_CACHE = false //TODO before enabling cache, implement size limit ot cache and make it more intelligent -> remove old unused entries?
+
 type LongLatHash = string
 const ELEVATION_CACHE = new Map<LongLatHash, number>()
 
@@ -39,23 +41,35 @@ let cacheHitCount = 0
 let cacheMissCount = 0
 let elevationSourcesCounted = new Map<string, number>()
 
+function printTerrainElevationStats(){
+    console.log(`elevation cache hit rate: ${(cacheHitCount/(cacheHitCount+cacheMissCount)*100).toFixed(2)}% (${cacheHitCount} hits, ${cacheMissCount} misses)`)
+    console.log('elevation sources:', elevationSourcesCounted)
+}
+
+//@ts-ignore
+window.printTerrainElevationStats = printTerrainElevationStats
+
 /**
  * height is relative to geoid, if you need orthometric (normal height) use convertEllipsoidalHeightToOrthometricHeight()
  */
 export async function getElevationAtPosition(viewer: Viewer, longitude: number, latitude: number, source?: string){
 
-    const hash = makeLongLatHash(longitude, latitude)
-    const cachedElevation = ELEVATION_CACHE.get(hash)
-    if(cachedElevation !== undefined){
-        cacheHitCount++
-        return Cartographic.fromDegrees(longitude, latitude, cachedElevation)
-    } else {
-        cacheMissCount++
-    }
+    let hash = ''
 
-    if(cacheMissCount % 100 === 0){
-        console.log(`elevation cache hit rate: ${(cacheHitCount/(cacheHitCount+cacheMissCount)*100).toFixed(2)}% (${cacheHitCount} hits, ${cacheMissCount} misses)`)
-        console.log('elevation sources:', elevationSourcesCounted)
+    if(USE_CACHE){
+        hash = makeLongLatHash(longitude, latitude)//Needed later too!
+
+        const cachedElevation = ELEVATION_CACHE.get(hash)
+        if(cachedElevation !== undefined){
+            cacheHitCount++
+            return Cartographic.fromDegrees(longitude, latitude, cachedElevation)
+        } else {
+            cacheMissCount++
+        }
+
+        if(cacheMissCount % 100 === 0){
+            printTerrainElevationStats()
+        }
     }
 
     const sourceString = source ?? 'unknown'
@@ -67,7 +81,9 @@ export async function getElevationAtPosition(viewer: Viewer, longitude: number, 
     const onGroundPos = inAirPos.clone()
     await sampleTerrainMostDetailed(viewer.terrainProvider, [onGroundPos])
 
-    ELEVATION_CACHE.set(hash, onGroundPos.height)
+    if(USE_CACHE){
+        ELEVATION_CACHE.set(hash, onGroundPos.height)
+    }
 
     return onGroundPos
 }
