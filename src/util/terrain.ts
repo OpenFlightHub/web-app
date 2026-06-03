@@ -32,18 +32,48 @@ export type TerrainVisibilityResult = {
     all: TerrainVisibilitySample[]
 }
 
+type LongLatHash = string
+const ELEVATION_CACHE = new Map<LongLatHash, number>()
+
+let cacheHitCount = 0
+let cacheMissCount = 0
+let elevationSourcesCounted = new Map<string, number>()
+
 /**
  * height is relative to geoid, if you need orthometric (normal height) use convertEllipsoidalHeightToOrthometricHeight()
  */
-export async function getElevationAtPosition(viewer: Viewer, longitude: number, latitude: number){
+export async function getElevationAtPosition(viewer: Viewer, longitude: number, latitude: number, source?: string){
+
+    const hash = makeLongLatHash(longitude, latitude)
+    const cachedElevation = ELEVATION_CACHE.get(hash)
+    if(cachedElevation !== undefined){
+        cacheHitCount++
+        return Cartographic.fromDegrees(longitude, latitude, cachedElevation)
+    } else {
+        cacheMissCount++
+    }
+
+    if(cacheMissCount % 100 === 0){
+        console.log(`elevation cache hit rate: ${(cacheHitCount/(cacheHitCount+cacheMissCount)*100).toFixed(2)}% (${cacheHitCount} hits, ${cacheMissCount} misses)`)
+        console.log('elevation sources:', elevationSourcesCounted)
+    }
+
+    const sourceString = source ?? 'unknown'
+    const currentCount = elevationSourcesCounted.get(sourceString) ?? 0
+    elevationSourcesCounted.set(sourceString, currentCount + 1)
 
     const inAirPos = Cartographic.fromDegrees(longitude, latitude, undefined, new Cartographic())
-
 
     const onGroundPos = inAirPos.clone()
     await sampleTerrainMostDetailed(viewer.terrainProvider, [onGroundPos])
 
+    ELEVATION_CACHE.set(hash, onGroundPos.height)
+
     return onGroundPos
+}
+
+function makeLongLatHash(longitude: number, latitude: number): LongLatHash{
+    return `${longitude.toFixed(8)},${latitude.toFixed(8)}`
 }
 
 /**

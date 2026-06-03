@@ -38,7 +38,7 @@ async function onMove(evt: MouseEvent){
 
     const mouseOverLocation = getMapTerrainLocationAt(viewer!, relativeX, relativeY)
 
-    const elevation = (await getElevationAtPosition(viewer!, mouseOverLocation.longitude, mouseOverLocation.latitude)).height
+    const elevation = (await getElevationAtPosition(viewer!, mouseOverLocation.longitude, mouseOverLocation.latitude, 'MapMouseMoveListener.onMove')).height
 
     latestMouseMove = {
         relativeX,

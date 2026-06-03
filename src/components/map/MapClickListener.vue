@@ -32,7 +32,7 @@ async function onClick(evt: MouseEvent){
 
     const clickedLocation = getMapTerrainLocationAt(viewer!, relativeX, relativeY)
 
-    const elevation = (await getElevationAtPosition(viewer!, clickedLocation.longitude, clickedLocation.latitude)).height
+    const elevation = (await getElevationAtPosition(viewer!, clickedLocation.longitude, clickedLocation.latitude, 'MapClickListener.onClick')).height
 
     emit('click', {
         longitude: clickedLocation.longitude,

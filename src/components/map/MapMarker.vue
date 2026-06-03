@@ -327,7 +327,7 @@ function removeMarker(){
 async function getHeightValue(){
     if(typeof props.position[2] === 'number'){
         if(props.heightIsRelative){
-            const elev = await getElevationAtPosition(viewer!, props.position[0], props.position[1])
+            const elev = await getElevationAtPosition(viewer!, props.position[0], props.position[1], 'MapMarker.getHeightValue')
             return elev.height + props.position[2]
         } else {
             return props.position[2]
@@ -372,7 +372,7 @@ async function addHeightIndicator(){
 }
 
 async function makeHeightIndicatorPositions(position: [number, number, number?]){
-    return [Cartesian3.fromDegrees(position[0], position[1], await getHeightValue()), Cartesian3.fromDegrees(position[0], position[1], (await getElevationAtPosition(viewer!, position[0], position[1])).height)]
+    return [Cartesian3.fromDegrees(position[0], position[1], await getHeightValue()), Cartesian3.fromDegrees(position[0], position[1], (await getElevationAtPosition(viewer!, position[0], position[1], 'MapMarker.makeHeightIndicatorPositions')).height)]
 }
 
 function removeHeightIndicator(){
@@ -409,7 +409,7 @@ async function addBearingIndicator(){
  */
 async function makeBearingIndicatorPositions(position: [number, number, number?], bearing: number){
 
-    const terrainElevation = (await getElevationAtPosition(viewer!, position[0], position[1])).height
+    const terrainElevation = (await getElevationAtPosition(viewer!, position[0], position[1], 'MapMarker.makeBearingIndicatorPositions')).height
 
     let elevation = await getHeightValue()
     if(typeof elevation === 'number'){

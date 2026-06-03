@@ -49,6 +49,7 @@ function onEditEvent(evt: Event){
     if(evt instanceof GeoObjectEditEvent && evt.geoObjectId !== props.geoObject.id){
         editIsVisible.value = false//TODO only allow editing in specific cases?
     }
+    infoIsVisible.value = false
 }
 
 function onFocusEvent(evt: Event){
@@ -81,6 +82,12 @@ function showInfo(){
     window.dispatchEvent(new GeoObjectShowInfoEvent(props.geoObject.id))
 }
 
+function editDone(newValue: ApiResponse_WorkspaceGeoObjectsGet[number]){
+    updateObject(props.geoObject, newValue)
+    hideEdit()
+    showInfo()
+}
+
 </script>
 
 <template>
@@ -90,7 +97,7 @@ function showInfo(){
 
         <template v-if="geoObject.sub_type === 0/* TODO use Message_Type_Event_Object_Data_Geo_Object_Type_SubType_TYPES.marking*/">
 
-            <MapDrawPoint v-if="editIsVisible && typeof props.geoObject.workspace_id === 'number'" :workspace-id="props.geoObject.workspace_id" :existing-geo-object="cloneObject(props.geoObject)" @edit-done="newValue => updateObject(props.geoObject, newValue)"  @cancel="hideEdit"></MapDrawPoint>
+            <MapDrawPoint v-if="editIsVisible && typeof props.geoObject.workspace_id === 'number'" :workspace-id="props.geoObject.workspace_id" :existing-geo-object="cloneObject(props.geoObject)" @edit-done="editDone"  @cancel="hideEdit"></MapDrawPoint>
 
             <MapMarker v-else :position="geoObject.config.point" :label="geoObject.name" icon-url="/images/geo_objects/markings/0.png" :icon-width="24" :icon-height="24" :show-height-indicator="true" :color="getColorForHex(geoObject.config.color)" @click="showInfo"></MapMarker>
 
@@ -98,7 +105,7 @@ function showInfo(){
 
         <template v-if="geoObject.sub_type === 1/* TODO use Message_Type_Event_Object_Data_Geo_Object_Type_SubType_TYPES.marking*/">
 
-            <MapDrawLine v-if="editIsVisible && typeof props.geoObject.workspace_id === 'number'" :workspace-id="props.geoObject.workspace_id" :existing-geo-object="cloneObject(props.geoObject)" @edit-done="newValue => updateObject(props.geoObject, newValue)" @cancel="hideEdit"></MapDrawLine>
+            <MapDrawLine v-if="editIsVisible && typeof props.geoObject.workspace_id === 'number'" :workspace-id="props.geoObject.workspace_id" :existing-geo-object="cloneObject(props.geoObject)" @edit-done="editDone" @cancel="hideEdit"></MapDrawLine>
 
             <!-- TODO implement configurable clamp to ground-->
             <MapPolyline v-else :points="geoObject.config.line" :color="getColorForHex(geoObject.config.color)" :label="geoObject.name" @click="showInfo"></MapPolyline>
@@ -109,7 +116,7 @@ function showInfo(){
 
         <template v-if="geoObject.sub_type === 3/* TODO use Message_Type_Event_Object_Data_Geo_Object_Type_SubType_TYPES.marking*/">
 
-            <MapDrawCircle v-if="editIsVisible && typeof props.geoObject.workspace_id === 'number'" :workspace-id="props.geoObject.workspace_id" :existing-geo-object="cloneObject(props.geoObject)" @edit-done="newValue => updateObject(props.geoObject, newValue)" @cancel="hideEdit"></MapDrawCircle>
+            <MapDrawCircle v-if="editIsVisible && typeof props.geoObject.workspace_id === 'number'" :workspace-id="props.geoObject.workspace_id" :existing-geo-object="cloneObject(props.geoObject)" @edit-done="editDone" @cancel="hideEdit"></MapDrawCircle>
 
             <!-- TODO implement configurable clamp to ground-->
             <MapCircle v-else :label="geoObject.name" :position="geoObject.config.center" :radius="geoObject.config.radius" :color="getColorForHex(geoObject.config.color, 0.3)" :filled="true" :outline-color="getColorForHex(geoObject.config.color)" @click="showInfo"></MapCircle>
@@ -140,7 +147,7 @@ function showInfo(){
             <div style="display: flex; justify-content: space-between;">
                 <h3>{{ geoObject.name }}</h3>
 
-                <Button v-if="typeof props.geoObject.workspace_id === 'number'" @click="showInfo"><IconVue name="pencil"></IconVue></Button>
+                <Button v-if="typeof props.geoObject.workspace_id === 'number'" @click="showEdit"><IconVue name="pencil"></IconVue></Button>
             </div>
 
             <GeoObjectTypeBadge :type="geoObject.type" :sub-type="geoObject.sub_type"></GeoObjectTypeBadge>

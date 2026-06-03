@@ -68,11 +68,11 @@ async function getCenterPosition(){
         if(walkedDistance + segmentLength > (lineLength / 2)){
             let currentHeight = currentPoint[2]
             if(currentHeight === 0){
-                currentHeight = (await getElevationAtPosition(viewer!, currentPoint[0], currentPoint[1])).height
+                currentHeight = (await getElevationAtPosition(viewer!, currentPoint[0], currentPoint[1], 'MapPolyline.getCenterPosition')).height
             }
             let nextHeight = nextPoint[2]
             if(nextHeight === 0){
-                nextHeight = (await getElevationAtPosition(viewer!, nextPoint[0], nextPoint[1])).height
+                nextHeight = (await getElevationAtPosition(viewer!, nextPoint[0], nextPoint[1], 'MapPolyline.getCenterPosition')).height
             }
 
             centerHeight = (currentHeight + nextHeight) / 2
@@ -107,11 +107,11 @@ async function addPolyline(){
         if(props.clampToGround){
             cartographicPosition = Cartographic.fromDegrees(lng, lat)
         } else if(typeof elevation !== 'number' || elevation === 0){
-            cartographicPosition = await getElevationAtPosition(viewer!, lng, lat)
+            cartographicPosition = await getElevationAtPosition(viewer!, lng, lat, 'MapPolyline.addPolyline')
             cartographicPosition.height += 10//10 to always show above terrain
         } else {
             if(props.heightIsRelative === true){
-                const terrainHeight = (await getElevationAtPosition(viewer!, lng, lat)).height
+                const terrainHeight = (await getElevationAtPosition(viewer!, lng, lat, 'MapPolyline.addPolyline')).height
                 cartographicPosition = Cartographic.fromDegrees(lng, lat, terrainHeight + elevation)
             } else {
                 cartographicPosition = Cartographic.fromDegrees(lng, lat, elevation)

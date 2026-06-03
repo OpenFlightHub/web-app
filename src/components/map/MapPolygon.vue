@@ -52,11 +52,11 @@ async function addAll(){
         if(props.clampToGround){
             cartographicPosition = Cartographic.fromDegrees(lng, lat)
         } else if(typeof elevation !== 'number' || elevation === 0){
-            cartographicPosition = await getElevationAtPosition(viewer!, lng, lat)
+            cartographicPosition = await getElevationAtPosition(viewer!, lng, lat, 'MapPolygon.addAll')
             cartographicPosition.height += 10//10 to always show above terrain
         } else {
             if(props.heightIsRelative === true){
-                const terrainHeight = (await getElevationAtPosition(viewer!, lng, lat)).height
+                const terrainHeight = (await getElevationAtPosition(viewer!, lng, lat, 'MapPolygon.addAll')).height
                 cartographicPosition = Cartographic.fromDegrees(lng, lat, terrainHeight + elevation)
             } else {
                 cartographicPosition = Cartographic.fromDegrees(lng, lat, elevation)

@@ -52,7 +52,7 @@ async function update(){
 
 async function addCircle(){
 
-    const height = props.clampToGround ? undefined : (typeof props.position[2] === 'number' ? props.position[2] : (await getElevationAtPosition(viewer!, props.position[0], props.position[1])).height)
+    const height = props.clampToGround ? undefined : (typeof props.position[2] === 'number' ? props.position[2] : (await getElevationAtPosition(viewer!, props.position[0], props.position[1], 'MapCircle.addCircle')).height)
 
     let circle = viewer!.entities.getById('map-circle-' + myId)
 
@@ -102,7 +102,7 @@ async function addOutline(){
 
     const turfCircle = turf.circle([props.position[0], props.position[1]], props.radius, {units: 'meters'})
 
-    const circleHeight = props.clampToGround ? 0 : ( typeof props.position[2] === 'number' ? props.position[2] : (await getElevationAtPosition(viewer!, props.position[0], props.position[1])).height )
+    const circleHeight = props.clampToGround ? 0 : ( typeof props.position[2] === 'number' ? props.position[2] : (await getElevationAtPosition(viewer!, props.position[0], props.position[1], 'MapCircle.addOutline')).height )
 
     const positions = turfCircle.geometry.coordinates[0].map(c => {
         const cartographicPosition = Cartographic.fromDegrees(c[0], c[1], circleHeight)

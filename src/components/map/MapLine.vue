@@ -59,16 +59,16 @@ function toHeightIsNotZero(){
 
 async function addLine(){
 
-    const fromPos = fromHeightIsNotZero() ? Cartographic.fromDegrees(props.from.position[0], props.from.position[1], props.from.elevation) : await getElevationAtPosition(viewer!, props.from.position[0], props.from.position[1])
+    const fromPos = fromHeightIsNotZero() ? Cartographic.fromDegrees(props.from.position[0], props.from.position[1], props.from.elevation) : await getElevationAtPosition(viewer!, props.from.position[0], props.from.position[1], 'MapLine.addLine')
 
-    const toPos = toHeightIsNotZero() ? Cartographic.fromDegrees(props.to.position[0], props.to.position[1], props.to.elevation) : await getElevationAtPosition(viewer!, props.to.position[0], props.to.position[1])
+    const toPos = toHeightIsNotZero() ? Cartographic.fromDegrees(props.to.position[0], props.to.position[1], props.to.elevation) : await getElevationAtPosition(viewer!, props.to.position[0], props.to.position[1], 'MapLine.addLine')
 
     if(props.heightIsRelative && typeof props.from.elevation === 'number'){
-        fromPos.height = (await getElevationAtPosition(viewer!, props.from.position[0], props.from.position[1])).height + props.from.elevation
+        fromPos.height = (await getElevationAtPosition(viewer!, props.from.position[0], props.from.position[1], 'MapLine.addLine')).height + props.from.elevation
     }
 
     if(props.heightIsRelative && typeof props.to.elevation === 'number'){
-        toPos.height = (await getElevationAtPosition(viewer!, props.to.position[0], props.to.position[1])).height + props.to.elevation
+        toPos.height = (await getElevationAtPosition(viewer!, props.to.position[0], props.to.position[1], 'MapLine.addLine')).height + props.to.elevation
     }
 
     let line = viewer!.entities.getById('map-line-' + myId)
