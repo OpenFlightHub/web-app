@@ -105,7 +105,8 @@ const label = ref(props.existingGeoObject ? props.existingGeoObject.name : '')
                     config
                 }" @created="(ref) => {
                     emit('edit-done', ref)
-                }" :watch-initial-values="['config']" @change="newData => {
+                }" show-cancel-button @cancel="emit('cancel')"
+                :watch-initial-values="['config']" @change="newData => {
                     label = newData.name || ''
                 }" v-slot="{reset}">
 
@@ -147,7 +148,8 @@ const label = ref(props.existingGeoObject ? props.existingGeoObject.name : '')
                     } else {
                         emit('create-done', ref)
                     }
-                }" :watch-initial-values="['config']" :check-function="()=>hasLocation === true ? true : 'Please select locations for the line by clicking on the map'" @change="newData => {
+                }" show-cancel-button @cancel="emit('cancel')"
+                :watch-initial-values="['config']" :check-function="()=>hasLocation === true ? true : 'Please select locations for the line by clicking on the map'" @change="newData => {
                     label = newData.name
                 }">
 
