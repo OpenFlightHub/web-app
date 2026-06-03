@@ -20,7 +20,7 @@
     "cesium": "^1.134.1",
     "dayjs": "^1.11.13",
     "json-schema-to-typescript": "^15.0.4",
-    "openflighthub-api-client-sdk": "^7.0.0",
+    "openflighthub-api-client-sdk": "^8.0.0",
     "ovenplayer": "^0.10.37",
     "pinia": "^3.0.2",
     "primevue": "^4.4.1",
