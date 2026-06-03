@@ -372,7 +372,7 @@ async function addHeightIndicator(){
 }
 
 async function makeHeightIndicatorPositions(position: [number, number, number?]){
-    return [Cartesian3.fromDegrees(position[0], position[1], await getHeightValue()), Cartesian3.fromDegrees(position[0], position[1], (await getElevationAtPosition(viewer!, position[0], position[1], 'MapMarker.makeHeightIndicatorPositions')).height)]
+    return [Cartesian3.fromDegrees(position[0], position[1], await getHeightValue()), Cartesian3.fromDegrees(position[0], position[1], /*(await getElevationAtPosition(viewer!, position[0], position[1], 'MapMarker.makeHeightIndicatorPositions')).height*/ 0)]//for performance reasons we use 0
 }
 
 function removeHeightIndicator(){
