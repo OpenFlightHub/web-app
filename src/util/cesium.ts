@@ -50,13 +50,24 @@ export function cleanupClickMyEntity(handle: ClickMyEntityHandle){
  * @returns The picked entity or undefined.
  */
 function pickEntity(viewer: Viewer, windowPosition: Cartesian2) : Entity | undefined {
-    const picked = viewer.scene.pick(windowPosition);
-    if (defined(picked)) {
-        const id = defaultValue(picked.id, picked.primitive.id);
-        if (id instanceof Entity) {
-            return id;
+    try {
+        const picked = viewer.scene.pick(windowPosition);
+        if (defined(picked)) {
+            const id = defaultValue(picked.id, picked.primitive.id);
+            if (id instanceof Entity) {
+                return id;
+            }
+        }
+
+    } catch(e) {
+        //catch if terrain for this area not provided (e.g. no global terrain coverage)
+        if((e as Error).message === 'normalized result is not a number' ){
+            return undefined
+        } else {
+            throw e
         }
     }
+
     return undefined;
 }
 
