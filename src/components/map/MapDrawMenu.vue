@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { inject, onBeforeUnmount, onMounted, ref } from 'vue';
 import { Button } from 'primevue';
 import MapDrawPoint from '../map/draw/MapDrawPoint.vue';
 import ImageVue from '../general/ImageVue.vue';
@@ -12,6 +12,8 @@ const props = defineProps<{
     taskId?: number
 }>()
 
+const mapContainer = inject<HTMLElement>('mapContainer')
+
 type ShowingType = 'none' | 'draw-point' | 'draw-line' | 'draw-circle'
 const showing = ref<ShowingType>('none')
 
@@ -22,17 +24,17 @@ function select(showingType: ShowingType){
         showing.value = 'none'
     } else {
         showing.value = showingType
-        window.dispatchEvent(new GeoObjectEditEvent(--editEventId))
+        mapContainer!.dispatchEvent(new GeoObjectEditEvent(--editEventId))
     }
 }
 
 
 onMounted(() => {
-    window.addEventListener(GeoObjectEditEvent.EVENT_NAME, onEditEvent)
+    mapContainer!.addEventListener(GeoObjectEditEvent.EVENT_NAME, onEditEvent)
 })
 
 onBeforeUnmount(() => {
-    window.removeEventListener(GeoObjectEditEvent.EVENT_NAME, onEditEvent)
+    mapContainer!.removeEventListener(GeoObjectEditEvent.EVENT_NAME, onEditEvent)
 })
 
 function onEditEvent(evt: Event){

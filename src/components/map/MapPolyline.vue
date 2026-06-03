@@ -3,7 +3,7 @@ import { getCurrentInstance, inject, onBeforeUnmount, onMounted, watch } from 'v
 import { Cartesian3, Cartographic, Color, HeightReference, LabelStyle, Viewer } from 'cesium';
 import { getElevationAtPosition } from '@/util/terrain';
 import { distance, length, lineString, midpoint } from '@turf/turf';
-import { cleanupClickMyEntity, setupClickMyEntity, ClickMyEntityHandle } from '@/util/cesium';
+import { setupClickMyEntity, ClickMyEntityHandle } from '@/util/cesium';
 
 
 //TODO if line elevation is below cesium terrain, clamp it to ground
@@ -21,7 +21,7 @@ const emit = defineEmits<{
     click: []
 }>()
 
-let markerClickMyEntityHandle: ClickMyEntityHandle
+let polylineClickMyEntityHandle: ClickMyEntityHandle
 
 
 const viewer = inject<Viewer>('cesiumViewer')
@@ -158,7 +158,11 @@ async function addPolyline(){
         }
     })
 
-    markerClickMyEntityHandle = setupClickMyEntity(mapContainer!, viewer!, polyline, ()=>{
+    if(polylineClickMyEntityHandle){
+        polylineClickMyEntityHandle.destroy()
+    }
+
+    polylineClickMyEntityHandle = setupClickMyEntity(mapContainer!, viewer!, polyline, ()=>{
         emit('click')
     })
 }
@@ -166,8 +170,8 @@ async function addPolyline(){
 function removePolyline(){
     viewer!.entities.removeById('map-polyline-' + myId)
 
-    if(markerClickMyEntityHandle){
-        cleanupClickMyEntity(markerClickMyEntityHandle)
+    if(polylineClickMyEntityHandle){
+        polylineClickMyEntityHandle.destroy()
     }
 }
 

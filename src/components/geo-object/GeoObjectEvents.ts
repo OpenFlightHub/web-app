@@ -36,3 +36,14 @@ export class GeoObjectShowInfoEvent extends CustomEvent<void> {
     }
 
 }
+
+
+export class MapNoGeoObjectSelectedEvent extends CustomEvent<void> {
+
+    static EVENT_NAME = 'map-no-geo-object-selected'
+
+    constructor() {
+        super('map-no-geo-object-selected')
+    }
+
+}

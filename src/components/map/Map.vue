@@ -9,7 +9,7 @@
 
 import { ref, onMounted, provide, getCurrentInstance, onBeforeUnmount, onBeforeMount } from 'vue';
 
-import { Cartesian3, Ion, Math as MathCesium, Terrain, Viewer, PerspectiveFrustum, CesiumTerrainProvider, SceneMode } from "cesium";
+import { Cartesian3, Ion, Math as MathCesium, Terrain, Viewer, PerspectiveFrustum, CesiumTerrainProvider, SceneMode, ScreenSpaceEventType } from "cesium";
 import "cesium/Build/Cesium/Widgets/widgets.css";
 import { getSetting } from '@/util/settings';
 import { WebMapServiceImageryProvider } from 'cesium';
@@ -58,6 +58,9 @@ let viewer: Viewer = new Viewer(props.mapContainer, {
     sceneModePicker: false,
     geocoder: props.disableUserControl !== true
 })
+
+//disable double click to center view around entity //TODO this can be a nice feature, but we need to be able to exit that mode again
+viewer.screenSpaceEventHandler.removeInputAction(ScreenSpaceEventType.LEFT_DOUBLE_CLICK)
 
 viewer.scene.globe.depthTestAgainstTerrain = true
 

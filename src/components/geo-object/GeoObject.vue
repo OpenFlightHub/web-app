@@ -8,7 +8,7 @@ import MapPolygon from '../map/MapPolygon.vue';
 import MapCircle from '../map/MapCircle.vue';
 import { computed, inject, onBeforeUnmount, onMounted, ref } from 'vue';
 import MapDrawPoint from '../map/draw/MapDrawPoint.vue';
-import { GeoObjectEditEvent, GeoObjectFocusEvent, GeoObjectShowInfoEvent } from '@/components/geo-object/GeoObjectEvents';
+import { GeoObjectEditEvent, GeoObjectFocusEvent, GeoObjectShowInfoEvent, MapNoGeoObjectSelectedEvent } from '@/components/geo-object/GeoObjectEvents';
 import { cloneObject, updateObject } from '@/util/vue';
 import MapDrawCircle from '../map/draw/MapDrawCircle.vue';
 import MapDrawLine from '../map/draw/MapDrawLine.vue';
@@ -35,21 +35,21 @@ const mapHelpers = inject<mapHelpersType>('mapHelpers')
 const mapContainer = inject<HTMLElement>('mapContainer')
 
 onMounted(() => {
-    window.addEventListener(GeoObjectEditEvent.EVENT_NAME, onEditEvent)
-    window.addEventListener(GeoObjectFocusEvent.EVENT_NAME, onFocusEvent)
-    window.addEventListener(GeoObjectShowInfoEvent.EVENT_NAME, onShowInfoEvent)
-    mapContainer!.addEventListener('click', onMapClick)
+    mapContainer!.addEventListener(GeoObjectEditEvent.EVENT_NAME, onEditEvent)
+    mapContainer!.addEventListener(GeoObjectFocusEvent.EVENT_NAME, onFocusEvent)
+    mapContainer!.addEventListener(GeoObjectShowInfoEvent.EVENT_NAME, onShowInfoEvent)
+    mapContainer!.addEventListener(MapNoGeoObjectSelectedEvent.EVENT_NAME, onMapNoGeoObjectSelectedEvent)
 })
 
 onBeforeUnmount(() => {
-    window.removeEventListener(GeoObjectEditEvent.EVENT_NAME, onEditEvent)
-    window.removeEventListener(GeoObjectFocusEvent.EVENT_NAME, onFocusEvent)
-    window.removeEventListener(GeoObjectShowInfoEvent.EVENT_NAME, onShowInfoEvent)
-    mapContainer!.removeEventListener('click', onMapClick)
+    mapContainer!.removeEventListener(GeoObjectEditEvent.EVENT_NAME, onEditEvent)
+    mapContainer!.removeEventListener(GeoObjectFocusEvent.EVENT_NAME, onFocusEvent)
+    mapContainer!.removeEventListener(GeoObjectShowInfoEvent.EVENT_NAME, onShowInfoEvent)
+    mapContainer!.removeEventListener(MapNoGeoObjectSelectedEvent.EVENT_NAME, onMapNoGeoObjectSelectedEvent)
 })
 
-function onMapClick(){
-    if(infoIsVisible.value){
+function onMapNoGeoObjectSelectedEvent(evt: Event){
+    if(evt instanceof MapNoGeoObjectSelectedEvent){
         infoIsVisible.value = false
     }
 }
@@ -80,7 +80,7 @@ function onShowInfoEvent(evt: Event){
 
 function showEdit(){
     editIsVisible.value = true
-    window.dispatchEvent(new GeoObjectEditEvent(props.geoObject.id))
+    mapContainer!.dispatchEvent(new GeoObjectEditEvent(props.geoObject.id))
 }
 
 function hideEdit(){
@@ -93,7 +93,7 @@ function hideEditAndShowInfo(){
 }
 
 function showInfo(){
-    window.dispatchEvent(new GeoObjectShowInfoEvent(props.geoObject.id))
+    mapContainer!.dispatchEvent(new GeoObjectShowInfoEvent(props.geoObject.id))
 }
 
 function editDone(newValue: ApiResponse_WorkspaceGeoObjectsGet[number]){

@@ -1,42 +1,113 @@
+import { MapNoGeoObjectSelectedEvent } from "@/components/geo-object/GeoObjectEvents";
 import { radiansToDegrees } from "@turf/turf";
 import { Cartesian2, Cartesian3, Cartographic, defined, Entity, HeadingPitchRoll, Viewer, Math as MathCesium, Transforms, Matrix3, Ray, Color } from "cesium";
-import { toRaw } from "vue";
 
-export type ClickMyEntityHandle = {
+type Callback = () => void
+
+class ElementClickHandler {
     readonly mapContainer: HTMLElement
-    readonly f: (evt: MouseEvent)=>void
+    readonly viewer: Viewer
+    readonly entities = new Map<Entity, Callback[]>()
+
+    readonly thisBoundOnClick = this.onClick.bind(this)
+
+    constructor(mapContainer: HTMLElement, viewer: Viewer){
+        this.mapContainer = mapContainer
+        this.viewer = viewer
+        this.mapContainer.addEventListener('click', this.thisBoundOnClick)
+    }
+
+    private onClick(evt: MouseEvent){
+        const clickX = evt.pageX
+        const clickY = evt.pageY
+        const bounds = this.mapContainer.getBoundingClientRect()
+
+        const containerX = bounds.left + window.scrollX
+        const containerY = bounds.top + window.scrollY
+
+        const relativeX = clickX - containerX
+        const relativeY = clickY - containerY
+
+        const clickedEntity = pickEntity(this.viewer, new Cartesian2(relativeX, relativeY))
+
+        if(clickedEntity){
+            const callback = this.entities.get(clickedEntity)
+            if(callback){
+                for(const cb of callback){
+                    cb()
+                }
+            }
+        } else {
+            this.mapContainer.dispatchEvent(new MapNoGeoObjectSelectedEvent())
+        }
+    }
+
+    makeHandleForEntity(entity: Entity, callback: ()=>void){
+        let existingCallbacks = this.entities.get(entity)
+        if(!existingCallbacks){
+            existingCallbacks = [callback]
+            this.entities.set(entity, existingCallbacks)
+        }
+
+        if(existingCallbacks.indexOf(callback) < 0){ //if exists, skip
+            existingCallbacks.push(callback)
+        }
+
+        return new ClickMyEntityHandle(this, entity, callback)
+    }
+
+    deleteHandle(handle: ClickMyEntityHandle){
+        const callbacks = this.entities.get(handle._entity)
+        if(callbacks){
+            const index = callbacks.indexOf(handle._callback)
+            if(index !== -1){
+                callbacks.splice(index, 1)
+            }
+            if(callbacks.length === 0){
+                this.entities.delete(handle._entity)
+            }
+        }
+    }
+
+    destroy(){
+        for(const entity of this.entities.keys()){
+            this.entities.delete(entity)
+        }
+        this.mapContainer.removeEventListener('click', this.thisBoundOnClick)
+    }
 }
+
+
+
+export class ClickMyEntityHandle {
+    private readonly elementClickHandler: ElementClickHandler
+    readonly _entity: Entity
+    readonly _callback: Callback
+
+    constructor(elementClickHandler: ElementClickHandler, entity: Entity, callback: Callback){
+        this.elementClickHandler = elementClickHandler
+        this._entity = entity
+        this._callback = callback
+    }
+
+    destroy(){
+        this.elementClickHandler.deleteHandle(this)
+    }
+}
+
+const mapContainerToHandlerMap = new Map<HTMLElement, ElementClickHandler>()
 
 export function setupClickMyEntity(mapContainer: HTMLElement, viewer: Viewer, entity: Entity, callback: ()=>void){
 
-    const handle: ClickMyEntityHandle = {
-        mapContainer,
-            f: evt => {
-                const clickX = evt.pageX
-                const clickY = evt.pageY
-                const bounds = mapContainer.getBoundingClientRect()
+    let callbackMap = mapContainerToHandlerMap.get(mapContainer)
+    if(!callbackMap){
 
-                const containerX = bounds.left + window.scrollX
-                const containerY = bounds.top + window.scrollY
+        callbackMap = new ElementClickHandler(mapContainer, viewer)
 
-                const relativeX = clickX - containerX
-                const relativeY = clickY - containerY
-
-                const clickedEntity = pickEntity(viewer, new Cartesian2(relativeX, relativeY))
-
-                if(clickedEntity === entity){
-                    callback()
-                }
-          }
+        mapContainerToHandlerMap.set(mapContainer, callbackMap)
     }
 
-    mapContainer.addEventListener('click', handle.f)
-
-    return handle
-}
-
-export function cleanupClickMyEntity(handle: ClickMyEntityHandle){
-    handle.mapContainer.removeEventListener('click', handle.f)
+    return callbackMap.makeHandleForEntity(entity, callback)
 }
 
 
@@ -131,6 +202,10 @@ export function getPointFromOriginWithBearingAndDistance(originLonLatElevation: 
 export function getColorForHex(hexString: string, alpha?: number){
 
     const match = hexString.match(/#([\dabcdefABCDEF]{2,2})([\dabcdefABCDEF]{2,2})([\dabcdefABCDEF]{2,2})/)
+
+    if(!match){
+        throw new Error('Invalid hex color string: ' + hexString)
+    }
 
     return new Color(parseInt(match[1], 16)/255, parseInt(match[2], 16)/255, parseInt(match[3], 16)/255, alpha)
 }

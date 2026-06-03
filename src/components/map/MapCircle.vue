@@ -3,7 +3,7 @@ import { getCurrentInstance, inject, onBeforeUnmount, onMounted, watch } from 'v
 import { Cartesian3, Color, HeightReference, Viewer, Cartographic, LabelStyle, PolylineDashMaterialProperty } from 'cesium';
 import * as turf from '@turf/turf'
 import { getElevationAtPosition } from '@/util/terrain';
-import { cleanupClickMyEntity, setupClickMyEntity, ClickMyEntityHandle } from '@/util/cesium';
+import { setupClickMyEntity, ClickMyEntityHandle } from '@/util/cesium';
 
 //TODO if line elevation is below cesium terrain, clamp it to ground
 const props = defineProps<{
@@ -22,7 +22,7 @@ const emit = defineEmits<{
     click: []
 }>()
 
-let markerClickMyEntityHandle: ClickMyEntityHandle
+let circleClickMyEntityHandle: ClickMyEntityHandle
 
 const viewer = inject<Viewer>('cesiumViewer')
 const mapContainer = inject<HTMLElement>('mapContainer')
@@ -86,8 +86,11 @@ async function addCircle(){
         }
     })
 
+    if(circleClickMyEntityHandle){
+        circleClickMyEntityHandle.destroy()
+    }
 
-    markerClickMyEntityHandle = setupClickMyEntity(mapContainer!, viewer!, circle, ()=>{
+    circleClickMyEntityHandle = setupClickMyEntity(mapContainer!, viewer!, circle, ()=>{
         emit('click')
     })
 }
@@ -132,8 +135,8 @@ async function addOutline(){
 function removeCircle(){
     viewer!.entities.removeById('map-circle-' + myId)
 
-    if(markerClickMyEntityHandle){
-        cleanupClickMyEntity(markerClickMyEntityHandle)
+    if(circleClickMyEntityHandle){
+        circleClickMyEntityHandle.destroy()
     }
 }
 

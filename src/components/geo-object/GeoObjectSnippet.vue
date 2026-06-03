@@ -3,13 +3,16 @@ import { ApiResponse_WorkspaceGeoObjectsGet } from 'openflighthub-api-client-sdk
 import Snippet from '../layout/Snippet.vue';
 import GeoObjectTypeBadge from './GeoObjectTypeBadge.vue';
 import { GeoObjectFocusEvent } from './GeoObjectEvents.js';
+import { inject } from 'vue';
 
 const props = defineProps<{
     geoObject: ApiResponse_WorkspaceGeoObjectsGet[number]
 }>()
 
+const mapContainer = inject<HTMLElement>('mapContainer')
+
 function emitFocus(){
-    window.dispatchEvent(new GeoObjectFocusEvent(props.geoObject.id))
+    mapContainer!.dispatchEvent(new GeoObjectFocusEvent(props.geoObject.id))
 }
 
 </script>

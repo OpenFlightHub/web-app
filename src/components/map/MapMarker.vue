@@ -3,7 +3,7 @@ import { getCurrentInstance, inject, onBeforeUnmount, onMounted, onUnmounted, re
 import { Cartesian2, Cartesian3, Color, DistanceDisplayCondition, Entity, HeightReference, LabelStyle, PolylineArrowMaterialProperty, PolylineDashMaterialProperty, VerticalOrigin, Viewer } from 'cesium';
 import { getElevationAtPosition } from '@/util/terrain';
 import { convertEllipsoidalHeightToOrthometricHeight } from '@/util/geoid';
-import { cleanupClickMyEntity, ClickMyEntityHandle, getPointFromOriginWithBearingAndDistance, setupClickMyEntity, toCssRGBA } from '@/util/cesium';
+import { ClickMyEntityHandle, getPointFromOriginWithBearingAndDistance, setupClickMyEntity, toCssRGBA } from '@/util/cesium';
 import * as turf from '@turf/turf';
 import { colorizeCanvas } from '@/util/canvas';
 import { watchForRealChange } from '@/util/vue';
@@ -309,6 +309,10 @@ async function addMarker(){
         }
     })
 
+    if(markerClickMyEntityHandle){
+        markerClickMyEntityHandle.destroy()
+    }
+
     markerClickMyEntityHandle = setupClickMyEntity(mapContainer!, viewer!, marker, ()=>{
         emit('click')
     })
@@ -318,7 +322,7 @@ async function addMarker(){
 function removeMarker(){
 
     if(markerClickMyEntityHandle){
-        cleanupClickMyEntity(markerClickMyEntityHandle)
+        markerClickMyEntityHandle.destroy()
     }
 
     viewer!.entities.removeById('map-marker-' + myId)
