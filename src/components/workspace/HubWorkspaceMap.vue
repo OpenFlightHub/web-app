@@ -25,6 +25,7 @@ const mapContainer = ref<HTMLElement>()
 const sidebarIsOpen = ref(false)
 const showMedia = ref(false)
 const showCollisionObjects = ref(false)
+const showDipul = ref(false)
 
 watch(()=> props.workspaceId, ()=>{
     console.log('workspaceId changed, forcing update of map')
@@ -46,7 +47,7 @@ function forceReRenderMap(){
 
     <Fullscreenable flex="row">
         <div id="map-container" ref="mapContainer">
-            <Map id="map" v-if="mapContainer" :map-container="mapContainer" :start-point="{longitude: props.longitude, latitude: props.latitude}" :start-height="10000" :start-camera-pitch="-90" :force-top-down="props.forceTopDown">
+            <Map id="map" v-if="mapContainer" :map-container="mapContainer" :start-point="{longitude: props.longitude, latitude: props.latitude}" :start-height="10000" :start-camera-pitch="-90" :force-top-down="props.forceTopDown" :show-dipul="showDipul">
 
                 <MapCollisionObjects v-if="showCollisionObjects"></MapCollisionObjects>
 
@@ -78,6 +79,10 @@ function forceReRenderMap(){
                 <label for="show-collision-objects">
                     <Checkbox v-model="showCollisionObjects" binary input-id="show-collision-objects"></Checkbox>
                     Show Collision Objects
+                </label>
+                <label for="show-dipul-layer">
+                    <Checkbox v-model="showDipul" binary input-id="show-dipul-layer"></Checkbox>
+                    Show DIPUL Layer
                 </label>
             </div>
         </div>

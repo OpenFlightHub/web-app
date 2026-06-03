@@ -7,7 +7,7 @@
             <MapMarker>
  */
 
-import { ref, onMounted, provide, getCurrentInstance, onBeforeUnmount, onBeforeMount } from 'vue';
+import { ref, onMounted, provide, getCurrentInstance, onBeforeUnmount, onBeforeMount, watch } from 'vue';
 
 import { Cartesian3, Ion, Math as MathCesium, Terrain, Viewer, PerspectiveFrustum, CesiumTerrainProvider, SceneMode, ScreenSpaceEventType } from "cesium";
 import "cesium/Build/Cesium/Widgets/widgets.css";
@@ -26,6 +26,7 @@ const props = defineProps<{
     disableUserControl?: boolean,
     cameraFOV?: number
     forceTopDown?: boolean
+    showDipul?: boolean //TODO refactor map to allo layer configuration from outside
 }>()
 //TODO watch props and respond to changes
 
@@ -94,7 +95,7 @@ layers.addImageryProvider(
 )
 
 // DIPUL https://www.dipul.de/homepage/de/hilfe/anleitung-fuer-den-web-map-service-wms/#/wms-nutzungsbedingungen
-/*layers.addImageryProvider(
+const dipulLayer = layers.addImageryProvider(
     new WebMapServiceImageryProvider({
         url: 'https://uas-betrieb.de/geoservices/dipul/wms?',
         layers: 'dipul:wohngrundstuecke,dipul:flugplaetze',
@@ -105,8 +106,12 @@ layers.addImageryProvider(
         },
         enablePickFeatures: true//TODO show information about the clicked feature, see https://cesium.com/docs/cesiumjs-ref-doc/WebMapServiceImageryProvider.html#pickFeatures
     })
-)*/
-//TODO enabling the DIPUL layer causes huge freezes when paaning the map
+)
+dipulLayer.show = props.showDipul === true
+
+watch(()=>props.showDipul, (newValue)=>{
+    dipulLayer.show = newValue
+})
 
 
 //TODO currently switching to 2D crashes cesium
