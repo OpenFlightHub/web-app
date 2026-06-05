@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import api from '@/api';
-import LoadApiArray from '@/components/functional/LoadApiArray.vue';
-import { Cartesian2, Cartographic, Viewer } from 'cesium';
-import { computed, inject, onMounted, reactive, ref } from 'vue';
+import { Viewer } from 'cesium';
+import { inject, reactive, ref } from 'vue';
 import CollisionObject from './CollisionObject.vue';
 import { bearing, distance, radiansToDegrees } from '@turf/turf';
 import { ApiResponse_InfoCollisionObjectsGet } from 'openflighthub-api-client-sdk';
@@ -43,41 +42,34 @@ function calculcateQueryParams(){
     }
 }
 
-let intervalId = setInterval(()=>{
-    if(!viewer){
+
+loadCollisionObjects(true)
+// TODO moveEnd is not sufficient, we must also listen to changes of rotation(and maybe zoom?)
+viewer!.scene.camera.moveEnd.addEventListener(()=>{
+
+    const newQueryParams = calculcateQueryParams()
+
+    const distanceToCurrentPosition = distance(
+        [newQueryParams.longitude, currentQueryParams.latitude],
+        [currentQueryParams.longitude, newQueryParams.latitude],
+        {units: 'meters'}
+    )
+
+    if(distanceToCurrentPosition > COLLISION_OBJECTS_RADIUS / 4){
+        // trigger reload
+        updateObject(currentQueryParams, newQueryParams)
+        loadCollisionObjects()
         return
+    } else {
+
+        const newCameraHeading = radiansToDegrees(viewer!.camera.heading)
+        if(newCameraHeading !== currentCameraHeading.value){
+            currentCameraHeading.value = newCameraHeading
+            updateShownObjects()
+        }
     }
 
-    clearInterval(intervalId)
-
-    loadCollisionObjects(true)
-
-    viewer.scene.camera.moveEnd.addEventListener(()=>{
-
-        const newQueryParams = calculcateQueryParams()
-
-        const distanceToCurrentPosition = distance(
-            [newQueryParams.longitude, currentQueryParams.latitude],
-            [currentQueryParams.longitude, newQueryParams.latitude],
-            {units: 'meters'}
-        )
-
-        if(distanceToCurrentPosition > COLLISION_OBJECTS_RADIUS / 2){
-            // trigger reload
-            updateObject(currentQueryParams, newQueryParams)
-            loadCollisionObjects()
-            return
-        } else {
-
-            const newCameraHeading = radiansToDegrees(viewer.camera.heading)
-            if(newCameraHeading !== currentCameraHeading.value){
-                currentCameraHeading.value = newCameraHeading
-                updateShownObjects()
-            }
-        }
-
-    })
-}, 50)
+})
 
 async function loadCollisionObjects(forceReload = false){
 
@@ -94,7 +86,17 @@ async function loadCollisionObjects(forceReload = false){
 
     }
 
-    updateArray(objects.value, await api.rest.info.collisionObjects.get({queryParams: currentQueryParams}))
+    const collisionResponse = await api.rest.info.collisionObjects.get({queryParams: currentQueryParams})
+
+    if(!collisionResponse){//code 204: no content yet (is loading)
+
+        setTimeout(()=>{//TODO not the smoothest code...
+            loadCollisionObjects(true)
+        }, 5000)
+        return
+    }
+
+    updateArray(objects.value, collisionResponse)
 
     updateShownObjects()
 }
