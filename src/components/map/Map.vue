@@ -43,6 +43,8 @@ Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI5Y2NlM
 
 let viewerLoadCheckInterval: ReturnType<typeof setInterval> | undefined = undefined
 
+// Cesium probably uses EPSG 4979 // WGS 84 but with ellipsoidal height (2d WGS48 is 4326)
+
 let viewer: Viewer = new Viewer(props.mapContainer, {
     //terrain: new Terrain(CesiumTerrainProvider.fromIonAssetId(4613429)),
     terrain: getSetting('use-dev-terrain') ? new Terrain(CesiumTerrainProvider.fromUrl('https://dev.openflighthub.org/ctb/20cm_siplinger-output')) : Terrain.fromWorldTerrain(),
@@ -59,6 +61,7 @@ let viewer: Viewer = new Viewer(props.mapContainer, {
     sceneModePicker: false,
     geocoder: props.disableUserControl !== true
 })
+
 
 //disable double click to center view around entity //TODO this can be a nice feature, but we need to be able to exit that mode again
 viewer.screenSpaceEventHandler.removeInputAction(ScreenSpaceEventType.LEFT_DOUBLE_CLICK)
