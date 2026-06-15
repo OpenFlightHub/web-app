@@ -54,6 +54,11 @@ window.printTerrainElevationStats = printTerrainElevationStats
  */
 export async function getElevationAtPosition(viewer: Viewer, longitude: number, latitude: number, source?: string){
 
+    if(!viewer.terrainProvider){
+        console.warn("viewer has no terrain provider, returning 0 elevation")
+        return Cartographic.fromDegrees(longitude, latitude, 0)
+    }
+
     let hash = ''
 
     if(USE_CACHE){
