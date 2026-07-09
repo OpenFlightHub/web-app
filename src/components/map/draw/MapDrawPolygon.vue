@@ -100,24 +100,13 @@ function propagateLocationData(){
 }
 
 function polygonHasKinks(polygon: [number, number, number?][]): boolean{
-    const coordinates = [...polygon.map(p => [p[0], p[1]]), [polygon[0][0], polygon[0][1]]]
-
-    return kinks(lineString(coordinates)).features.length > 0
-}
-
-function checkPolygonHasKinks(polygon: [number, number, number?][], dontShowErrorToast?: boolean){
     if(polygon.length < 3){
         return false
     }
 
-    if(polygonHasKinks(locationData)){
-        if(dontShowErrorToast !== true){
-            toast.add({severity: 'error', summary: 'Error', detail: 'Invalid polygon: polygon intersects itself. Please select a different location.'})
-        }
-        return true
-    } else {
-        return false
-    }
+    const coordinates = [...polygon.map(p => [p[0], p[1]]), [polygon[0][0], polygon[0][1]]]
+
+    return kinks(lineString(coordinates)).features.length > 0
 }
 
 
@@ -134,6 +123,18 @@ function updatePoint(index: number, newPoint: [number, number, number?]){
     const newPointWithElevationZero = [newPoint[0], newPoint[1], 0] as [number, number, number]
     locationData[index] = newPointWithElevationZero
     propagateLocationData()
+}
+
+function checkFunction(): true | string {
+    if(locationData.length < 3){
+        return 'Please select at least 3 locations for the polygon by clicking on the map'
+    }
+
+    if(polygonHasKinks(locationData)){
+        return 'Polygon intersections are not allowed'
+    }
+
+    return true
 }
 
 </script>
@@ -182,7 +183,7 @@ function updatePoint(index: number, newPoint: [number, number, number?]){
                 }" @created="(ref) => {
                     emit('edit-done', ref)
                 }" show-cancel-button @cancel="emit('cancel')"
-                :watch-initial-values="['config']" @change="newData => {
+                :watch-initial-values="['config']" :check-function="checkFunction" @change="newData => {
                     label = newData.name || ''
                 }" v-slot="{reset}">
 
@@ -225,18 +226,7 @@ function updatePoint(index: number, newPoint: [number, number, number?]){
                         emit('create-done', ref)
                     }
                 }" show-cancel-button @cancel="emit('cancel')"
-                :watch-initial-values="['config']" :check-function="()=>{
-                    if(locationData.length < 3){
-                        return 'Please select at least 3 locations for the polygon by clicking on the map'
-                    }
-
-                    if(checkPolygonHasKinks(locationData)){
-                        return 'Polygon intersections are not allowed'
-                    }
-
-                    return true
-
-                }" @change="newData => {
+                :watch-initial-values="['config']" :check-function="checkFunction" @change="newData => {
                     label = newData.name
                 }">
 
