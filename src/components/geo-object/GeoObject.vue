@@ -22,6 +22,7 @@ import api from '@/api/index.js';
 import LoadApi from '../functional/LoadApi.vue';
 import { Button } from 'primevue';
 import NumberDisplayOrSlot from '../display/numbers/NumberDisplayOrSlot.vue';
+import MapDrawPolygon from '../map/draw/MapDrawPolygon.vue';
 
 const props = defineProps<{
     geoObject: ApiResponse_WorkspaceGeoObjectsGet[number]
@@ -113,7 +114,7 @@ function editDone(newValue: ApiResponse_WorkspaceGeoObjectsGet[number]){
 
             <MapDrawPoint v-if="editIsVisible && typeof props.geoObject.workspace_id === 'number'" :workspace-id="props.geoObject.workspace_id" :existing-geo-object="cloneObject(props.geoObject)" @edit-done="editDone"  @cancel="hideEditAndShowInfo"></MapDrawPoint>
 
-            <MapMarker v-else :position="geoObject.config.point" :label="geoObject.name" icon-url="/images/geo_objects/markings/0.png" :icon-width="24" :icon-height="24" :show-height-indicator="true" :color="getColorForHex(geoObject.config.color)" @click="showInfo"></MapMarker>
+            <MapMarker v-else :position="geoObject.config.point" :label="geoObject.name" icon-url="/images/geo_objects/markings/0.png" :icon-width="24" :icon-height="24" :show-height-indicator="true" :color="getColorForHex(geoObject.config.color)" @click-marker="showInfo"></MapMarker>
 
         </template>
 
@@ -125,8 +126,16 @@ function editDone(newValue: ApiResponse_WorkspaceGeoObjectsGet[number]){
             <MapPolyline v-else :points="geoObject.config.line" :color="getColorForHex(geoObject.config.color)" :label="geoObject.name" @click="showInfo"></MapPolyline>
         </template>
 
-        <!-- TODO implement configurable clamp to ground-->
-        <MapPolygon v-if="geoObject.sub_type === 2/* TODO use Message_Type_Event_Object_Data_Geo_Object_Type_SubType_TYPES.marking*/" :points="geoObject.config.polygon/*TODO support multi-array polygon*/" :color="getColorForHex(geoObject.config.color, 0.3)" :filled="true" :outline-color="getColorForHex(geoObject.config.color)"></MapPolygon>
+
+        <template v-if="geoObject.sub_type === 2/* TODO use Message_Type_Event_Object_Data_Geo_Object_Type_SubType_TYPES.marking*/">
+
+
+            <MapDrawPolygon v-if="editIsVisible && typeof props.geoObject.workspace_id === 'number'" :workspace-id="props.geoObject.workspace_id" :existing-geo-object="cloneObject(props.geoObject)" @edit-done="editDone" @cancel="hideEditAndShowInfo"></MapDrawPolygon>
+
+            <MapPolygon v-else :points="geoObject.config.polygon/*TODO support multi-array polygon*/" :color="getColorForHex(geoObject.config.color, 0.3)" :filled="true" :outline-color="getColorForHex(geoObject.config.color)" clamp-to-ground @click="showInfo"></MapPolygon>
+
+
+        </template>
 
         <template v-if="geoObject.sub_type === 3/* TODO use Message_Type_Event_Object_Data_Geo_Object_Type_SubType_TYPES.marking*/">
 

@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { getCurrentInstance, inject, onBeforeUnmount, onMounted, onUnmounted, ref, watch } from 'vue';
-import { Cartesian2, Cartesian3, Color, DistanceDisplayCondition, Entity, HeightReference, LabelStyle, PolylineArrowMaterialProperty, PolylineDashMaterialProperty, VerticalOrigin, Viewer } from 'cesium';
+import { Cartesian2, Cartesian3, Cartographic, Color, DistanceDisplayCondition, Entity, HeightReference, LabelStyle, Math as CesiumMath, PolylineArrowMaterialProperty, PolylineDashMaterialProperty, ScreenSpaceEventHandler, ScreenSpaceEventType, VerticalOrigin, Viewer } from 'cesium';
 import { getElevationAtPosition } from '@/util/terrain';
 import { convertEllipsoidalHeightToOrthometricHeight } from '@/util/geoid';
 import { ClickMyEntityHandle, getPointFromOriginWithBearingAndDistance, setupClickMyEntity, toCssRGBA } from '@/util/cesium';
 import * as turf from '@turf/turf';
 import { colorizeCanvas } from '@/util/canvas';
 import { watchForRealChange } from '@/util/vue';
+import { objectsAreEqual } from '@/util/object';
 
 //TODO if marker elevation is below cesium terrain, clamp it to ground
 const props = defineProps<{
@@ -25,6 +26,7 @@ const props = defineProps<{
     backgroundCircle?: Color
     blink?: number // switch between color and backgroundCircle (if both are set) or color and transparent. Time in ms
     maxVisibleDistance?: number
+    draggable?: boolean
 }>()
 
 const viewer = inject<Viewer>('cesiumViewer')
@@ -49,6 +51,9 @@ watchForRealChange(()=>props.autoBearing, update)
 watchForRealChange(()=>props.backgroundCircle, updateCanvasAndIcon, {deep: true})
 watchForRealChange(()=>props.blink, update)
 watchForRealChange(()=>props.maxVisibleDistance, update)
+watchForRealChange(()=>props.draggable, ()=>{
+    setupOrRemoveDragging()
+})
 
 
 const BACKGROUND_CIRCLE_OVERLAP = 0.3
@@ -57,10 +62,25 @@ let lastPosition: [number, number, number?]
 
 
 const emit = defineEmits<{
-    click: []
+    'click-marker': []
+    'drag-start': [[number, number, number?]]
+    'dragging': [[number, number, number?]]
+    'drag-end': [[number, number, number?]]
 }>()
 
 let markerClickMyEntityHandle: ClickMyEntityHandle
+let markerDragHandler: ScreenSpaceEventHandler | undefined
+let isDraggingMarker = false
+let dragBeginPosition: [number, number, number?] | undefined
+let lastDraggedPosition: [number, number, number?] | undefined
+
+let cameraControlsBeforeDrag = {
+    enableRotate: true,
+    enableTilt: true,
+    enableLook: true,
+    enableTranslate: true,
+    enableZoom: true,
+}
 
 const myId = '' + getCurrentInstance()?.uid
 
@@ -71,10 +91,13 @@ let canvas = document.createElement('canvas')
 onMounted(async()=>{
     await update()
 
+    setupOrRemoveDragging()
+
     await blink()
 })
 
 onBeforeUnmount(()=>{
+    removeDragging()
     removeMarker()
     removeHeightIndicator()
     removeBearingIndicator()
@@ -105,6 +128,12 @@ async function blink(){
 onUnmounted(()=>{
     clearTimeout(blinkTimeout)
 })
+
+
+let preventNextClickTimeMs: number = 0
+function preventNextClick(){
+    preventNextClickTimeMs = Date.now()
+}
 
 async function updatePosition(newValue: typeof props.position, oldValue: typeof props.position){//TODO add this optimization for all the other map elements too (and for all the properties if possible)
 
@@ -143,6 +172,174 @@ async function updatePosition(newValue: typeof props.position, oldValue: typeof 
         }
     }
 
+}
+
+function pickLongitudeLatitudeFromScreenPosition(screenPosition: Cartesian2): [number, number] | undefined {
+    if(!viewer){
+        return
+    }
+
+    const pickedCartesian = viewer.scene.pickPositionSupported
+        ? viewer.scene.pickPosition(screenPosition)
+        : viewer.camera.pickEllipsoid(screenPosition, viewer.scene.globe.ellipsoid)
+
+    const fallbackCartesian = viewer.camera.pickEllipsoid(screenPosition, viewer.scene.globe.ellipsoid)
+    const cartesian = pickedCartesian || fallbackCartesian
+    if(!cartesian){
+        return
+    }
+
+    const cartographic = Cartographic.fromCartesian(cartesian)
+
+    return [CesiumMath.toDegrees(cartographic.longitude), CesiumMath.toDegrees(cartographic.latitude)]
+}
+
+function setCameraControlsEnabled(enabled: boolean){
+    if(!viewer){
+        return
+    }
+
+    const controller = viewer.scene.screenSpaceCameraController
+
+    if(enabled){
+        controller.enableRotate = cameraControlsBeforeDrag.enableRotate
+        controller.enableTilt = cameraControlsBeforeDrag.enableTilt
+        controller.enableLook = cameraControlsBeforeDrag.enableLook
+        controller.enableTranslate = cameraControlsBeforeDrag.enableTranslate
+        controller.enableZoom = cameraControlsBeforeDrag.enableZoom
+        return
+    }
+
+    cameraControlsBeforeDrag = {
+        enableRotate: controller.enableRotate,
+        enableTilt: controller.enableTilt,
+        enableLook: controller.enableLook,
+        enableTranslate: controller.enableTranslate,
+        enableZoom: controller.enableZoom,
+    }
+
+    controller.enableRotate = false
+    controller.enableTilt = false
+    controller.enableLook = false
+    controller.enableTranslate = false
+    controller.enableZoom = false
+}
+
+async function applyPositionToExistingEntities(position: [number, number, number?]){
+    let marker = viewer!.entities.getById('map-marker-' + myId)
+    if(marker){
+        //@ts-ignore
+        marker.position = Cartesian3.fromDegrees(position[0], position[1], position[2])
+    }
+
+    let heightIndicator = viewer!.entities.getById('map-marker-height-indicator-' + myId)
+    if(heightIndicator){
+        const pos = await makeHeightIndicatorPositions(position)
+        //@ts-ignore
+        heightIndicator.polyline.positions = pos
+    }
+
+    let bearingIndicator = viewer!.entities.getById('map-marker-bearing-indicator-' + myId)
+    if(bearingIndicator){
+        const pos = await makeBearingIndicatorPositions(position, typeof props.bearing === 'number' ? props.bearing : autoBearing)
+        //@ts-ignore
+        bearingIndicator.polyline.positions = pos
+    }
+}
+
+function setupOrRemoveDragging(){
+    if(!viewer || !mapContainer){
+        return
+    }
+
+    if(props.draggable !== true){
+        removeDragging()
+        return
+    }
+
+    if(markerDragHandler){
+        return
+    }
+
+    markerDragHandler = new ScreenSpaceEventHandler(viewer.scene.canvas)
+
+    markerDragHandler.setInputAction((movement: { position: Cartesian2 })=>{
+        if(props.draggable !== true){
+            return
+        }
+
+        const picked = viewer.scene.pick(movement.position)
+        const pickedEntity = picked && (picked as any).id as Entity | undefined
+        if(!pickedEntity || pickedEntity.id !== 'map-marker-' + myId){
+            return
+        }
+
+         const lonLat = pickLongitudeLatitudeFromScreenPosition(movement.position)
+        if(!lonLat){
+            return
+        }
+
+        dragBeginPosition = [lonLat[0], lonLat[1], props.position[2]]
+
+        setCameraControlsEnabled(false)
+    }, ScreenSpaceEventType.LEFT_DOWN)
+
+    markerDragHandler.setInputAction(async(movement: { endPosition: Cartesian2 })=>{
+        if(props.draggable !== true){
+            return
+        }
+
+        const lonLat = pickLongitudeLatitudeFromScreenPosition(movement.endPosition)
+        if(!lonLat){
+            return
+        }
+
+        const nextPosition: [number, number, number?] = [lonLat[0], lonLat[1], props.position[2]]
+
+        if(!isDraggingMarker && dragBeginPosition && !objectsAreEqual(dragBeginPosition, nextPosition)){
+            isDraggingMarker = true
+            emit('drag-start', dragBeginPosition)
+        }
+
+        if(isDraggingMarker){
+            lastDraggedPosition = nextPosition
+
+            await applyPositionToExistingEntities(nextPosition)
+
+            emit('dragging', nextPosition)
+        }
+    }, ScreenSpaceEventType.MOUSE_MOVE)
+
+    markerDragHandler.setInputAction(()=>{
+
+        dragBeginPosition = undefined
+        lastDraggedPosition = undefined
+        setCameraControlsEnabled(true)
+
+        if(!isDraggingMarker){
+            return
+        }
+
+        preventNextClick()
+
+        isDraggingMarker = false
+        emit('drag-end', lastDraggedPosition || [props.position[0], props.position[1], props.position[2]])
+    }, ScreenSpaceEventType.LEFT_UP)
+}
+
+function removeDragging(){
+    if(markerDragHandler){
+        markerDragHandler.destroy()
+        markerDragHandler = undefined
+    }
+
+    if(isDraggingMarker){
+        isDraggingMarker = false
+    }
+
+    lastDraggedPosition = undefined
+
+    setCameraControlsEnabled(true)
 }
 
 
@@ -314,7 +511,12 @@ async function addMarker(){
     }
 
     markerClickMyEntityHandle = setupClickMyEntity(mapContainer!, viewer!, marker, ()=>{
-        emit('click')
+
+        if(Date.now() < (preventNextClickTimeMs + 200)){
+            return
+        }
+
+        emit('click-marker')
     })
 
 }
@@ -329,12 +531,16 @@ function removeMarker(){
 }
 
 async function getHeightValue(){
-    if(typeof props.position[2] === 'number'){
+    return getHeightValueAtPosition(props.position)
+}
+
+async function getHeightValueAtPosition(position: [number, number, number?]){
+    if(typeof position[2] === 'number'){
         if(props.heightIsRelative){
-            const elev = await getElevationAtPosition(viewer!, props.position[0], props.position[1], 'MapMarker.getHeightValue')
-            return elev.height + props.position[2]
+            const elev = await getElevationAtPosition(viewer!, position[0], position[1], 'MapMarker.getHeightValue')
+            return elev.height + position[2]
         } else {
-            return props.position[2]
+            return position[2]
         }
     }
 }
@@ -376,7 +582,7 @@ async function addHeightIndicator(){
 }
 
 async function makeHeightIndicatorPositions(position: [number, number, number?]){
-    return [Cartesian3.fromDegrees(position[0], position[1], await getHeightValue()), Cartesian3.fromDegrees(position[0], position[1], /*(await getElevationAtPosition(viewer!, position[0], position[1], 'MapMarker.makeHeightIndicatorPositions')).height*/ 0)]//for performance reasons we use 0
+    return [Cartesian3.fromDegrees(position[0], position[1], await getHeightValueAtPosition(position)), Cartesian3.fromDegrees(position[0], position[1], /*(await getElevationAtPosition(viewer!, position[0], position[1], 'MapMarker.makeHeightIndicatorPositions')).height*/ 0)]//for performance reasons we use 0
 }
 
 function removeHeightIndicator(){
@@ -415,7 +621,7 @@ async function makeBearingIndicatorPositions(position: [number, number, number?]
 
     const terrainElevation = (await getElevationAtPosition(viewer!, position[0], position[1], 'MapMarker.makeBearingIndicatorPositions')).height
 
-    let elevation = await getHeightValue()
+    let elevation = await getHeightValueAtPosition(position)
     if(typeof elevation === 'number'){
         if(elevation < (terrainElevation + 1)){
             elevation = terrainElevation + 1

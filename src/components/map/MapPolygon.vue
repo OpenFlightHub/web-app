@@ -2,6 +2,7 @@
 import { getCurrentInstance, inject, onBeforeUnmount, onMounted, watch } from 'vue';
 import { Cartesian3, Cartographic, Color, Entity, Viewer } from 'cesium';
 import { getElevationAtPosition } from '@/util/terrain';
+import { ClickMyEntityHandle, setupClickMyEntity } from '@/util/cesium';
 
 
 //TODO if line elevation is below cesium terrain, clamp it to ground
@@ -19,6 +20,13 @@ const viewer = inject<Viewer>('cesiumViewer')
 const mapContainer = inject<HTMLElement>('mapContainer')
 
 const myId = '' + getCurrentInstance()?.uid
+
+let polygonClickMyEntityHandle: ClickMyEntityHandle
+
+
+const emit = defineEmits<{
+    'click': []
+}>()
 
 watch(()=>props.points, update, {deep: true})
 watch(()=>props.clampToGround, update, {deep: true})
@@ -106,6 +114,16 @@ async function addAll(){
             material: props.outlineColor || props.color
         }
     })
+
+
+
+    if(polygonClickMyEntityHandle){
+        polygonClickMyEntityHandle.destroy()
+    }
+
+    polygonClickMyEntityHandle = setupClickMyEntity(mapContainer!, viewer!, polygon, ()=>{
+        emit('click')
+    })
 }
 
 
@@ -113,6 +131,11 @@ async function addAll(){
 function removeAll(){
     viewer!.entities.removeById('map-polygon-' + myId)
     viewer!.entities.removeById('map-polygon_outline-' + myId)
+
+
+    if(polygonClickMyEntityHandle){
+        polygonClickMyEntityHandle.destroy()
+    }
 }
 
 </script>

@@ -3,7 +3,7 @@ import api from '@/api';
 import LoadApiWithIdParamInUrl from '@/components/functional/LoadApiWithIdParamInUrl.vue';
 import Padding from '@/components/layout/Padding.vue';
 import ModalVue from '@/components/display/ModalVue.vue';
-import { ref } from 'vue';
+import { provide, ref } from 'vue';
 import SplitVue from '@/components/layout/SplitVue.vue';
 import Map from '@/components/map/Map.vue';
 import TaskGeoObjects from '@/components/task/TaskGeoObjects.vue';
@@ -17,11 +17,11 @@ import TaskEditForm from '@/components/task/TaskEditForm.vue';
 import GeoObjectSnippet from '@/components/geo-object/GeoObjectSnippet.vue';
 import List from '@/components/layout/List.vue';
 import MapDrawMenu from '@/components/map/MapDrawMenu.vue';
+import ProvideMapContainerOutside from '@/components/map/outside_map_container/ProvideMapContainerOutside.vue';
 
 const mapContainer = ref<HTMLDivElement>()
 
 const showTaskEditModal = ref(false)
-
 
 </script>
 
@@ -55,42 +55,44 @@ const showTaskEditModal = ref(false)
                         <template #right_or_bottom>
 
                             <div>
+                                <ProvideMapContainerOutside v-if="mapContainer" :map-container="mapContainer">
 
-                                <table class="uncolored">
-                                    <tbody>
-                                        <tr>
-                                            <td>
-                                                <h3>State</h3>
-                                            </td>
-                                            <td>
-                                                <TaskStateBadge :state="task.data.state"></TaskStateBadge>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <h3>Assigned to</h3>
-                                            </td>
-                                            <td>
-                                                <TeamSnippet v-if="typeof mission.data.assigned_to_team_id === 'number'" :id="mission.data.assigned_to_team_id"></TeamSnippet>
-                                                <span v-else>-</span>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <h3>Description</h3>
-                                            </td>
-                                            <td>
-                                                <p>{{ task.data.description }}</p>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                                    <table class="uncolored">
+                                        <tbody>
+                                            <tr>
+                                                <td>
+                                                    <h3>State</h3>
+                                                </td>
+                                                <td>
+                                                    <TaskStateBadge :state="task.data.state"></TaskStateBadge>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <h3>Assigned to</h3>
+                                                </td>
+                                                <td>
+                                                    <TeamSnippet v-if="typeof mission.data.assigned_to_team_id === 'number'" :id="mission.data.assigned_to_team_id"></TeamSnippet>
+                                                    <span v-else>-</span>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <h3>Description</h3>
+                                                </td>
+                                                <td>
+                                                    <p>{{ task.data.description }}</p>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
 
-                                <h3>Related GeoObjects</h3>
+                                    <h3>Related GeoObjects</h3>
 
-                                <List>
-                                    <GeoObjectSnippet v-for="geoObject of task.data.geo_objects.sort((a, b)=> a.id - b.id)" :key="geoObject.id" :geo-object="geoObject"></GeoObjectSnippet>
-                                </List>
+                                    <List>
+                                        <GeoObjectSnippet v-for="geoObject of task.data.geo_objects.sort((a, b)=> a.id - b.id)" :key="geoObject.id" :geo-object="geoObject"></GeoObjectSnippet>
+                                    </List>
+                                </ProvideMapContainerOutside>
                             </div>
 
                         </template>

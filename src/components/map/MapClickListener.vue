@@ -11,11 +11,35 @@ const emit = defineEmits<{
     click: [{longitude: number, latitude: number, height: number}]
 }>()
 
+let isDragging = false
+
 onMounted(()=>{
     mapContainer!.addEventListener('click', onClick)
+
+    viewer!.camera.moveStart.addEventListener(startDragging)
+    viewer!.camera.moveEnd.addEventListener(stopDragging)
 })
 
+onBeforeUnmount(()=>{
+    mapContainer!.removeEventListener('click', onClick)
+
+    viewer!.camera.moveStart.removeEventListener(startDragging)
+    viewer!.camera.moveEnd.removeEventListener(stopDragging)
+})
+
+function startDragging(){
+    isDragging = true
+}
+
+function stopDragging(){
+    isDragging = false
+}
+
 async function onClick(evt: MouseEvent){
+    if(isDragging){
+        return
+    }
+
     if(evt.target !== viewer!.canvas){
         return
     }

@@ -99,7 +99,7 @@ if(props.watchInitialValues){
     for(const fieldName of props.watchInitialValues){
         watch(() => props.initialValues[fieldName], (newValue) => {
             form.value!.setFieldValue(fieldName, newValue)
-        })
+        }, {deep: true})
     }
 }
 
