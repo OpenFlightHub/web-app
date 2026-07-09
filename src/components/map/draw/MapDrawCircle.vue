@@ -67,6 +67,7 @@ const label = ref(props.existingGeoObject ? props.existingGeoObject.name : '')
 
     <MapClickListener @click="(loc)=>{
         hasLocation = true
+        loc.height = 0 //on map click, set to zero height (clamp to ground)
         updateObject(locationData, loc)
         config.center[0] = loc.longitude
         config.center[1] = loc.latitude
