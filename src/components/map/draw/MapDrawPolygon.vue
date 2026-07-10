@@ -12,8 +12,11 @@ import IconVue from '@/components/general/IconVue.vue';
 import { getColorForHex } from '@/util/cesium.js';
 import MapPolygon from '../MapPolygon.vue';
 import MapMarker from '../MapMarker.vue';
-import { kinks, lineString, lineToPolygon, midpoint } from '@turf/turf';
+import { distance, kinks, lineString, lineToPolygon, midpoint } from '@turf/turf';
 import { getColor } from '@/config/colors.js';
+
+const ICON_SIZE = 20
+const MIN_DISTANCE_BETWEEN_POINTS = 1 // meters
 
 const props = defineProps<{
     workspaceId: number
@@ -95,6 +98,35 @@ function insertPointAfter(index: number){
     propagateLocationData()
 }
 
+function getPointBefore(index: number): [number, number, number]{
+    if(index === 0){
+        return locationData[locationData.length - 1]
+    } else {
+        return locationData[index - 1]
+    }
+}
+
+function getPointAfter(index: number): [number, number, number]{
+    if(index >= locationData.length - 1){
+        return locationData[0]
+    } else {
+        return locationData[index + 1]
+    }
+}
+
+function addPointAfter(index: number, newPoint: [number, number, number]){
+
+    const pointBefore = getPointBefore(index)
+    const pointAfter = getPointAfter(index)
+
+    if(distance(pointBefore, newPoint, {units: 'meters'}) < MIN_DISTANCE_BETWEEN_POINTS || distance(pointAfter, newPoint, {units: 'meters'}) < MIN_DISTANCE_BETWEEN_POINTS){
+        return
+    }
+
+    locationData.splice(index + 1, 0, newPoint)
+    propagateLocationData()
+}
+
 function propagateLocationData(){
     config.polygon = locationData
 }
@@ -148,26 +180,24 @@ function checkFunction(): true | string {
 
         const locAsNumberArray: [number, number, number] = [loc.longitude, loc.latitude, 0]
 
-        locationData.push(locAsNumberArray)
-
-        propagateLocationData()
+        addPointAfter(locationData.length - 1, locAsNumberArray)
 
     }"></MapClickListener>
 
-    <MapMarker v-if="locationData.length === 1" :position="locationData[0]" icon-url="/images/ui/draw_polygon/remove.png" :icon-width="32" :icon-height="32" :background-circle="getColor('accent')" @click-marker="removePoint(0)" draggable @drag-end="preventNextClick" @dragging="(newPoint)=>{updatePoint(0, newPoint)}"></MapMarker>
+    <MapMarker v-if="locationData.length === 1" :position="locationData[0]" icon-url="/images/ui/draw_polygon/remove.png" :icon-width="ICON_SIZE" :icon-height="ICON_SIZE" :background-circle="getColor('accent')" @click-marker="removePoint(0)" draggable @drag-end="preventNextClick" @dragging="(newPoint)=>{updatePoint(0, newPoint)}"></MapMarker>
 
     <MapPolygon v-if="locationData.length > 1" :points="locationData" :color="getColorForHex(config.color, 0.3)" filled :outline-color="getColorForHex(config.color)" :label="label" :outline-width="8" :clamp-to-ground="true"></MapPolygon>
 
     <template v-for="part, index in polygonParts">
-        <MapMarker :position="center(part.from, part.to)" icon-url="/images/ui/draw_polygon/add.png" :icon-width="32" :icon-height="32" :background-circle="getColor('accent')" @click-marker="insertPointAfter(index)"></MapMarker>
+        <MapMarker :position="center(part.from, part.to)" icon-url="/images/ui/draw_polygon/add.png" :icon-width="ICON_SIZE" :icon-height="ICON_SIZE" :background-circle="getColor('accent')" @click-marker="insertPointAfter(index)"></MapMarker>
 
-        <MapMarker :position="part.to" icon-url="/images/ui/draw_polygon/remove.png" :icon-width="32" :icon-height="32" :background-circle="getColor('accent')"  @click-marker="removePoint(index + 1)" draggable @drag-end="preventNextClick()" @dragging="(newPoint)=>{updatePoint(index + 1, newPoint)}"></MapMarker>
+        <MapMarker :position="part.to" icon-url="/images/ui/draw_polygon/remove.png" :icon-width="ICON_SIZE" :icon-height="ICON_SIZE" :background-circle="getColor('accent')"  @click-marker="removePoint(index + 1)" draggable @drag-end="preventNextClick()" @dragging="(newPoint)=>{updatePoint(index + 1, newPoint)}"></MapMarker>
     </template>
 
     <template v-if="locationData.length > 1">
-        <MapMarker :position="locationData[0]" icon-url="/images/ui/draw_polygon/remove.png" :icon-width="32" :icon-height="32" :background-circle="getColor('accent')" @click-marker="removePoint(0)" draggable @drag-end="preventNextClick" @dragging="(newPoint)=>{updatePoint(0, newPoint)}"></MapMarker>
+        <MapMarker :position="locationData[0]" icon-url="/images/ui/draw_polygon/remove.png" :icon-width="ICON_SIZE" :icon-height="ICON_SIZE" :background-circle="getColor('accent')" @click-marker="removePoint(0)" draggable @drag-end="preventNextClick" @dragging="(newPoint)=>{updatePoint(0, newPoint)}"></MapMarker>
 
-        <MapMarker :position="center(locationData[0], locationData[locationData.length - 1])" icon-url="/images/ui/draw_polygon/add.png" :icon-width="32" :icon-height="32" :background-circle="getColor('accent')" @click-marker="insertPointAfter(locationData.length - 1)"></MapMarker>
+        <MapMarker :position="center(locationData[0], locationData[locationData.length - 1])" icon-url="/images/ui/draw_polygon/add.png" :icon-width="ICON_SIZE" :icon-height="ICON_SIZE" :background-circle="getColor('accent')" @click-marker="insertPointAfter(locationData.length - 1)"></MapMarker>
     </template>
 
 
