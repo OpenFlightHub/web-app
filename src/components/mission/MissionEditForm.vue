@@ -28,9 +28,10 @@ const emit = defineEmits<{
                 name: {type: 'text', required: true},
                 assigned_to_team_id: {type: 'select', required: false, options: teams.data.map(team => ({ label: team.name, value: team.id })), allowNull: true},
                 description: {type: 'textarea', required: false},
+                notes: {type: 'textarea', required: false},
                 state: {type: 'select', required: true, options: Object.entries(MISSION_STATES).map(([key, value]) => ({ label: key, value })), mappedBadge: {colorMap: MISSION_COLOR_MAP}}
             }"
-            :editable-fields="props.onlyShowAssignment ? ['assigned_to_team_id'] : ['name', 'assigned_to_team_id', 'description', 'state']"
+            :editable-fields="props.onlyShowAssignment ? ['assigned_to_team_id'] : ['name', 'assigned_to_team_id', 'description', 'notes', 'state']"
             title="Edit Mission" @created="(updatedMission) => {
                 updateObject(props.mission, updatedMission)
                 emit('created', updatedMission)

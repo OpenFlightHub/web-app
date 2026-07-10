@@ -28,10 +28,11 @@ const emit = defineEmits<{
                 name: {type: 'text', required: true},
                 assigned_to_team_id: {type: 'select', required: false, options: teams.data.map(team => ({ label: team.name, value: team.id }))},
                 description: {type: 'textarea', required: false},
+                notes: {type: 'textarea', required: false},
                 state: {type: 'number', required: true},
                 workspace_id: {type: 'number', required: true}
             }"
-            :editable-fields="['name', 'assigned_to_team_id', 'description']"
+            :editable-fields="['name', 'assigned_to_team_id', 'description', 'notes']"
             title="Create Mission" @created="emit('created', $event)" @cancel="emit('cancel')"></ApiForm>
     </LoadApiArray>
 

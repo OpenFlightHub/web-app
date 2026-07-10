@@ -24,10 +24,11 @@ const emit = defineEmits<{
         :fields="{
         name: {type: 'text', required: true},
         description: {type: 'textarea', required: true},
+        notes: {type: 'textarea', required: false},
         mission_id: {type: 'number', required: true},
         state: {type: 'number', required: true}
         }"
-        :editable-fields="['name', 'description']"
+        :editable-fields="['name', 'description', 'notes']"
         title="Create Task"
         @created="emit('created', $event)" @cancel="emit('cancel')"></ApiForm>
 

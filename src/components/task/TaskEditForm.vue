@@ -23,9 +23,10 @@ const emit = defineEmits<{
         :fields="{
             name: {type: 'text', required: true},
             description: {type: 'textarea', required: true},
+            notes: {type: 'textarea', required: false},
             state: {type: 'select', required: true, options: Object.entries(TASK_STATES).map(([key, value]) => ({ label: key, value })), mappedBadge: {colorMap: TASK_COLOR_MAP}}
         }"
-        :editable-fields="['name', 'description', 'state']"
+        :editable-fields="['name', 'description', 'notes', 'state']"
         title="Edit Task"
         @created="(updatedTask)=>{
             updateObject(props.task, updatedTask)

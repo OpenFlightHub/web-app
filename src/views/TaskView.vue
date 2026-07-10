@@ -84,6 +84,14 @@ const showTaskEditModal = ref(false)
                                                     <p>{{ task.data.description }}</p>
                                                 </td>
                                             </tr>
+                                            <tr>
+                                                <td>
+                                                    <h3>Notes</h3>
+                                                </td>
+                                                <td>
+                                                    <p>{{ task.data.notes }}</p>
+                                                </td>
+                                            </tr>
                                         </tbody>
                                     </table>
 

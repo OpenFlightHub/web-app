@@ -85,6 +85,14 @@ const showMissionEditModal = ref(false)
                                                         <p>{{ mission.data.description }}</p>
                                                     </td>
                                                 </tr>
+                                                <tr>
+                                                    <td>
+                                                        <h3>Notes</h3>
+                                                    </td>
+                                                    <td>
+                                                        <p>{{ mission.data.notes }}</p>
+                                                    </td>
+                                                </tr>
                                             </tbody>
                                         </table>
                                     </div>
