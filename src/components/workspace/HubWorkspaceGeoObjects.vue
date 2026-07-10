@@ -12,6 +12,7 @@ const props = defineProps<{
     initialLongitude: number
     initialLatitude: number//TODO implement movement of map
     showOnlyAircraft?: boolean
+    hideMissionGeoObjects?: boolean
 }>()
 
 const viewer = inject<Viewer>('cesiumViewer')
@@ -60,13 +61,38 @@ function destroy(){
 
 onUnmounted(destroy)
 
+function shouldShowGeoObject(geoObject: ApiResponse_WorkspaceGeoObjectsGet[number]){
+    if(props.showOnlyAircraft){
+        if(geoObject.type === 1){//traffic
+            return true
+        }
+
+        if(geoObject.type === 2 && [0, 1, 2].includes(geoObject.sub_type)){//unit (helicopter, airplane, drone)
+            return true
+        }
+
+        return false
+    }
+
+
+    if(props.hideMissionGeoObjects){
+        if(geoObject.type === 0 ){//marking
+            if(geoObject.tasks && geoObject.tasks.length > 0){//linked to a task, so it is a mission geo object
+                return false
+            }
+        }
+    }
+
+    return true
+
+}
+
 </script>
 
 <template>
 
     <template v-for="geoObject of geoObjects" :key="geoObject.id" :geo-object="geoObject">
-        <GeoObject v-if="!props.showOnlyAircraft ||
-            (geoObject.type === 1 || geoObject.type === 2 && (geoObject.sub_type === 0 || geoObject.sub_type === 1 || geoObject.sub_type === 2))" :key="geoObject.id" :geo-object="geoObject"></GeoObject>
+        <GeoObject v-if="shouldShowGeoObject(geoObject)" :key="geoObject.id" :geo-object="geoObject"></GeoObject>
     </template>
 
 </template>

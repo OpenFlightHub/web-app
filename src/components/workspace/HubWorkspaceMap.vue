@@ -26,6 +26,7 @@ const sidebarIsOpen = ref(false)
 const showMedia = ref(false)
 const showCollisionObjects = ref(false)
 const showDipul = ref(false)
+const hideMissionGeoObjects = ref(false)
 
 watch(()=> props.workspaceId, ()=>{
     console.log('workspaceId changed, forcing update of map')
@@ -54,7 +55,7 @@ function forceReRenderMap(){
                 <template v-if="geoidIsLoaded">
                     <HubWorkspaceMapConnection v-for="connection in props.connections" :key="connection.id" :connection="connection"></HubWorkspaceMapConnection><!-- TODO once we implemented making geoobject units from drone connections, we can delete this -->
 
-                    <HubWorkspaceGeoObjects :workspace-id="props.workspaceId" :initial-longitude="props.longitude" :initial-latitude="props.latitude"></HubWorkspaceGeoObjects>
+                    <HubWorkspaceGeoObjects :workspace-id="props.workspaceId" :initial-longitude="props.longitude" :initial-latitude="props.latitude" :hide-mission-geo-objects="hideMissionGeoObjects"></HubWorkspaceGeoObjects>
                 </template>
 
                 <template v-if="showMedia">
@@ -83,6 +84,10 @@ function forceReRenderMap(){
                 <label for="show-dipul-layer">
                     <Checkbox v-model="showDipul" binary input-id="show-dipul-layer"></Checkbox>
                     Show DIPUL Layer
+                </label>
+                <label for="hide-mission-geo-objects">
+                    <Checkbox v-model="hideMissionGeoObjects" binary input-id="hide-mission-geo-objects"></Checkbox>
+                    Hide Mission Geo Objects
                 </label>
             </div>
         </div>
