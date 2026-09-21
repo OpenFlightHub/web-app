@@ -132,7 +132,7 @@ function editDone(newValue: ApiResponse_WorkspaceGeoObjectsGet[number]){
 
             <MapDrawPolygon v-if="editIsVisible && typeof props.geoObject.workspace_id === 'number'" :workspace-id="props.geoObject.workspace_id" :existing-geo-object="cloneObject(props.geoObject)" @edit-done="editDone" @cancel="hideEditAndShowInfo"></MapDrawPolygon>
 
-            <MapPolygon v-else :points="geoObject.config.polygon/*TODO support multi-array polygon*/" :color="getColorForHex(geoObject.config.color, 0.3)" :filled="true" :outline-color="getColorForHex(geoObject.config.color)" clamp-to-ground @click="showInfo"></MapPolygon>
+            <MapPolygon v-else :points="geoObject.config.polygon/*TODO support multi-array polygon*/" :color="getColorForHex(geoObject.config.color, 0.3)" :filled="true" :outline-color="getColorForHex(geoObject.config.color)" clamp-to-ground @click="showInfo" :label="geoObject.name"></MapPolygon>
 
 
         </template>

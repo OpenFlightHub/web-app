@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { getCurrentInstance, inject, onBeforeUnmount, onMounted, watch } from 'vue';
-import { Cartesian3, Cartographic, Color, Entity, Viewer } from 'cesium';
+import { Cartesian3, Cartographic, Color, Entity, HeightReference, LabelStyle, Viewer } from 'cesium';
 import { getElevationAtPosition } from '@/util/terrain';
 import { ClickMyEntityHandle, setupClickMyEntity } from '@/util/cesium';
+import { lineString, length, distance, midpoint, center } from '@turf/turf';
 
 
 //TODO if line elevation is below cesium terrain, clamp it to ground
@@ -13,7 +14,8 @@ const props = defineProps<{
     color: Color
     filled?: boolean
     outlineColor?: Color
-    outlineWidth?: number
+    outlineWidth?: number,
+    label?: string
 }>()
 
 const viewer = inject<Viewer>('cesiumViewer')
@@ -35,6 +37,7 @@ watch(()=>props.color, update, {deep: true})
 watch(()=>props.filled, update, {deep: true})
 watch(()=>props.outlineColor, update, {deep: true})
 watch(()=>props.outlineWidth, update)
+watch(()=>props.label, update)
 
 onMounted(update)
 onBeforeUnmount(()=>{
@@ -99,19 +102,42 @@ async function addAll(){
 
     positions.push(positions[0])// polyline needs the first point again
 
-    let outline = viewer!.entities.getById('map-polygon_outline-' + myId)
+    let outline = viewer!.entities.getById('map-polygon-outline-' + myId)
 
     if(outline){
         viewer!.entities.remove(outline)//TODO dont remove entity, instead update it
     }
 
     outline = viewer!.entities.add({
-        id: 'map-polygon_outline-' + myId,
+        id: 'map-polygon-outline-' + myId,
         polyline: {
             positions,
             width: typeof props.outlineWidth === 'number' ? props.outlineWidth : 3,
             clampToGround: props.clampToGround,
             material: props.outlineColor || props.color
+        }
+    })
+
+
+
+    const centerPosition = await getCenterPosition()
+
+    let label = viewer!.entities.getById('map-polygon-label-' + myId)
+
+    if(label){
+        viewer!.entities.remove(label)//TODO dont remove entity, instead update it
+    }
+
+    label =  viewer!.entities.add({
+        id: 'map-polygon-label-' + myId,
+        position: Cartesian3.fromDegrees(centerPosition.longitude, centerPosition.latitude),
+        label: {
+            text: (props.label ? props.label + ' ' : ''),
+            font: '14pt monospace',
+            style: LabelStyle.FILL_AND_OUTLINE,
+            outlineWidth: 2,
+            heightReference: HeightReference.CLAMP_TO_GROUND,
+            disableDepthTestDistance: Number.POSITIVE_INFINITY, // show always above terrain https://community.cesium.com/t/points-labels-stuck-under-terrain/11141
         }
     })
 
@@ -127,10 +153,22 @@ async function addAll(){
 }
 
 
+async function getCenterPosition(){
+    if(props.points.length === 0){
+        return {longitude: 0, latitude: 0}
+    }
+
+    const line = lineString(props.points.map(p => [p[0], p[1]]))
+
+    const centerPoint = center(line)
+    return {longitude: centerPoint.geometry.coordinates[0], latitude: centerPoint.geometry.coordinates[1]}
+}
+
 
 function removeAll(){
     viewer!.entities.removeById('map-polygon-' + myId)
-    viewer!.entities.removeById('map-polygon_outline-' + myId)
+    viewer!.entities.removeById('map-polygon-outline-' + myId)
+    viewer!.entities.removeById('map-polygon-label-' + myId)
 
 
     if(polygonClickMyEntityHandle){
