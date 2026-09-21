@@ -9,7 +9,7 @@
 
 import { ref, onMounted, provide, getCurrentInstance, onBeforeUnmount, onBeforeMount, watch } from 'vue';
 
-import { Cartesian3, Ion, Math as MathCesium, Terrain, Viewer, PerspectiveFrustum, CesiumTerrainProvider, SceneMode, ScreenSpaceEventType } from "cesium";
+import { Cartesian3, Ion, Math as MathCesium, Terrain, Viewer, PerspectiveFrustum, CesiumTerrainProvider, SceneMode, ScreenSpaceEventType, IonImageryProvider, ImageryLayer, OpenStreetMapImageryProvider } from "cesium";
 import "cesium/Build/Cesium/Widgets/widgets.css";
 import { getSetting } from '@/util/settings';
 import { WebMapServiceImageryProvider } from 'cesium';
@@ -45,9 +45,17 @@ let viewerLoadCheckInterval: ReturnType<typeof setInterval> | undefined = undefi
 
 // Cesium probably uses EPSG 4979 // WGS 84 but with ellipsoidal height (2d WGS48 is 4326)
 
+const selectedTerrainProvider = getSetting('terrain-provider')
+
 let viewer: Viewer = new Viewer(props.mapContainer, {
     //terrain: new Terrain(CesiumTerrainProvider.fromIonAssetId(4613429)),
-    terrain: getSetting('use-dev-terrain') ? new Terrain(CesiumTerrainProvider.fromUrl('https://dev.openflighthub.org/ctb/20cm_siplinger-output')) : Terrain.fromWorldTerrain(),
+    terrain: (()=>{switch(selectedTerrainProvider){
+
+        case 'ofh-siplinger': return new Terrain(CesiumTerrainProvider.fromUrl('https://dev.openflighthub.org/ctb/20cm_siplinger-output'))
+
+        case 'cesium':
+        default: return Terrain.fromWorldTerrain()
+    }})(),
     // terrain: new Terrain(CesiumTerrainProvider.fromUrl('https://dev.openflighthub.org/terrain2/tiles/dynamic/?minZoom=1&maxZoom=18&cog=/config/tiles.vrt')),
     animation: false,
     timeline: false,
@@ -57,7 +65,7 @@ let viewer: Viewer = new Viewer(props.mapContainer, {
     navigationInstructionsInitiallyVisible: props.disableUserControl !== true,
     selectionIndicator: props.disableUserControl !== true,
     infoBox: false,
-    baseLayerPicker: getSetting('allow-bing-maps') === true,
+    baseLayerPicker: false,
     sceneModePicker: false,
     geocoder: props.disableUserControl !== true
 })
@@ -74,30 +82,42 @@ viewer.scene.globe.tileLoadProgressEvent.addEventListener((event)=>{
     }
 })
 
+
 const layers = viewer.scene.imageryLayers
 layers.removeAll(true)
-// layers.addImageryProvider(
-//     await IonImageryProvider.fromAssetId(4613429)//3954 Cesium Ion free
-// )
 
-layers.addImageryProvider(
-    new WebMapServiceImageryProvider({
-        url: 'https://geoservices.bayern.de/od/wms/dop/v1/dop20?',
-        layers: 'by_dop20c',
-        credit: 'Datenquellen: Bayerische Vermessungsverwaltung, © Europäische Union, enthält Copernicus Sentinel-2 Daten 2018, verarbeitet durch das Bundesamt für Kartographie und Geodäsie (BKG)',
-        enablePickFeatures: false//not supported
-    })
+const imageryLayers = {
+    bing: ImageryLayer.fromWorldImagery({}),
+    sentinel: ImageryLayer.fromProviderAsync(
+        IonImageryProvider.fromAssetId(3954)//cesium ion free
+    ),
+    openstreetmap: new ImageryLayer(
+        new OpenStreetMapImageryProvider({
+            url : 'https://tile.openstreetmap.org/',
+            credit : '© OpenStreetMap'
+        })
+    ),
+    bayern: new ImageryLayer(
+        new WebMapServiceImageryProvider({
+            url: 'https://geoservices.bayern.de/od/wms/dop/v1/dop20?',
+            layers: 'by_dop20c',
+            credit: 'Datenquellen: Bayerische Vermessungsverwaltung, © Europäische Union, enthält Copernicus Sentinel-2 Daten 2018, verarbeitet durch das Bundesamt für Kartographie und Geodäsie (BKG)',
+            enablePickFeatures: false//not supported
+        })
+    )
+}
 
-    // new TileLayer({
-    //     source: new TileWMS({
-    //         url: 'https://geoservices.bayern.de/od/wms/dop/v1/dop20?',
-    //         params: {LAYERS: ['by_dop20c']},
-    //         attributions: 'Datenquellen: Bayerische Vermessungsverwaltung, © Europäische Union, enthält Copernicus Sentinel-2 Daten 2018, verarbeitet durch das Bundesamt für Kartographie und Geodäsie (BKG)'
-    //     })
-    // })
-)
 
-// DIPUL https://www.dipul.de/homepage/de/hilfe/anleitung-fuer-den-web-map-service-wms/#/wms-nutzungsbedingungen
+
+
+const selectedMapProvider = getSetting('map-provider')
+
+for(const [key, layer] of Object.entries(imageryLayers)){
+    layer.show = key === selectedMapProvider
+    layers.add(layer)
+}
+
+// DIPUL https://www.dipul.de/homepage/de/hilfe/anleitung-fuer-den-web-map-service-wms/#/wms-nutzungsbedingungen,
 const dipulLayer = layers.addImageryProvider(
     new WebMapServiceImageryProvider({
         url: 'https://uas-betrieb.de/geoservices/dipul/wms?',
@@ -118,10 +138,6 @@ watch(()=>props.showDipul, (newValue)=>{
 
 
 //TODO currently switching to 2D crashes cesium
-// const openstreetmap = new OpenStreetMapImageryProvider({
-//     url : 'https://tile.openstreetmap.org/'
-// })
-//viewer.imageryLayers.addImageryProvider(openstreetmap) //TODO add attribution see https://operations.osmfoundation.org/policies/tiles/
 
 resetCamera()
 

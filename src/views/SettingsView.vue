@@ -6,6 +6,7 @@ import Padding from '@/components/layout/Padding.vue';
 import { Button } from 'primevue';
 
 import useMainStore from "@/stores/main"
+import SettingSelect from '@/components/settings/SettingSelect.vue';
 const store = useMainStore()
 
 //TODO automatically generate user inputs from settings and make it reactive
@@ -29,8 +30,28 @@ function reset(){
 
         <List>
             <div v-if="store.isAdmin" class="settings">
-                <label>Allow Bing Maps Terrain&nbsp;<Button @click="setSetting('allow-bing-maps', true)">Allow</Button></label>
-                <label>Use dev Terrain&nbsp;<Button @click="setSetting('use-dev-terrain', true)">Allow</Button></label>
+                <SettingSelect settingName="map-provider" :possibleValues="[{
+                    label: 'Sentinel',
+                    value: 'sentinel'
+                }, {
+                    label: 'Bing',
+                    value: 'bing'
+                }, {
+                    label: 'OpenStreetMap',
+                    value: 'openstreetmap'
+                }, {
+                    label: 'Bayern LDBV',
+                    value: 'bayern'
+                }]"/>
+
+                <SettingSelect settingName="terrain-provider" :possibleValues="[{
+                    value: 'cesium',
+                    label: 'Cesium'
+                }, {
+                    value: 'ofh-siplinger',
+                    label: 'OFH Siplinger'
+                }]"/>
+
                 <label>Reset Settings&nbsp;<Button @click="reset">Reset All Settings</Button></label>
             </div>
         </List>

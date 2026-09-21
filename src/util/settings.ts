@@ -1,9 +1,14 @@
 const LOCAL_STORAGE_ITEM_NAME = 'ofh_settings'
 
+type Setting_MapProvider ='sentinel' | 'bing' | 'openstreetmap' | 'bayern'
+type Setting_TerrainProvider = 'cesium' | 'ofh-siplinger'
+
 const SETTINGS = {
-    'allow-bing-maps': false,
-    'use-dev-terrain': false
+    'map-provider': 'sentinel' as Setting_MapProvider,
+    'terrain-provider': 'cesium' as Setting_TerrainProvider
 }
+
+const DEFAULT_SETTINGS = SETTINGS
 
 
 export function getSetting<N extends keyof typeof SETTINGS>(name: N): (typeof SETTINGS)[N] {
@@ -27,10 +32,21 @@ export function getSetting<N extends keyof typeof SETTINGS>(name: N): (typeof SE
 
 }
 
-export function setSetting<N extends keyof typeof SETTINGS>(name: N, value: (typeof SETTINGS)[N]) {
+export type SettingType<SettingName extends keyof typeof SETTINGS> = (typeof SETTINGS)[SettingName]
+export type SettingName = keyof typeof SETTINGS
+
+export function setSetting<N extends SettingName>(name: N, value: (typeof SETTINGS)[N]) {
     const storedSettings = loadStoredSettings()
 
     storedSettings[name] = value
+
+    saveStoredSettings(storedSettings)
+}
+
+export function resetSetting<N extends SettingName>(name: N) {
+    const storedSettings = loadStoredSettings()
+
+    storedSettings[name] = DEFAULT_SETTINGS[name]
 
     saveStoredSettings(storedSettings)
 }
