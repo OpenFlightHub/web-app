@@ -99,6 +99,9 @@ function insertPointAfter(index: number){
 }
 
 function getPointBefore(index: number): [number, number, number]{
+    if(index < 0 || index >= locationData.length){
+        throw new Error('Index out of bounds: ' + index)
+    }
     if(index === 0){
         return locationData[locationData.length - 1]
     } else {
@@ -116,14 +119,29 @@ function getPointAfter(index: number): [number, number, number]{
 
 function addPointAfter(index: number, newPoint: [number, number, number]){
 
-    const pointBefore = getPointBefore(index)
-    const pointAfter = getPointAfter(index)
 
-    if(distance(pointBefore, newPoint, {units: 'meters'}) < MIN_DISTANCE_BETWEEN_POINTS || distance(pointAfter, newPoint, {units: 'meters'}) < MIN_DISTANCE_BETWEEN_POINTS){
-        return
+    if(locationData.length === 0){
+        locationData.push(newPoint)
+    } else {
+
+        if(index < 0){
+            index = 0;
+        }
+
+        if(index >= locationData.length){
+            index = locationData.length - 1;
+        }
+
+        const pointBefore = getPointBefore(index)
+        const pointAfter = getPointAfter(index)
+
+        if(distance(pointBefore, newPoint, {units: 'meters'}) < MIN_DISTANCE_BETWEEN_POINTS || distance(pointAfter, newPoint, {units: 'meters'}) < MIN_DISTANCE_BETWEEN_POINTS){
+            return
+        }
+
+        locationData.splice(index + 1, 0, newPoint)
     }
 
-    locationData.splice(index + 1, 0, newPoint)
     propagateLocationData()
 }
 
