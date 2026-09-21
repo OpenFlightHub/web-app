@@ -7,7 +7,7 @@ import Checkbox from 'primevue/checkbox'
 import { Button } from 'primevue';
 import HubWorkspaceMapDroneMedia from './HubWorkspaceMapDroneMedia.vue';
 import Map from '../map/Map.vue';
-import HubWorkspaceGeoObjects from './HubWorkspaceGeoObjects.vue';
+import HubWorkspaceGeoObjects from './geo_objects/HubWorkspaceGeoObjects.vue';
 import Fullscreenable from '../functional/Fullscreenable.vue';
 import MapCollisionObjects from '../info/collision-objects/MapCollisionObjects.vue';
 import MapDrawMenu from '../map/MapDrawMenu.vue';

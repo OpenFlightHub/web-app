@@ -1,11 +1,18 @@
 <script setup lang="ts">
 import api from '@/api'
-import {inject, onMounted, onUnmounted, reactive} from 'vue'
+import {inject, onMounted, onUnmounted, reactive, watch} from 'vue'
 import { Viewer } from 'cesium';
 import { ApiResponse_WorkspaceGeoObjectsGet } from 'openflighthub-api-client-sdk';
 import { updateArray, updateObject } from '@/util/vue';
-import GeoObject from '../geo-object/GeoObject.vue';
 import dayjs from 'dayjs';
+import TCAS, { TCAS_Options } from './tcas';
+import GeoObject from '@/components/geo-object/GeoObject.vue';
+
+type TrafficOptions = {
+    elevationMin?: number
+    elevationMax?: number
+    tcas?: TCAS_Options
+}
 
 const props = defineProps<{
     workspaceId: number
@@ -13,6 +20,7 @@ const props = defineProps<{
     initialLatitude: number//TODO implement movement of map
     showOnlyAircraft?: boolean
     hideMissionGeoObjects?: boolean
+    trafficOptions?: TrafficOptions
 }>()
 
 const viewer = inject<Viewer>('cesiumViewer')
@@ -20,6 +28,7 @@ const mapContainer = inject<HTMLElement>('mapContainer')
 
 const geoObjects = reactive<ApiResponse_WorkspaceGeoObjectsGet>([])
 
+let tcas: TCAS | undefined
 
 onMounted(setup)
 
@@ -52,10 +61,32 @@ async function setup(){
         }
 
     })
+
+    if(props.trafficOptions?.tcas){
+        tcas = new TCAS(geoObjects, props.trafficOptions.tcas)
+    }
 }
+
+watch(()=> props.trafficOptions, ()=>{
+    if(props.trafficOptions?.tcas){
+        if(!tcas){
+            tcas = new TCAS(geoObjects, props.trafficOptions.tcas)
+        }
+    } else {
+        if(tcas){
+            tcas.destroy()
+            tcas = undefined
+        }
+    }
+})
 
 function destroy(){
     //TODO unsubscribe
+
+    if(tcas){
+        tcas.destroy()
+        tcas = undefined
+    }
 }
 
 

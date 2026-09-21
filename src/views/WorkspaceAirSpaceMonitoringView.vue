@@ -7,8 +7,9 @@ import LoadApiArrayWithIdParamInUrl from '@/components/functional/LoadApiArrayWi
 import { ref } from 'vue';
 import Fullscreenable from '@/components/functional/Fullscreenable.vue';
 import Map from '@/components/map/Map.vue';
-import HubWorkspaceGeoObjects from '@/components/workspace/HubWorkspaceGeoObjects.vue';
+import HubWorkspaceGeoObjects from '@/components/workspace/geo_objects/HubWorkspaceGeoObjects.vue';
 import HubWorkspaceMapConnection from '@/components/workspace/HubWorkspaceMapConnection.vue';
+import IconVue from '@/components/general/IconVue.vue';
 
 const mapContainer = ref<HTMLElement>()
 
@@ -24,11 +25,11 @@ const mapContainer = ref<HTMLElement>()
 
             <Fullscreenable flex="row">
                <div id="map-container" ref="mapContainer">
-                  <Map id="map" v-if="mapContainer" :map-container="mapContainer" :start-point="{longitude: workspace.data.longitude, latitude: workspace.data.latitude}" :start-height="10000" :start-camera-pitch="-90" force-top-down>
+                  <Map id="map" v-if="mapContainer" :map-container="mapContainer" :start-point="{longitude: workspace.data.longitude, latitude: workspace.data.latitude}" :start-height="50000" :start-camera-pitch="-90" force-top-down>
 
                      <HubWorkspaceMapConnection v-for="connection in connections.data" :key="connection.id" :connection="connection"></HubWorkspaceMapConnection><!-- TODO once we implemented making geoobject units from drone connections, we can delete this -->
 
-                     <HubWorkspaceGeoObjects :workspace-id="workspace.data.id" :initial-longitude="workspace.data.longitude" :initial-latitude="workspace.data.latitude" show-only-aircraft></HubWorkspaceGeoObjects>
+                     <HubWorkspaceGeoObjects :workspace-id="workspace.data.id" :initial-longitude="workspace.data.longitude" :initial-latitude="workspace.data.latitude" show-only-aircraft :traffic-options="{tcas: {bubbleRadius: 10000, warningTime: 1800, alertTime: 900}}"></HubWorkspaceGeoObjects>
 
                   </Map>
                </div>
