@@ -85,7 +85,7 @@ const createdLiveShareKey = ref<ApiResponse_ConnectionLiveShareKeysPost | null>(
                 <p><a :href="liveShareUrl" target="_blank">{{ liveShareUrl }}</a></p>
                 <br/>
                 <p>
-                    <QRCodeUrl :url="liveShareUrl"></QRCodeUrl>
+                    <QRCodeUrl :url="liveShareUrl" with-logo></QRCodeUrl>
                 </p>
             </div>
 

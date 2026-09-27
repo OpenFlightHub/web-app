@@ -1,31 +1,37 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import QRCode from 'qrcode-generator'
-
-const baseImage = ref<HTMLImageElement | null>(null)
+import { drawLogoOntopOfImage, loadImage } from '@/util/canvas';
 
 const props = defineProps<{
     url: string
     withLogo?: boolean
 }>()
 
-const dataUrl = computed(() => {
+const dataUrl = ref('')
 
+async function makeImage(){
     const qr = QRCode(0, 'M')
     qr.addData(props.url)
     qr.make()
-    return qr.createDataURL(20)
-})
 
-watch(()=>{
+    const baseImageDataUrl = qr.createDataURL(20)
+
     if(props.withLogo){
-        addLogoOntopOfImage()
+
+        const logoImage = await loadImage('/images/logo_small.png')
+        const baseImage = await loadImage(baseImageDataUrl)
+
+        const canvas = drawLogoOntopOfImage(baseImage, logoImage, 0.2)
+        dataUrl.value = canvas.toDataURL()
+    } else {
+        dataUrl.value = baseImageDataUrl
     }
-})
-
-function addLogoOntopOfImage(){
-
 }
+
+watch(()=>props.url, makeImage)
+watch(()=>props.withLogo, makeImage)
+onMounted(makeImage)
 
 </script>
 
@@ -33,7 +39,7 @@ function addLogoOntopOfImage(){
 
     <div>
 
-        <img ref="baseImage" :src="dataUrl" alt="QR Code" />
+        <img :src="dataUrl" alt="QR Code" />
 
     </div>
 
