@@ -10,11 +10,11 @@ const props = defineProps<{
 }>()
 
 const myId = '' + getCurrentInstance()?.uid
-const video = ref(null)
+const video = ref<HTMLDivElement | null>(null)
 
 const notSupported = ref(false)
 
-const player = ref<ovenplayer.OvenPlayerInstance>(null)
+const player = ref<ovenplayer.OvenPlayerInstance | null>(null)
 const isPlaying = ref(false)
 
 onMounted(()=>{
@@ -22,7 +22,7 @@ onMounted(()=>{
         notSupported.value = true
     }
 
-    video.value.id = myId
+    video.value!.id = myId
 
     setupPlayer()
 })
@@ -72,7 +72,7 @@ function setupPlayer(){
         console.warn('failed to setup ovenplayer for livevideo', myId, video.value)
     }
 
-    player.value.on('stateChanged', evt => {
+    player.value!.on('stateChanged', evt => {
         isPlaying.value = evt.newstate === 'playing'
     })
 
@@ -112,6 +112,8 @@ function setupPlayer(){
 
 #container {
     position: relative;
+    max-width: 100vw;
+    max-height: 100vh;
 
     #disconnected-cover, #info-overlay {
         position: absolute;

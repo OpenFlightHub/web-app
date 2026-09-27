@@ -12,6 +12,7 @@ import { FormResolverOptions } from '@primevue/forms';
 import InputMapLocation from './InputMapLocation.vue';
 import SelectMappedBadge from './SelectMappedBadge.vue';
 import { cloneObject } from '@/util/vue.js';
+import dayjs from 'dayjs';
 
 export type Field<FieldType, DataShape extends Record<string, string> = Record<string, string>> = FieldType extends 'text' ? FieldTypeText : FieldType extends 'email' ? FieldTypeEmail : FieldType extends 'number' ? FieldTypeNumber : FieldType extends 'select' ? FieldTypeSelect : FieldType extends 'checkbox' ? FieldTypeCheckbox : FieldType extends 'date-with-time' ? FieldTypeDateWithTime : FieldType extends 'raw' ? FieldTypeRaw : FieldType extends 'map-location' ? FieldTypeMapLocation<DataShape> : FieldType extends 'textarea' ? FieldTypeTextarea : FieldBase<FieldType>
 
@@ -51,6 +52,7 @@ export interface FieldTypeCheckbox extends FieldBase<'checkbox'> {
 export interface FieldTypeDateWithTime extends FieldBase<'date-with-time'> {
     onlyDate?: boolean // if true, time will be ignored and set to 00:00:00
     max?: Date // maximum date that can be selected
+    min?: Date // minimum date that can be selected
     noSeconds?: boolean // if true, seconds will be ignored and set to 00
 }
 
@@ -267,7 +269,7 @@ function withNullOption(options: {value: any, label: string}[]): {value: any, la
 
                         <template v-else-if="props.fields[fieldName].type === 'date-with-time'">
                             <IftaLabel>
-                                <DatePicker :id="fieldName" :name="fieldName" :required="props.fields[fieldName].required" :show-time="props.fields[fieldName].onlyDate !== true" hour-format="24" :max-date="props.fields[fieldName].max" fluid @update:model-value="emitChange"></DatePicker>
+                                <DatePicker :id="fieldName" :model-value="dayjs(props.initialValues[fieldName]).toDate()" :name="fieldName" :required="props.fields[fieldName].required" :show-time="props.fields[fieldName].onlyDate !== true" hour-format="24" :max-date="props.fields[fieldName].max" :min-date="props.fields[fieldName].min" fluid @update:model-value="emitChange"></DatePicker>
                                 <label :for="fieldName">{{ props.readableLabels?.[fieldName] ?? fieldName }}</label>
                             </IftaLabel>
                         </template>

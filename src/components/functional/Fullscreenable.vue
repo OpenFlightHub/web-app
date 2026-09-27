@@ -3,7 +3,6 @@ import { ref, onMounted } from 'vue';
 
 import IconVue from '../general/IconVue.vue';
 import { Button } from 'primevue';
-import { getColor } from '@/config/colors';
 import AbsoluteContainer from '../layout/AbsoluteContainer.vue';
 
 const props = defineProps<{
@@ -36,7 +35,7 @@ function toggleFullscreen(){
 
         <slot></slot>
 
-        <AbsoluteContainer :x="10" :y="10" :z-index="2">
+        <AbsoluteContainer :x="10" :y="10" :z-index="200">
             <Button @click.stop="toggleFullscreen()">
                 <IconVue id="toggle-fullscreen" :name="isFullScreen ? 'fullscreen-exit' : 'arrows-fullscreen'"></IconVue>
             </Button>

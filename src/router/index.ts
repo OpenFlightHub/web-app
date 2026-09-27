@@ -34,10 +34,10 @@ import MissionView from '@/views/MissionView.vue'
 import DatabaseView from '@/views/admin/system/DatabaseView.vue'
 import TaskView from '@/views/TaskView.vue'
 import WorkspaceAirSpaceMonitoringView from '@/views/WorkspaceAirSpaceMonitoringView.vue'
+import SharedLiveView from '@/views/SharedLiveView.vue'
 
 
-
-const PATH_NAMES_THAT_DO_NOT_REQUIRE_LOGIN = ['login', 'password-reset', 'password-set-new'] /* this equals a routes "name" property */
+const PATH_NAMES_THAT_DO_NOT_REQUIRE_LOGIN = ['login', 'password-reset', 'password-set-new', 'live'] /* this equals a routes "name" property */
 const PATH_NAMES_THAT_DO_NOT_ALLOW_LOGGED_IN = ['password-reset', 'password-set-new'] /* this equals a routes "name" property */
 
 
@@ -226,6 +226,12 @@ export function makeRouter(pinia: Pinia){
             {
                 path: '/user/:userId',
                 component: UserView
+            },
+
+            {
+                path: '/live/:connectionId/:sharedKey',
+                name: 'live',
+                component: SharedLiveView
             },
 
             {

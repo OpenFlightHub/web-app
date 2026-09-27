@@ -3,10 +3,13 @@ import { onMounted, reactive, ref } from 'vue';
 import LiveVideo from './LiveVideo.vue';
 import api from '@/api';
 import IconVue from '../general/IconVue.vue';
-import { ApiResponse_ConnectionGet } from 'openflighthub-api-client-sdk';
+import { ApiResponse_ConnectionGet, ApiResponse_ConnectionLiveShareKeysPost } from 'openflighthub-api-client-sdk';
 import { updateObject } from '@/util/vue';
 import IconsStacked from '../general/IconsStacked.vue';
 import Spacing from '../layout/Spacing.vue';
+import ModalVue from '../display/ModalVue.vue';
+import ApiForm from '../functional/form/ApiForm.vue';
+import dayjs from 'dayjs';
 
 const props = defineProps<{
     connectionId: number
@@ -30,6 +33,10 @@ async function updateConnection(){
 
 const showFullscreen = ref(false)
 
+const showShare = ref(false)
+
+const createdLiveShareKey = ref<ApiResponse_ConnectionLiveShareKeysPost | null>(null)
+
 </script>
 
 <template>
@@ -39,7 +46,10 @@ const showFullscreen = ref(false)
         <div id="top-info">
             <span>Connection {{ props.connectionId }}</span>
         </div>
+
         <IconVue id="fullscreen-toggle" :name="showFullscreen ? 'x-lg' : 'arrows-fullscreen'" @click="showFullscreen = !showFullscreen"></IconVue><!-- TODO replace this custom solution with Fullscreenable.vue -->
+
+        <IconVue id="share-button" name="share" @click="showShare = true"></IconVue>
 
         <div v-if="!myStreamToken">
             Loading ...
@@ -50,6 +60,23 @@ const showFullscreen = ref(false)
                 <IconsStacked :names="['broadcast', 'slash-lg']" :colors="['red', undefined]"></IconsStacked><Spacing></Spacing>Stream Not Alive
             </div>
         </template>
+
+        <ModalVue :visible="showShare" @close="showShare = false">
+
+            <ApiForm v-if="!createdLiveShareKey" type="create" title="Share Live Stream" :api-method="api.rest.connection.liveShareKeys.post" :params="{connectionId: props.connectionId}" :fields="{
+                name: {type: 'text'},
+                valid_until: {type: 'date-with-time', min: new Date()}
+            }" :editable-fields="['name', 'valid_until']" :readable-labels="{valid_until: 'expiration'}" :initial-values="{valid_until: dayjs().add(7, 'day').toISOString()}" @created="key => {
+                createdLiveShareKey = key
+            }"></ApiForm>
+
+            <template v-if="createdLiveShareKey">
+                <p>Share this link with others to allow them to view the live stream:</p>
+                <p><a :href="'https://openflighthub.org/live/' + props.connectionId + '/' + createdLiveShareKey.key" target="_blank">{{ 'https://openflighthub.org/live/' + props.connectionId  + '/' + createdLiveShareKey.key }}</a></p>
+            </template>
+
+        </ModalVue>
+
     </div>
 
 </template>
@@ -65,16 +92,23 @@ const showFullscreen = ref(false)
     cursor: pointer;
     background-color: var(--neutral-darkest);
 
-    #fullscreen-toggle {
+    #fullscreen-toggle, #share-button {
         position: absolute;
         font-size: 1.3em;
         top: 0.5em;
-        right: 0.5em;
         color: var(--primary);
 
         &:hover {
             color: var(--neutral-light);
         }
+    }
+
+    #fullscreen-toggle {
+        right: 0.5em;
+    }
+
+    #share-button {
+        left: 0.5em;
     }
 
     #top-info {

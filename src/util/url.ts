@@ -4,13 +4,20 @@ export function getAnchorUrlForId(id: string){
     return document.location.protocol + '//' + document.location.host + document.location.pathname + '#' + id
 }
 
-export function getIdParamFromRoute(paramName: string, route: RouteLocationNormalizedLoadedGeneric){
+export function getParamFromRoute(paramName: string, route: RouteLocationNormalizedLoadedGeneric){
     const param = route.params[paramName]
     if(param instanceof Array === false && typeof param !== 'string'){
         throw new Error('could not parse id param from route: ' + paramName)
     }
 
-    const id = parseInt(param instanceof Array ? param[0] : param)
+    return param instanceof Array ? param[0] : param
+}
+
+
+export function getIdParamFromRoute(paramName: string, route: RouteLocationNormalizedLoadedGeneric){
+    const param = getParamFromRoute(paramName, route)
+
+    const id = parseInt(param)
 
     if(isNaN(id)){
         throw new Error('could not parse id param from route: ' + paramName)
