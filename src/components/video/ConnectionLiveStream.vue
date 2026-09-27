@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue';
+import { computed, onMounted, reactive, ref } from 'vue';
 import LiveVideo from './LiveVideo.vue';
 import api from '@/api';
 import IconVue from '../general/IconVue.vue';
@@ -10,6 +10,7 @@ import Spacing from '../layout/Spacing.vue';
 import ModalVue from '../display/ModalVue.vue';
 import ApiForm from '../functional/form/ApiForm.vue';
 import dayjs from 'dayjs';
+import QRCodeUrl from '../functional/qrcode/QRCodeUrl.vue';
 
 const props = defineProps<{
     connectionId: number
@@ -37,6 +38,14 @@ const showShare = ref(false)
 
 const createdLiveShareKey = ref<ApiResponse_ConnectionLiveShareKeysPost | null>(null)
 
+    const liveShareUrl = computed(() => {
+        if(!createdLiveShareKey.value){
+            return ''
+        }
+
+        return 'https://hub.openflighthub.org/live/' + props.connectionId + '/' + createdLiveShareKey.value.key
+    })
+
 </script>
 
 <template>
@@ -47,7 +56,7 @@ const createdLiveShareKey = ref<ApiResponse_ConnectionLiveShareKeysPost | null>(
             <span>Connection {{ props.connectionId }}</span>
         </div>
 
-        <IconVue id="fullscreen-toggle" :name="showFullscreen ? 'x-lg' : 'arrows-fullscreen'" @click="showFullscreen = !showFullscreen"></IconVue><!-- TODO replace this custom solution with Fullscreenable.vue -->
+        <IconVue id="fullscreen-toggle" :name="showFullscreen ? 'fullscreen-exit' : 'arrows-fullscreen'" @click="showFullscreen = !showFullscreen"></IconVue><!-- TODO replace this custom solution with Fullscreenable.vue -->
 
         <IconVue id="share-button" name="share" @click="showShare = true"></IconVue>
 
@@ -70,10 +79,15 @@ const createdLiveShareKey = ref<ApiResponse_ConnectionLiveShareKeysPost | null>(
                 createdLiveShareKey = key
             }"></ApiForm>
 
-            <template v-if="createdLiveShareKey">
+            <div v-if="createdLiveShareKey" id="done-sharing">
                 <p>Share this link with others to allow them to view the live stream:</p>
-                <p><a :href="'https://openflighthub.org/live/' + props.connectionId + '/' + createdLiveShareKey.key" target="_blank">{{ 'https://openflighthub.org/live/' + props.connectionId  + '/' + createdLiveShareKey.key }}</a></p>
-            </template>
+                <br/>
+                <p><a :href="liveShareUrl" target="_blank">{{ liveShareUrl }}</a></p>
+                <br/>
+                <p>
+                    <QRCodeUrl :url="liveShareUrl"></QRCodeUrl>
+                </p>
+            </div>
 
         </ModalVue>
 
@@ -126,9 +140,9 @@ const createdLiveShareKey = ref<ApiResponse_ConnectionLiveShareKeysPost | null>(
     &.fullscreen {
         position: fixed;
         top: 0;
-        left: 0;
+        left: 3vw;
         z-index: 10000;
-        width: 100vw;
+        width: 97vw;
         height: 100vh;
     }
 
@@ -140,5 +154,12 @@ const createdLiveShareKey = ref<ApiResponse_ConnectionLiveShareKeysPost | null>(
     }
 }
 
+#done-sharing {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1em;
+}
 
 </style>
